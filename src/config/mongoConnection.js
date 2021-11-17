@@ -1,6 +1,10 @@
 const MongoClient = require('mongodb').MongoClient;
-require('dotenv').config({ path: '../.env' });
-console.log(process.env.DB_URL);
+require('dotenv').config({ path: `${__dirname}/.env` });
+
+// console.log(__dirname);
+// console.log(process.env.DB_URL);
+// console.log(process.env.DB_NAME);
+
 const settings = {
   mongoConfig: {
     serverUrl: process.env.DB_URL,
