@@ -1,5 +1,8 @@
 const MongoClient = require('mongodb').MongoClient;
-require('dotenv').config({ path: `${__dirname}/.env` });
+const path = require('path');
+const envPath = path.resolve('./.env');
+// console.log(envPath);
+require('dotenv').config({ path: envPath });
 
 // console.log(__dirname);
 // console.log(process.env.DB_URL);
