@@ -5,8 +5,8 @@ export default function LogIn() {
 	const logUserIn = async (e) => {
 		e.preventDefault();
 
-		const email = document.getElementById('email').value;
-		const password = document.getElementById('password').value;
+		const email = e.target[0].value;
+		const password = e.target[1].value;
 
 		let result;
 		try {
