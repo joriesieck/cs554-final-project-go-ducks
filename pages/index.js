@@ -3,30 +3,28 @@ import layout things
 */
 import Head from "next/head";
 
-export default function Question({ questionData }) {
+export default function Home({ questionData }) {
   return (
     <div>
-      <Head>
-        <title>{questionData.title}</title>
-      </Head>
-      <article>
-        <p>{questionData.answer}</p>
-      </article>
+      <title>Jeopardy</title>
     </div>
   );
 }
 
-export async function getStaticPaths() {
-  const paths = getAllQuestionIds();
-  return {
-    paths,
-    fallback: false,
-  };
-}
+// Won't be necessary due to server rendering
 
-export async function getStaticProps({ params }) {
+// export async function getStaticPaths() {
+//   const paths = getAllQuestionIds();
+//   return {
+//     paths,
+//     fallback: false,
+//   };
+// }
+
+//
+export async function getServerSideProps(context) {
   // Make calls to API
-  const questionData = await getQuestionData(params.id);
+  const questionData = await getQuestionData(context.id);
   return {
     props: {
       questionData,
