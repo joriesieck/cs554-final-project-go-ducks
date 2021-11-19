@@ -53,6 +53,8 @@ export default function CreateUser() {
 			console.log(e);
 			setErrors([e.toString()]);
 		}
+
+		// TODO print success message -> redirect to profile maybe?
 	}
 
 	return (
