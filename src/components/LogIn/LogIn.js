@@ -29,6 +29,8 @@ export default function LogIn() {
 				<button type="submit">Log in</button>
 			</form>
 			<p>Test user: email: testing@test.com, password: test12</p>
+
+			<p>Not a user yet? <a href="/create-user">Create Account</a></p>
 		</>
 	)
 }

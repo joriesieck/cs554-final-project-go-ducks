@@ -1,12 +1,14 @@
 import { auth } from "../../firebase/firebaseSetup";
-import { createUserWithEmailAndPassword } from "@firebase/auth";
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "@firebase/auth";
 import { Alert, Button, TextField } from "@mui/material";
 import { useState } from "react";
+import { Redirect } from "react-router-dom";
 
-// TODO styling
+import './CreateUser.css';
 
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
+	const [created, setCreated] = useState(false);
 
 	const createUser = async (e) => {
 		e.preventDefault();
@@ -41,37 +43,48 @@ export default function CreateUser() {
 			return;
 		}
 
-		// TODO make sure user doesn't exist
-
+		// make sure user doesn't exist
+		try {
+			const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+			if (signInMethods.length>0) throw 'Email address already associated with an account.';
+		} catch (e) {
+			console.log(e);
+			setErrors([e.toString()]);
+			return;
+		}
 
 		let result;
 		try {
 			result = await createUserWithEmailAndPassword(auth, email, password);
-			console.log('user should be created');
-			console.log(result);
+			if (!result.user.uid) throw 'Something went wrong creating your account, please try again.';
 		} catch (e) {
 			console.log(e);
 			setErrors([e.toString()]);
 		}
 
-		// TODO print success message -> redirect to profile maybe?
+		// redirect to landing page
+		setCreated(true);
 	}
 
+	if (created) return <Redirect to="/home" />;
+
 	return (
-		<>
+		<div id="create-user">
 			<h1>Create User</h1>
-			<form onSubmit={createUser}>
+			<form onSubmit={createUser} id="create-user-form">
 				<TextField id="username" required label="Username" />
 				<TextField id="email" required type="email" label="Email" />
 				<TextField id="password" required type="password" label="Password" helperText="Must be at least 6 characters." />
-				<Button type="submit">Create User</Button>
+				<Button type="submit" variant="contained">Create User</Button>
 			</form>
 
-			{errors && <Alert severity="error">
+			{errors && <Alert severity="error" id="create-user-errors">
 				<ul>
 					{errors.map((error) => <li key={error}>{error}</li>)}
 				</ul>
 			</Alert>}
-		</>
+
+			<p>Already have an account? <a href="/">Log in</a> instead.</p>
+		</div>
 	)
 }
