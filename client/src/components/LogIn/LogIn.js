@@ -1,5 +1,6 @@
 import { auth } from "../../firebase/firebaseSetup";
 import { signInWithEmailAndPassword } from "@firebase/auth";
+import axios from 'axios';
 
 export default function LogIn() {
 	const logUserIn = async (e) => {
@@ -16,6 +17,16 @@ export default function LogIn() {
 		} catch (e) {
 			console.log(e);
 		}
+
+		// call the get user endpoint
+		let data;
+		try {
+			({data} = await axios.get('http://localhost:3001/users/testuser'));
+		} catch (e) {
+			console.log('error');
+			console.log(e);
+		}
+		console.log(data);
 	}
 
 	return (
