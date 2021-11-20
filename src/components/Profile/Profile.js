@@ -1,5 +1,9 @@
-import { Button, List, ListItem, ListItemText, TextField } from "@mui/material"
+import { Button, List, ListItem, ListItemIcon, ListItemText, TextField } from "@mui/material"
 import { useState } from "react";
+import PersonIcon from '@mui/icons-material/Person';
+import SportsScoreIcon from '@mui/icons-material/SportsScore';
+
+import './Profile.css';
 
 const userData = {
 	username: 'fakeuser',
@@ -57,9 +61,10 @@ export default function Profile () {
 		// TODO delete user in DB
 	}
 	return (
-		<>
+		<div id="profile">
 			<h1>Profile</h1>
-			<div>
+			<div className="profile-list">
+			<div className="profile-editable">
 				{!editUser && <span>Username: {userData.username}</span>}
 				{editUser && <form id="save-username" onSubmit={editProfile}>
 				<TextField
@@ -71,7 +76,7 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-username" onClick={toggleEdit}>{editUser ? 'Discard' : 'Edit'}</Button>
 			</div>
-			<div>
+			<div className="profile-editable">
 				{!editEmail && <span>Email: {userData.email}</span>}
 				{editEmail && <form id="save-email" onSubmit={editProfile}>
 				<TextField
@@ -84,7 +89,7 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? 'Discard' : 'Edit'}</Button>
 			</div>
-			<div>
+			<div className="profile-editable">
 				{!editPass && <span>Password: {'*'.repeat(userData.password.length)}</span>}
 				{editPass && <form id="save-password" onSubmit={editProfile}>
 				<TextField
@@ -97,23 +102,26 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-password" onClick={toggleEdit}>{editPass ? 'Discard' : 'Edit'}</Button>
 			</div>
+			</div>
 
-			<div>
+			<div className="profile-list">
 			<span>High Scores</span>
 			<List>
-				{userData.highScores.map((score) => (
-					<ListItem>
+				{userData.highScores.map((score, i) => (
+					<ListItem disablePadding key={i}>
+						<ListItemIcon><SportsScoreIcon /></ListItemIcon>
 						<ListItemText primary={score} />
 					</ListItem>
 				))}
 			</List>
 			</div>
 
-			<div>
+			<div className="profile-list">
 			<span>Friends</span>
 			<List>
-				{userData.friends.map((friend) => (
-					<ListItem>
+				{userData.friends.map((friend, i) => (
+					<ListItem disablePadding key={i}>
+						<ListItemIcon><PersonIcon /></ListItemIcon>
 						<ListItemText primary={friend} />
 					</ListItem>
 				))}
@@ -121,6 +129,6 @@ export default function Profile () {
 			</div>
 
 			<Button onClick={deleteUser}>Delete Account</Button>
-		</>
+		</div>
 	)
 }

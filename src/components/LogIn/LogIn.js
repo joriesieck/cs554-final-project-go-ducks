@@ -4,7 +4,7 @@ import { Redirect } from "react-router-dom";
 
 export default function LogIn() {
 	// if user is already logged in, redirect to landing
-	if (auth.currentUser) return <Redirect to="/" />;
+	if (auth.currentUser) return <Redirect to="/home" />;
 
 	const logUserIn = async (e) => {
 		e.preventDefault();
