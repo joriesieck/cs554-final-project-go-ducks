@@ -6,6 +6,9 @@ import { Redirect } from "react-router-dom";
 
 import './CreateUser.css';
 
+// TODO use mui error props instead of alert?
+// TODO show password button?
+
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
@@ -46,7 +49,7 @@ export default function CreateUser() {
 		// make sure user doesn't exist
 		try {
 			const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-			if (signInMethods.length>0) throw 'Email address already associated with an account.';
+			if (signInMethods.length>0) throw Error('Email address already associated with an account.');
 		} catch (e) {
 			console.log(e);
 			setErrors([e.toString()]);
@@ -56,11 +59,13 @@ export default function CreateUser() {
 		let result;
 		try {
 			result = await createUserWithEmailAndPassword(auth, email, password);
-			if (!result.user.uid) throw 'Something went wrong creating your account, please try again.';
+			if (!result.user.uid) throw Error('Something went wrong creating your account, please try again.');
 		} catch (e) {
 			console.log(e);
 			setErrors([e.toString()]);
 		}
+
+		// TODO add user to db
 
 		// redirect to landing page
 		setCreated(true);
