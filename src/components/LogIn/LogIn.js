@@ -3,7 +3,7 @@ import { signInWithEmailAndPassword } from "@firebase/auth";
 import { Redirect } from "react-router-dom";
 
 export default function LogIn() {
-	// if user is already logged in, redirect to landing
+	// if user is already logged in, redirect to home
 	if (auth.currentUser) return <Redirect to="/home" />;
 
 	const logUserIn = async (e) => {

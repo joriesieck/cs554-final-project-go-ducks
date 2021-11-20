@@ -2,12 +2,12 @@ import { Tabs, Tab } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function NavBar(props) {
-	const [value, setValue] = useState('landing');
+export default function NavBar() {
+	const [value, setValue] = useState('home');
 
 	useEffect(() => {
-		const newUrl = window.location.href.match(/\/[a-zA-Z]+\/?$/)[0];
-		setValue(newUrl.substr(1));
+		const newUrl = window.location.href.match(/\/[a-zA-Z]+\/?$/)[0].substr(1).toLowerCase();
+		setValue(newUrl);
 	}, [window.location.href])
 
 	return (
@@ -16,8 +16,8 @@ export default function NavBar(props) {
 			onChange={(e) => { setValue(e.target.innerText.toLowerCase()) }}
 		>
 			<Tab
-				value='landing'
-				label='Landing'
+				value='home'
+				label='Home'
 				component={Link}
 				to='/home'
 			/>

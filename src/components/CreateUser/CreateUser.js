@@ -12,7 +12,7 @@ import './CreateUser.css';
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
-	// if user is already logged in, redirect to landing
+	// if user is already logged in, redirect to home
 	if (auth.currentUser) return <Redirect to="/home" />;
 
 	const createUser = async (e) => {
@@ -69,7 +69,7 @@ export default function CreateUser() {
 
 		// TODO add user to db
 
-		// redirect to landing page
+		// redirect to home page
 		setCreated(true);
 	}
 
