@@ -1,4 +1,4 @@
-const data = require('../data');
+const data = require('.');
 const userData = data.users;
 
 const getUser = async () => {
