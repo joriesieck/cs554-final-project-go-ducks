@@ -1,14 +1,9 @@
 import { Tabs, Tab } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function NavBar() {
-	const [value, setValue] = useState('home');
-
-	useEffect(() => {
-		const newUrl = window.location.href.match(/\/[a-zA-Z]+\/?$/)[0].substr(1).toLowerCase();
-		setValue(newUrl);
-	}, [window.location.href])
+	const [value, setValue] = useState(window.location.href.match(/\/[a-zA-Z]+\/?$/)[0].substr(1).toLowerCase());
 
 	return (
 		<Tabs

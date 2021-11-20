@@ -1,4 +1,4 @@
-import { Button, List, ListItem, ListItemIcon, ListItemText, TextField } from "@mui/material"
+import { Button, Grid, List, ListItem, ListItemIcon, ListItemText, TextField } from "@mui/material"
 import { useState } from "react";
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
@@ -13,7 +13,6 @@ const userData = {
 	friends: ['fakeuser1', 'fakeuser2', 'fakeuser3']
 }
 
-// TODO styling
 // TODO pull data from database/firebase
 
 export default function Profile () {
@@ -63,9 +62,9 @@ export default function Profile () {
 	return (
 		<div id="profile">
 			<h1>Profile</h1>
-			<div className="profile-list">
-			<div className="profile-editable">
-				{!editUser && <span>Username: {userData.username}</span>}
+			<Grid className="profile-list">
+			<Grid item xs={12} className="profile-editable">
+				{!editUser && <><Grid item xs={2}>Username:</Grid><Grid item xs={6}>{userData.username}</Grid></>}
 				{editUser && <form id="save-username" onSubmit={editProfile}>
 				<TextField
 					id="username"
@@ -75,9 +74,9 @@ export default function Profile () {
 				<Button type="submit">Save</Button>
 				</form>}
 				<Button id="edit-username" onClick={toggleEdit}>{editUser ? 'Discard' : 'Edit'}</Button>
-			</div>
-			<div className="profile-editable">
-				{!editEmail && <span>Email: {userData.email}</span>}
+			</Grid>
+			<Grid item xs={12} className="profile-editable">
+				{!editEmail && <><Grid item xs={2}>Email:</Grid><Grid item xs={6}>{userData.email}</Grid></>}
 				{editEmail && <form id="save-email" onSubmit={editProfile}>
 				<TextField
 					id="email"
@@ -88,9 +87,9 @@ export default function Profile () {
 				<Button type="submit">Save</Button>
 				</form>}
 				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? 'Discard' : 'Edit'}</Button>
-			</div>
-			<div className="profile-editable">
-				{!editPass && <span>Password: {'*'.repeat(userData.password.length)}</span>}
+			</Grid>
+			<Grid item xs={12} className="profile-editable">
+				{!editPass && <><Grid item xs={2}>Password:</Grid><Grid item xs={6}>{'*'.repeat(userData.password.length)}</Grid></>}
 				{editPass && <form id="save-password" onSubmit={editProfile}>
 				<TextField
 					id="password"
@@ -101,8 +100,8 @@ export default function Profile () {
 				<Button type="submit">Save</Button>
 				</form>}
 				<Button id="edit-password" onClick={toggleEdit}>{editPass ? 'Discard' : 'Edit'}</Button>
-			</div>
-			</div>
+			</Grid>
+			</Grid>
 
 			<div className="profile-list">
 			<span>High Scores</span>
@@ -128,7 +127,7 @@ export default function Profile () {
 			</List>
 			</div>
 
-			<Button onClick={deleteUser}>Delete Account</Button>
+			<Button color="error" onClick={deleteUser}>Delete Account</Button>
 		</div>
 	)
 }
