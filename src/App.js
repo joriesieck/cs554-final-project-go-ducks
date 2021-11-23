@@ -1,12 +1,15 @@
 import logo from "./logo.svg";
 import "./App.css";
 
+import CreateUser from './components/CreateUser/CreateUser';
+import LogIn from './components/LogIn/LogIn';
+
 function App() {
   return (
-    <div>
-      <title>Jeopardy</title>
-      <h1>Welcome to jeopardy</h1>
-    </div>
+    <>
+    <CreateUser />
+    <LogIn />
+    </>
   );
 }
 export default App;
