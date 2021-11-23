@@ -2,32 +2,22 @@
 import layout things
 */
 import Head from "next/head";
-
+import { getQuestionData } from "../lib/questions";
 export default function Home({ questionData }) {
   return (
     <div>
       <title>Jeopardy</title>
+      <h1>test</h1>
     </div>
   );
 }
 
-// Won't be necessary due to server rendering
-
-// export async function getStaticPaths() {
-//   const paths = getAllQuestionIds();
+// export async function getServerSideProps(context) {
+//   // Make calls to API
+//   const questionData = await getQuestionData();
 //   return {
-//     paths,
-//     fallback: false,
+//     props: {
+//       questionData,
+//     },
 //   };
 // }
-
-//
-export async function getServerSideProps(context) {
-  // Make calls to API
-  const questionData = await getQuestionData(context.id);
-  return {
-    props: {
-      questionData,
-    },
-  };
-}

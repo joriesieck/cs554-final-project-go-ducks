@@ -1,24 +1,31 @@
 import Head from "next/head";
-import getQuestionData from "../../lib/questions";
+import { getQuestionData } from "../../lib/questions";
+import { useEffect, useState } from "react";
 
-export default async function QuestionPage({ questionData }) {
+const baseUrl = "http://jservice.io/api";
+
+export default function QuestionPage({ categories }) {
   return (
     <div>
       <Head>
-        <title>{questionData.name}</title>
+        <h1>
+          {categories.map((category) => (
+            <p>{category.id}</p>
+          ))}
+        </h1>
       </Head>
-      <article>
-        <h1>{questionData.name}</h1>
-      </article>
     </div>
   );
 }
 
 export async function getServerSideProps({ params }) {
-  const questionData = await getQuestionData(params.id);
+  const categories = await fetch("http://jservice.io/api/categories").then(
+    (res) => res.json()
+  );
+  console.log(categories);
   return {
     props: {
-      questionData,
+      categories,
     },
   };
 }
