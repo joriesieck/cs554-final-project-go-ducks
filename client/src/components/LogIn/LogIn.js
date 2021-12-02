@@ -1,8 +1,11 @@
 import { auth } from "../../firebase/firebaseSetup";
 import { signInWithEmailAndPassword } from "@firebase/auth";
-import axios from 'axios';
+import { Redirect } from "react-router-dom";
 
 export default function LogIn() {
+	// if user is already logged in, redirect to home
+	if (auth.currentUser) return <Redirect to="/home" />;
+
 	const logUserIn = async (e) => {
 		e.preventDefault();
 
@@ -17,16 +20,6 @@ export default function LogIn() {
 		} catch (e) {
 			console.log(e);
 		}
-
-		// call the get user endpoint
-		let data;
-		try {
-			({data} = await axios.get('http://localhost:3001/users/testuser'));
-		} catch (e) {
-			console.log('error');
-			console.log(e);
-		}
-		console.log(data);
 	}
 
 	return (
@@ -40,6 +33,8 @@ export default function LogIn() {
 				<button type="submit">Log in</button>
 			</form>
 			<p>Test user: email: testing@test.com, password: test12</p>
+
+			<p>Not a user yet? <a href="/create-user">Create Account</a></p>
 		</>
 	)
 }
