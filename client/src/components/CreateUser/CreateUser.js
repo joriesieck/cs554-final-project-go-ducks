@@ -12,8 +12,8 @@ import './CreateUser.css';
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
-	// if user is already logged in, redirect to home
-	if (auth.currentUser) return <Redirect to="/home" />;
+	// // if user is already logged in, redirect to home
+	// if (auth.currentUser) return <Redirect to="/home" />;
 
 	const createUser = async (e) => {
 		e.preventDefault();

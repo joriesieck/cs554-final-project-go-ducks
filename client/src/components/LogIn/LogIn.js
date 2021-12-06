@@ -5,8 +5,9 @@ import {Button, TextField} from '@mui/material';
 import './LogIn.css';
 
 export default function LogIn() {
-	// if user is already logged in, redirect to home
-	if (auth.currentUser) return <Redirect to="/home" />;
+	// console.log(auth);
+	// // if user is already logged in, redirect to home
+	// if (auth.currentUser) return <Redirect to="/home" />;
 
 	const logUserIn = async (e) => {
 		e.preventDefault();
