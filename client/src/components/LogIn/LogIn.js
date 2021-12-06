@@ -12,7 +12,8 @@ export default function LogIn() {
 		e.preventDefault();
 
 		const email = e.target[0].value;
-		const password = e.target[1].value;
+		const password = e.target[2].value;
+		console.log(e.target, email, password)
 
 		let result;
 		try {
