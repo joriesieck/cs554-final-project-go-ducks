@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const data = require('../data');
-const userData = data.users;
+const userData = require('../data/dummy_users');  // change to data.users when db funcs are done
+const { checkString, checkBool } = require('../inputChecks');
 
 // get user
 router.get('/:username', async (req, res) => {
@@ -9,11 +10,9 @@ router.get('/:username', async (req, res) => {
   let username = req.params.username;
   // make sure it's a string, nonempty, etc
   try {
-    if (!username) throw 'Please provide a username.';
-    if (typeof username!=='string') throw 'Username must be a string.';
-    username = username.trim();
-    if (username==='') throw 'Username must contain at least one character.';
-    if (username.match(/[   ]/)) throw 'Username cannot contain any whitespace characters';
+    let check = checkString(username, 'Username', false);
+    if (check.error) throw check.error;
+    username = check.result;
   } catch (e) {
     res.status(400).json({ error: e });
     return;
@@ -23,7 +22,7 @@ router.get('/:username', async (req, res) => {
   let user;
   try {
     user = await userData.getUserByName(username);
-    if (!user.name) throw 'No user found.';
+    if (!user.username) throw 'No user found.';
   } catch (e) {
     res.status(404).json({ error: e.message || e.toString() });
     return;
@@ -33,6 +32,37 @@ router.get('/:username', async (req, res) => {
   res.json(user);
 });
 
-// create user - TODO once that fn is finished
+// create user
+router.post('/', async (req, res) => {
+  // get variables from req body
+  let {username, email, optedForLeaderboard} = req.body;
+  // make sure exists, type, etc
+  try {
+    let check = checkString(username, 'Username', false);
+    if (check.error) throw check.error;
+    username = check.result;
+    check = checkString(email, 'Email', false);
+    if (check.error) throw check.error;
+    email = check.result;
+    check = checkBool(optedForLeaderboard, 'optedForLeaderboard');
+    if (check.error) throw check.error;
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  // create the user
+  let user;
+  try {
+    user = await userData.addUser(username, email, optedForLeaderboard);
+    if (!user.username) throw 'Sorry, something went wrong creating the user.';
+  } catch (e) {
+    res.status(500).json({ error: e });
+    return;
+  }
+
+  // send the new user to the front end
+  res.status(201).json(user);
+})
 
 module.exports = router;
