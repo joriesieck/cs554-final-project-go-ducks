@@ -1,6 +1,8 @@
 import { auth } from "../../firebase/firebaseSetup";
 import { signInWithEmailAndPassword } from "@firebase/auth";
 import { Redirect } from "react-router-dom";
+import {Button, TextField} from '@mui/material';
+import './LogIn.css';
 
 export default function LogIn() {
 	// if user is already logged in, redirect to home
@@ -10,7 +12,8 @@ export default function LogIn() {
 		e.preventDefault();
 
 		const email = e.target[0].value;
-		const password = e.target[1].value;
+		const password = e.target[2].value;
+		console.log(e.target, email, password)
 
 		let result;
 		try {
@@ -23,18 +26,16 @@ export default function LogIn() {
 	}
 
 	return (
-		<>
+		<div id="login-user">
 			<h1>Log In</h1>
-			<form onSubmit={logUserIn}>
-				<label htmlFor="email">Email</label>
-				<input id="email" />
-				<label htmlFor="password">Password</label>
-				<input id="password" />
-				<button type="submit">Log in</button>
+			<form onSubmit={logUserIn} id="login-user-form">
+				<TextField id="email" required type="email" label="Email" />
+				<TextField id="password" required type="password" label="Password" />
+				<Button type="submit" variant="contained">Log in</Button>
 			</form>
 			<p>Test user: email: testing@test.com, password: test12</p>
 
 			<p>Not a user yet? <a href="/create-user">Create Account</a></p>
-		</>
+		</div>
 	)
 }
