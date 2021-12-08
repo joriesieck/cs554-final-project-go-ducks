@@ -7,9 +7,6 @@ import { useSelector, useDispatch } from "react-redux";
 
 import './CreateUser.css';
 
-// TODO use mui error props instead of alert?
-// TODO show password button?
-
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
