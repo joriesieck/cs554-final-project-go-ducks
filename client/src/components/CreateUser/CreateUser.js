@@ -3,6 +3,7 @@ import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "@fir
 import { Alert, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
 import './CreateUser.css';
 
@@ -12,8 +13,11 @@ import './CreateUser.css';
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
-	// // if user is already logged in, redirect to home
-	// if (auth.currentUser) return <Redirect to="/home" />;
+	const user = useSelector((state) => state.user);
+	const dispatch = useDispatch();
+
+	// if user is already logged in, redirect to home
+	if (user) return <Redirect to="/home" />;
 
 	const createUser = async (e) => {
 		e.preventDefault();
@@ -68,6 +72,12 @@ export default function CreateUser() {
 		}
 
 		// TODO add user to db
+
+		// log in
+		dispatch({
+			type: 'LOG_IN',
+			payload: username
+		});
 
 		// redirect to home page
 		setCreated(true);

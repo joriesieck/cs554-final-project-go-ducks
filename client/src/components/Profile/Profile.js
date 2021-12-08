@@ -2,6 +2,8 @@ import { Button, Grid, List, ListItem, ListItemIcon, ListItemText, TextField } f
 import { useState } from "react";
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import { useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
 
 import './Profile.css';
 
@@ -19,6 +21,9 @@ export default function Profile () {
 	const [editUser, setEditUser] = useState(false);
 	const [editEmail, setEditEmail] = useState(false);
 	const [editPass, setEditPass] = useState(false);
+	const user = useSelector((state) => state.user);
+	// if user is not logged in, redirect to login
+	if (!user) return <Redirect to="/" />;
 
 	const toggleEdit = (e) => {
 		e.preventDefault();
