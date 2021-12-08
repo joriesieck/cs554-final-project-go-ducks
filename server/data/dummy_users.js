@@ -16,5 +16,17 @@ module.exports = {
 			optedForLeaderboard,
 			highScores: []
 		}
+	},
+	async removeUser(username) {
+		return {success: true};
+	},
+	async addFriend(username, friendToAdd) {
+		return {username, friends:[friendToAdd]}
+	},
+	async removeFriend(username, friendToRemove) {
+		return {username, friends:[]}
+	},
+	async addHighScore(username, highScore) {
+		return {username, highScores:[highScore]}
 	}
 }
