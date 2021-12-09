@@ -17,12 +17,10 @@ const inputChecks = {
 	checkObjId (objId, varName) {
 		if (!objId || arguments.length<2) throw `Please provide a value for ${varName}`;
 		try {
-			objId = ObjectId(objId);
+			if (objId !== ObjectId(objId).toString()) throw `${varName} must be an ObjectId`;
 		} catch (e) {
-			console.log(e);
-			throw `${varName} must be an ObjectId`;
+			throw e.toString();
 		}
-		return objId;
 	},
 	checkNum (num, varName) {
 		if (num===undefined || num===null || arguments.length<2) throw `Please provide a value for ${varName}`;

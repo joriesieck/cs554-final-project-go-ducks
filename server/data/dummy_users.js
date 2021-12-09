@@ -1,3 +1,5 @@
+const { ObjectId } = require("mongodb");
+
 module.exports = {
 	async getUserByName(username) {
 		return {
@@ -10,6 +12,7 @@ module.exports = {
 	},
 	async addUser(username, email, optedForLeaderboard) {
 		return {
+			id: new ObjectId(),
 			username,
 			email,
 			friendIDS: [],

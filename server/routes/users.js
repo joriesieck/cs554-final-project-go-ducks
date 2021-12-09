@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const data = require('../data');
 const userData = require('../data/dummy_users');  // change to data.users when db funcs are done
-const { checkString, checkBool, checkObjId } = require('../inputChecks');
+const { checkString, checkBool, checkObjId, checkNum } = require('../inputChecks');
 
 // get user
 router.get('/:username', async (req, res) => {
@@ -107,7 +107,7 @@ router.patch('/add-friend', async (req, res) => {
     return;
   }
 
-  return user;
+  res.status(200).json(user);
 });
 
 // remove friend
@@ -133,7 +133,7 @@ router.patch('/remove-friend', async (req, res) => {
     return;
   }
 
-  return user;
+  res.status(200).json(user);
 });
 
 // add high score
@@ -159,7 +159,7 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
-  return user;
+  res.status(200).json(user);
 });
 
 module.exports = router;
