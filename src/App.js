@@ -1,5 +1,4 @@
-import logo from "./logo.svg";
-import "./App.css";
+import logo from './logo.svg';
 
 import CreateUser from './components/CreateUser/CreateUser';
 import LogIn from './components/LogIn/LogIn';
@@ -7,8 +6,8 @@ import LogIn from './components/LogIn/LogIn';
 function App() {
   return (
     <>
-    <CreateUser />
-    <LogIn />
+      <CreateUser />
+      <LogIn />
     </>
   );
 }
