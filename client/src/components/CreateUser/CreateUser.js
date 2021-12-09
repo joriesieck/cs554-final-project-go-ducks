@@ -1,4 +1,4 @@
-import { auth, provider } from "../../firebase/firebaseSetup";
+import { auth, googleProvider, gitProvider } from "../../firebase/firebaseSetup";
 import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithPopup } from "@firebase/auth";
 import { Alert, Button, TextField } from "@mui/material";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 import './CreateUser.css';
 import googleLogo from '../../imgs/google-logo.png';
+import gitLogo from '../../imgs/github-logo.png';
 
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
@@ -87,9 +88,16 @@ export default function CreateUser() {
 		setCreated(true);
 	}
 
-	const providerSignIn = async (e) => {
+	const googleProviderSignIn = (e) => {
 		e.preventDefault();
+		providerSignIn(googleProvider);
+	}
+	const gitProviderSignIn = (e) => {
+		e.preventDefault();
+		providerSignIn(gitProvider);
+	}
 
+	const providerSignIn = async (provider) => {
 		// todo - email already exists as regular user?
 
 		let result;
@@ -101,6 +109,7 @@ export default function CreateUser() {
 			setErrors(['Please allow pop-ups and try again to sign in with a provider.']);
 		}
 		if (result && result.user && result.user.email) setErrors(null);
+		// TODO what if user exits popup?
 
 		// TODO - check if email already exists in db. if it does, delete that db record, i guess??
 
@@ -153,10 +162,20 @@ export default function CreateUser() {
 				<Button type="submit" variant="contained">Create User</Button>
 			</form>}
 
-			{displayButton && <Button variant="contained" className='provider-logo' onClick={providerSignIn}>
+			{displayButton&& <div className="provider-logos">
+			<Button variant="contained" className='provider-logo' onClick={googleProviderSignIn}>
 				<img src={googleLogo} alt="sign in with google" height={50} width={50} />
 				Sign up with Google
-			</Button>}
+			</Button>
+			{/* <Button variant="contained" className='provider-logo' onClick={fbProviderSignIn}>
+				<img src={fbLogo} alt="sign in with facebook" height={50} width={50} />
+				Sign in with Facebook
+			</Button> */}
+			<Button variant="contained" className='provider-logo' onClick={gitProviderSignIn}>
+				<img src={gitLogo} alt="sign in with github" height={50} width={50} />
+				Sign up with GitHub
+			</Button>
+			</div>}
 			{!displayButton && <>
 				<p>Thanks for signing up! We still need a username to complete your registration.</p>
 				<form onSubmit={storeProviderInfo}>
