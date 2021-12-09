@@ -1,15 +1,18 @@
-import { auth } from "../../firebase/firebaseSetup";
-import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "@firebase/auth";
+import { auth, provider } from "../../firebase/firebaseSetup";
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithPopup } from "@firebase/auth";
 import { Alert, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
 import './CreateUser.css';
+import googleLogo from '../../imgs/google-logo.png';
 
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
+	const [displayButton, setDisplayButton] = useState(true);
+	const [email, setEmail] = useState(null);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -40,6 +43,8 @@ export default function CreateUser() {
 		if (username==='') errorList.push('Username must contain at least one character.');
 		if (email==='') errorList.push('Email must contain at least one character.');
 		if (password==='') errorList.push('Password must contain at least one character.');
+		if (username.match(/[ 	]/)) errorList.push('Username cannot contain any whitespace');
+		if (email.match(/[ 	]/)) errorList.push('Email cannot contain any whitespace');
 		// make sure password is at least 6 characters
 		if (password.length<6) errorList.push('Password must be at least 6 characters.');
 
@@ -59,6 +64,8 @@ export default function CreateUser() {
 			return;
 		}
 
+		// TODO - make sure username not already in db
+
 		let result;
 		try {
 			result = await createUserWithEmailAndPassword(auth, email, password);
@@ -70,13 +77,67 @@ export default function CreateUser() {
 
 		// TODO add user to db
 
-		// log in
+		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
-			payload: username
+			payload: email
 		});
 
 		// redirect to home page
+		setCreated(true);
+	}
+
+	const providerSignIn = async (e) => {
+		e.preventDefault();
+
+		// todo - email already exists as regular user?
+
+		let result;
+		try {
+			// try pop up - some browsers block
+			result = await signInWithPopup(auth, provider);
+		} catch (e) {
+			// print a message asking to allow popups
+			setErrors(['Please allow pop-ups and try again to sign in with a provider.']);
+		}
+		if (result && result.user && result.user.email) setErrors(null);
+
+		// TODO - check if email already exists in db. if it does, delete that db record, i guess??
+
+		// store email
+		setEmail(result.user.email);
+
+		// prompt for username
+		setDisplayButton(false);
+	}
+
+	const storeProviderInfo = (e) => {
+		e.preventDefault();
+		
+		let username = e.target[0].value;
+		// error checking
+		const errorList = [];
+		if (username && typeof username !== 'string') errorList.push('Username must be a string.');
+		username = username.trim();
+		if (username==='') errorList.push('Username must contain at least one character.');
+		if (username.match(/[ 	]/)) errorList.push('Username cannot contain any whitespace');
+
+		// if there were errors, set errors
+		if (errorList.length>0) {
+			setErrors(errorList);
+			return;
+		}
+
+		// TODO - check if username already exists in db
+		
+		// TODO - add user to database
+
+		dispatch({
+			type: 'LOG_IN',
+			payload: email
+		});
+
+		// redirect to homepage
 		setCreated(true);
 	}
 
@@ -85,12 +146,24 @@ export default function CreateUser() {
 	return (
 		<div id="create-user">
 			<h1>Create User</h1>
-			<form onSubmit={createUser} id="create-user-form">
+			{displayButton && <form onSubmit={createUser} id="create-user-form">
 				<TextField id="username" required label="Username" />
 				<TextField id="email" required type="email" label="Email" />
 				<TextField id="password" required type="password" label="Password" helperText="Must be at least 6 characters." />
 				<Button type="submit" variant="contained">Create User</Button>
-			</form>
+			</form>}
+
+			{displayButton && <Button variant="contained" className='provider-logo' onClick={providerSignIn}>
+				<img src={googleLogo} alt="sign in with google" height={50} width={50} />
+				Sign up with Google
+			</Button>}
+			{!displayButton && <>
+				<p>Thanks for signing up! We still need a username to complete your registration.</p>
+				<form onSubmit={storeProviderInfo}>
+					<TextField id="provider-username" required label="Username" />
+					<Button type="submit" variant="contained">Complete signup</Button>
+				</form>
+			</>}
 
 			{errors && <Alert severity="error" id="create-user-errors">
 				<ul>

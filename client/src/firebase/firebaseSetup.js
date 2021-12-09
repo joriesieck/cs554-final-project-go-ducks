@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import env from 'react-dotenv';
 
 // add our API keys
@@ -18,5 +18,8 @@ const firebaseApp = initializeApp(firebaseConfig);
 // set up auth
 const auth = getAuth(firebaseApp);
 
+// set up google
+const provider = new GoogleAuthProvider();
+
 export default firebaseApp;
-export {auth};
+export {auth, provider};

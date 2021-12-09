@@ -15,7 +15,7 @@ const userData = {
 	friends: ['fakeuser1', 'fakeuser2', 'fakeuser3']
 }
 
-// TODO pull data from database/firebase
+// TODO pull data from database
 
 export default function Profile () {
 	const [editUser, setEditUser] = useState(false);

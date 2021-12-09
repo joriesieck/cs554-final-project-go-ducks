@@ -12,3 +12,11 @@
 	margin-right: auto;
 	max-width: 500px;
 }
+
+.provider-logo {
+	margin-top: 10px !important;
+}
+
+.login-error {
+	margin-top: 10px;
+}
