@@ -4,6 +4,7 @@ import { Redirect } from "react-router-dom";
 import {Alert, Button, TextField} from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
+import inputChecks from '../../inputChecks';
 
 import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
@@ -11,7 +12,7 @@ import gitLogo from '../../imgs/github-logo.png';
 import './LogIn.css';
 
 export default function LogIn() {
-	const [error, setError] = useState(null);
+	const [errors, setErrors] = useState(null);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -21,11 +22,27 @@ export default function LogIn() {
 	const logUserIn = async (e) => {
 		e.preventDefault();
 
-		const email = e.target[0].value;
+		let email = e.target[0].value;
 		const password = e.target[2].value;
 
-		// todo - error checking
-		console.log(e.target, email, password)
+		const errorList = [];
+		// error checking
+		try {
+			email = inputChecks.checkString(email, 'Email', true, false);
+		} catch (e) {
+			errorList.push(e.toString());
+		}
+		try {
+			inputChecks.checkString(password, 'Password', false, false);
+		} catch (e) {
+			errorList.push(e.toString());
+		}
+
+		// if there were errors, set errors
+		if (errorList.length>0) {
+			setErrors(errorList);
+			return;
+		}
 
 		let result;
 		try {
@@ -33,7 +50,7 @@ export default function LogIn() {
 			console.log('user should be logged in');
 			console.log(result);
 		} catch (e) {
-			setError(e);
+			setErrors(['Invalid login credentials.']);
 			return;
 		}
 
@@ -59,7 +76,7 @@ export default function LogIn() {
 	}
 
 	const providerSignIn = async (provider) => {
-		// todo - email already exists as regular user?
+		// DBTODO - email already exists as regular user?
 
 		let result;
 		try {
@@ -68,11 +85,11 @@ export default function LogIn() {
 		} catch (e) {
 			console.log(e);
 			// print a message asking to allow popups
-			setError('Please allow pop-ups and try again to sign in with a provider.');
+			setErrors(['Please allow pop-ups and try again to sign in with a provider.']);
 		}
-		if (result && result.user && result.user.email) setError(null);
+		if (result && result.user && result.user.email) setErrors(null);
 		console.log(result);
-		// TODO - make sure we have a record for this person in the db. otherwise we need to get a username from them & store info -> so maybe redirect to create-user page & make them "sign in" w google again?
+		// DBTODO - make sure we have a record for this person in the db. otherwise we need to get a username from them & store info -> so maybe redirect to create-user page & make them "sign in" w google again?
 
 		// store email in redux
 		dispatch({
@@ -105,8 +122,13 @@ export default function LogIn() {
 			</Button>
 			</div>
 
-			{error && <Alert severity="error" className='login-error'>
-				{error}	
+			{errors && <Alert severity="error" className="create-user-errors">
+				<ul>
+					{errors.map((error) => {
+						error = error.replace('Error: ', '');
+						return <li key={error}>{error}</li>
+					})}
+				</ul>
 			</Alert>}
 
 			<p>Test user: email: testing@test.com, password: test12</p>

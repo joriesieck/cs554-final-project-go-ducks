@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import './CreateUser.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
+import inputChecks from "../../inputChecks";
 
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
@@ -26,26 +27,25 @@ export default function CreateUser() {
 
 		let username = e.target[0].value;
 		let email = e.target[2].value;
-		let password = e.target[4].value;
+		const password = e.target[4].value;
 
-		// make sure all values exist
+		// error checking
 		const errorList = [];
-		if (!username) errorList.push('Please enter a username.');
-		if (!email) errorList.push('Please enter an email.');
-		if (!password) errorList.push('Please enter a password.');
-		// make sure all values are strings
-		if (username && typeof username !== 'string') errorList.push('Username must be a string.');
-		if (email && typeof email !== 'string') errorList.push('Email must be a string.');
-		if (password && typeof password !== 'string') errorList.push('Password must be a string.');
-		// trim and make sure all values are nonempty
-		username = username.trim();
-		email = email.trim();
-		// don't trim password
-		if (username==='') errorList.push('Username must contain at least one character.');
-		if (email==='') errorList.push('Email must contain at least one character.');
-		if (password==='') errorList.push('Password must contain at least one character.');
-		if (username.match(/[ 	]/)) errorList.push('Username cannot contain any whitespace');
-		if (email.match(/[ 	]/)) errorList.push('Email cannot contain any whitespace');
+		try {
+			username = inputChecks.checkString(username, 'Username', true, false);
+		} catch (e) {
+			errorList.push(e.toString());
+		}
+		try {
+			email = inputChecks.checkString(email, 'Email', true, false);
+		} catch (e) {
+			errorList.push(e.toString());
+		}
+		try {
+			inputChecks.checkString(password, 'Password', false, true);
+		} catch (e) {
+			errorList.push(e.toString());
+		}
 		// make sure password is at least 6 characters
 		if (password.length<6) errorList.push('Password must be at least 6 characters.');
 
@@ -65,7 +65,7 @@ export default function CreateUser() {
 			return;
 		}
 
-		// TODO - make sure username not already in db
+		// DBTODO - make sure username not already in db
 
 		let result;
 		try {
@@ -76,7 +76,7 @@ export default function CreateUser() {
 			setErrors([e.toString()]);
 		}
 
-		// TODO add user to db
+		// DBTODO add user to db
 
 		// store email in redux
 		dispatch({
@@ -107,9 +107,13 @@ export default function CreateUser() {
 			setErrors(['Please allow pop-ups and try again to sign in with a provider.']);
 		}
 		if (result && result.user && result.user.email) setErrors(null);
-		// TODO what if user exits popup?
+		else {
+			// if user exits popup
+			setErrors(['Looks like we couldn\'t sign you up. Please try again, or try creating an account using email and password.']);
+			return;
+		}
 
-		// TODO - check if email already exists in db. if it does, delete that db record, i guess??
+		// DBTODO - check if email already exists in db. if it does, delete that db record, i guess??
 
 		// store email
 		setEmail(result.user.email);
@@ -123,21 +127,15 @@ export default function CreateUser() {
 		
 		let username = e.target[0].value;
 		// error checking
-		const errorList = [];
-		if (username && typeof username !== 'string') errorList.push('Username must be a string.');
-		username = username.trim();
-		if (username==='') errorList.push('Username must contain at least one character.');
-		if (username.match(/[ 	]/)) errorList.push('Username cannot contain any whitespace');
-
-		// if there were errors, set errors
-		if (errorList.length>0) {
-			setErrors(errorList);
-			return;
+		try {
+			username = inputChecks.checkString(username, 'Username', true, false);
+		} catch (e) {
+			setErrors([e]);
 		}
 
-		// TODO - check if username already exists in db
+		// DBTODO - check if username already exists in db
 		
-		// TODO - add user to database
+		// DBTODO - add user to database
 
 		dispatch({
 			type: 'LOG_IN',
@@ -182,9 +180,12 @@ export default function CreateUser() {
 				</form>
 			</>}
 
-			{errors && <Alert severity="error" id="create-user-errors">
+			{errors && <Alert severity="error" className="create-user-errors">
 				<ul>
-					{errors.map((error) => <li key={error}>{error}</li>)}
+					{errors.map((error) => {
+						error = error.replace('Error: ', '');
+						return <li key={error}>{error}</li>;
+					})}
 				</ul>
 			</Alert>}
 
