@@ -1,8 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const data = require('../data');
-const userData = require('../data/dummy_users');  // change to data.users when db funcs are done
-const { checkString, checkBool, checkObjId, checkNum } = require('../inputChecks');
+const userData = require('../data/users'); // change to data.users when db funcs are done
+const {
+  checkString,
+  checkBool,
+  checkObjId,
+  checkNum,
+} = require('../inputChecks');
 
 // get user
 router.get('/:username', async (req, res) => {
@@ -33,7 +38,7 @@ router.get('/:username', async (req, res) => {
 // create user
 router.post('/', async (req, res) => {
   // get variables from req body
-  let {username, email, optedForLeaderboard} = req.body;
+  let { username, email, optedForLeaderboard } = req.body;
   // make sure exists, type, etc
   try {
     username = checkString(username, 'Username', false);
@@ -48,9 +53,8 @@ router.post('/', async (req, res) => {
   let user;
   try {
     user = await userData.addUser(username, email, optedForLeaderboard);
-    if (!user.username) throw 'Sorry, something went wrong creating the user.';
   } catch (e) {
-    res.status(400).json({ error: e });
+    res.status(400).json({ error: `Could not create user. Error: ${e}` });
     return;
   }
 
@@ -81,13 +85,13 @@ router.delete('/:username', async (req, res) => {
   }
 
   // return success
-  res.status(200).json({message: `${username} successfully deleted`});
+  res.status(200).json({ message: `${username} successfully deleted` });
 });
 
 // add friend
 router.patch('/add-friend', async (req, res) => {
   // get the variables from req.body
-  let {username, friendToAdd} = req.body;
+  let { username, friendToAdd } = req.body;
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
@@ -113,7 +117,7 @@ router.patch('/add-friend', async (req, res) => {
 // remove friend
 router.patch('/remove-friend', async (req, res) => {
   // get the variables from req.body
-  let {username, friendToRemove} = req.body;
+  let { username, friendToRemove } = req.body;
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
@@ -139,7 +143,7 @@ router.patch('/remove-friend', async (req, res) => {
 // add high score
 router.patch('/add-highscore', async (req, res) => {
   // get the variables from req.body
-  let {username, highScore} = req.body;
+  let { username, highScore } = req.body;
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
