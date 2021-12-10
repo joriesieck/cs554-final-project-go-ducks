@@ -98,8 +98,6 @@ export default function CreateUser() {
 	}
 
 	const providerSignIn = async (provider) => {
-		// todo - email already exists as regular user?
-
 		let result;
 		try {
 			// try pop up - some browsers block

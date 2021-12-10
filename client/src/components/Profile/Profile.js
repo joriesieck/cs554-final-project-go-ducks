@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 
 import './Profile.css';
+import { updateEmail } from "firebase/auth";
+import { auth } from "../../firebase/firebaseSetup";
 
 const userData = {
 	username: 'fakeuser',
@@ -33,7 +35,7 @@ export default function Profile () {
 		else if (e.target.id==='edit-password') setEditPass(!editPass);
 	}
 
-	const editProfile = (e) => {
+	const editProfile = async (e) => {
 		e.preventDefault();
 		// get the field we're editing
 		const fieldToEdit = e.target.id;
@@ -41,6 +43,7 @@ export default function Profile () {
 		// get the new value
 		const newValue = e.target[0].value;
 		console.log(newValue);
+		// TODO error checking
 		// edit the user and toggle edit
 		if (fieldToEdit==='save-username') {
 			userData.username = newValue;
@@ -49,12 +52,20 @@ export default function Profile () {
 		if (fieldToEdit==='save-email') {
 			userData.email = newValue;
 			setEditEmail(false);
+			// TODO - what if user signed in with gmail but is trying to change to a non-gmail address?
+			// edit user in fb
+			try {
+				await updateEmail(auth.currentUser, newValue);
+			} catch (e) {
+				console.log(e);
+				// TODO do something with this
+			}
 		}
 		if (fieldToEdit==='save-password') {
 			userData.password = newValue;
 			setEditPass(false);
 		}
-		// TODO edit user in fb (if email or password changed)
+		
 		// TODO edit user in db
 	}
 

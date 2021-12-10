@@ -22,7 +22,7 @@
 
 .provider-logos {
 	display: flex;
-	justify-content: space-between;
+	flex-direction: column;
 }
 
 .login-error {
