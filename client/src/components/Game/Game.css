@@ -1,4 +1,35 @@
+#gamePlay
+{
+    height: 100vh;
+}
+
 .gameGrid
 {
     height: 100vh;
+}
+
+#statusBar
+{
+    height: 6vh;
+}
+
+.gridColumn
+{
+    height: 84vh;
+}
+
+.gridColumn button, .gridRow button
+{
+    width: 100%;
+    height: 100%;
+    color: #FFCC00;
+    font-size: 48px;
+    font-family: Impact, fantasy;
+    background-color: #060CE9
+}
+
+button.gridHeader
+{
+    height: 16vh;
+    color: white;
 }

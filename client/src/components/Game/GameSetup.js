@@ -1,24 +1,39 @@
 import React, {useState, useEffect} from 'react';
 import GameGrid from './GameGrid';
 import {FormControl, 
-    FormLabel, ToggleButtonGroup, ToggleButton} from '@mui/material';
+    FormLabel, ToggleButtonGroup, ToggleButton, Button, TextField} from '@mui/material';
 
 export default function GameSetup()
 {
     const [gameType, setGameType] = useState("");
     const [categoryChoice, setCategoryChoice] = useState("");
+    const [inSetup, setInSetup] = useState(true);
+    const [inGame, setInGame] = useState(false);
     const [categories, setCategories] = useState([]);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
+
+    useEffect(() =>
+    {
+        if (categoryChoice === 'random') 
+        {
+            let cats = setRandomCategories();
+            setCategories(cats)
+        }
+    }, [categoryChoice])
     
     //query all categories from the API
-    const handleGameTypeChange = (e) =>
+    const handleGameTypeChange = (e, newGameType) =>
     {
+        setGameType(newGameType);
         //set the game type
         //make the category choice appear
     }
 
-    const handleCategoryChoiceChange = (e) =>
+    const handleCategoryChoiceChange = (e, catChoice) =>
     {
+        setCategoryChoice(catChoice);
+        if (catChoice === 'custom') setCategories([]);
+        console.log(catChoice)
         //the callback for the toggles
         //set the category choice
         //make the next step appear
@@ -26,28 +41,60 @@ export default function GameSetup()
 
     const handleFormSubmit = (e) =>
     {
-        
+        setInSetup(false);
+        setInGame(true);
+    }
+
+    const setRandomCategories = () =>
+    {
+        return ['r','a','n','d','o','m'];
+    }
+
+    const CategoryForm = (props) =>
+    {
+        return (
+            <div>
+                <TextField></TextField>
+                <Button></Button>
+            </div>
+        );
     }
 
     return(
-        <div>
-            <FormControl component="fieldset">
+        <div id="gamePlay">
+            {inSetup ?
+            <FormControl id="gameSetupForm" component="fieldset">
                 <FormLabel>What kind of game are you looking to play?</FormLabel>
-                <ToggleButtonGroup exclusive value={gameType}>
+                <ToggleButtonGroup exclusive value={gameType} onChange={handleGameTypeChange}>
                     <ToggleButton value="solo">Solo</ToggleButton>
                     <ToggleButton value="friends">With Friends</ToggleButton>
                 </ToggleButtonGroup>
-                <ToggleButtonGroup exclusive value={categoryChoice}>
-                    <ToggleButton value="random">Random</ToggleButton>
-                    <ToggleButton value="selected">Custom</ToggleButton>
-                </ToggleButtonGroup>
-                {//if selected categories is checked, then display a series of dropdown lists for all the categories
-
-                //if random is checked, show game play button
-                //go to game grid set up with given info
+                <br/>
+                {
+                    gameType !== "" ? 
+                    <>
+                        <FormLabel>What kind of categories would you like to play with?</FormLabel>
+                        <ToggleButtonGroup exclusive value={categoryChoice} onChange={handleCategoryChoiceChange}>
+                            <ToggleButton value="random">Random</ToggleButton>
+                            <ToggleButton value="custom">Custom</ToggleButton>
+                        </ToggleButtonGroup>
+                    </> : <></>
                 }
+                {
+                    categoryChoice !== "" && gameType !== "" ? 
+                    (categoryChoice === 'custom' ? <CategoryForm /> : 
+                    <ul>Categories
+                        {categories.map((category) => <li key={category}>{category}</li>)}
+                    </ul>) : <></>
+                }
+
+                {categoryChoice !== '' && gameType !== '' && categories.length === 6 || categoryChoice === 'custom' ? <Button type="submit" onClick={handleFormSubmit}>Start Game</Button> : <></>}
             </FormControl>
-            <GameGrid></GameGrid>
+            : <div></div>
+            }
+            {inGame ?
+            <GameGrid id="grid" categories={categories}></GameGrid> : <div></div>
+            }
         </div>    
     );
 }
