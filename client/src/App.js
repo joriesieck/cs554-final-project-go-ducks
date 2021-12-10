@@ -9,7 +9,7 @@ function App() {
       <Router>
         <Route exact path='/' component={LogIn} />
         <Route exact path='/create-user' component={CreateUser} />
-        <Route path={['/home', '/profile']} component={AuthContainer} />
+        <Route path={['/home', '/profile', '/game']} component={AuthContainer} />
       </Router>
     </>
   );
