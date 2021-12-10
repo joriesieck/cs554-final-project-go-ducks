@@ -2,11 +2,12 @@ import { Alert, Button, Grid, List, ListItem, ListItemIcon, ListItemText, Modal,
 import { useState } from "react";
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
-import { useSelector } from "react-redux";
+import CloseIcon from '@mui/icons-material/Close';
+import { useSelector, useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
 
 import './Profile.css';
-import { reauthenticateWithCredential, updateEmail } from "firebase/auth";
+import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser } from "firebase/auth";
 import { auth } from "../../firebase/firebaseSetup";
 import inputChecks from "../../inputChecks";
 import LogIn from "../LogIn/LogIn";
@@ -15,7 +16,6 @@ import { Box } from "@mui/system";
 const userData = {
 	username: 'fakeuser',
 	email: 'fakeuser@gmail.com',
-	password: 'blahblah',
 	highScores: [10, 25],
 	friends: ['fakeuser1', 'fakeuser2', 'fakeuser3']
 }
@@ -34,8 +34,12 @@ export default function Profile () {
 
 	const [openModal, setOpenModal] = useState(false);
 	const [loginErrors, setLoginErrors] = useState(null);
+	const [fieldToUpdate, setFieldToUpdate] = useState(null);
+	const [redirect, setRedirect] = useState(false);
 
 	const user = useSelector((state) => state.user);
+	const dispatch = useDispatch();
+
 	// if user is not logged in, redirect to login
 	if (!user) return <Redirect to="/" />;
 
@@ -89,37 +93,38 @@ export default function Profile () {
 			setEditUser(false);
 		}
 		if (fieldToEdit==='save-email') {
-			// edit user in fb
-			try {
-				console.log(auth.currentUser);
-				await updateEmail(auth.currentUser, newValue);
-			} catch (e) {
-				console.log(e);
-				if (e.toString().includes('requires-recent-login')) setOpenModal(true);
-				else setEmailError(e.toString());
-				return;
-			}
-			userData.email = newValue;
-			setEditEmail(false);
+			// prompt for login credentials
+			setOpenModal(true);
+			setFieldToUpdate({
+				field: 'email',
+				value: newValue
+			});
+			return;
 		}
 		if (fieldToEdit==='save-password') {
-			userData.password = newValue;
-			setEditPass(false);
-			// TODO change in fb
+			setOpenModal(true);
+			setFieldToUpdate({
+				field: 'pass',
+				value: newValue
+			});
+			return;
 		}
 		
 		// DBTODO edit user in db
 	}
 
-	const deleteUser = (e) => {
+	const triggerDeleteUser = (e) => {
 		e.preventDefault();
-		console.log('delete user');
-		// TODO delete user in firebase
+		// trigger reauth
+		setFieldToUpdate({field:'delete'});
+		setOpenModal(true);
 		// DBTODO delete user in DB
 	}
 
 	const reAuth = async (e) => {
 		e.preventDefault();
+
+		setLoginErrors(null);
 
 		let email = e.target[0].value;
 		const password = e.target[2].value;
@@ -144,25 +149,88 @@ export default function Profile () {
 		}
 
 		console.log(email, password);
-		//TODO finish
+		let result;
+		try {
+			const cred = EmailAuthProvider.credential(email,password);
+			result = await reauthenticateWithCredential(auth.currentUser, cred);
+		} catch (e) {
+			setLoginErrors(['Invalid login credentials.']);
+			return;
+		}
+		// make sure we got the token
+		if (!result || !result.operationType==='reauthenticate') {
+			setLoginErrors(['Something went wrong. Please try again.']);
+			return;
+		}
+
+		if (fieldToUpdate.field==='email') {
+			try {
+				await updateEmail(auth.currentUser, fieldToUpdate.value);
+			} catch (e) {
+				console.log(e);
+				setLoginErrors([e.toString()]);
+				return;
+			}
+			userData.email = fieldToUpdate.value;
+			// DBTODO update email in database
+			setEditEmail(false);
+			setOpenModal(false);
+		} else if (fieldToUpdate.field==='pass') {
+			try {
+				await updatePassword(auth.currentUser, fieldToUpdate.value);
+			} catch (e) {
+				console.log(e);
+				setLoginErrors([e.toString()]);
+				return;
+			}
+			setEditPass(false);
+			setOpenModal(false);
+		} else if (fieldToUpdate.field==='delete') {
+			alert('Are you sure you want to delete your account?');
+			try {
+				const result = await deleteUser(auth.currentUser);
+				console.log(result);
+				dispatch({
+					type: 'LOG_OUT'
+				})
+				setRedirect(true);
+				return;
+			} catch (e) {
+				console.log(e);
+				setLoginErrors([e.toString()]);
+			}
+		}
+		setFieldToUpdate(null);
+		//TODO make sure all states are updating/resetting correctly
+	}
+
+	const handleClose = () => {
+		setLoginErrors(null);
 		setOpenModal(false);
 	}
+
+	if (redirect) return <Redirect to='/' />;
 
 	return (
 		<div id="profile">
 			<Modal
 				open={openModal}
-				// onClose={handleClose}
+				onClose={handleClose}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 				className={`profile-reauth-modal${loginErrors ? ' profile-reauth-modal-errors' : ''}`}	
 			>
 				<Box className='profile-reauth-box'>
-					<h1 id="modal-modal-title">Log In</h1>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Log In</h1></Grid>
+						<Grid item xs={1}><CloseIcon id='profile-reauth-close' onClick={handleClose} /></Grid>
+					</Grid>
+
 					<Alert id="modal-modal-description" severity="info">Please log in again to save changes.</Alert>
 					<form onSubmit={reAuth} id="reauth-user-form">
-						<TextField id="reauth-email"  label="Email" />
-						<TextField id="reauth-password" type="password" label="Password" />
+						<TextField id="reauth-email" required type="email" label="Email" />
+						<TextField id="reauth-password" required type="password" label="Password" />
 						<Button type="submit" variant="contained">Log in</Button>
 					</form>
 					{loginErrors && <Alert severity="error" className="create-user-errors">
@@ -208,19 +276,17 @@ export default function Profile () {
 				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? 'Discard' : 'Edit'}</Button>
 			</Grid>
 			<Grid item xs={12} className="profile-editable">
-				{!editPass && <><Grid item xs={2}>Password:</Grid><Grid item xs={6}>{'*'.repeat(userData.password.length)}</Grid></>}
 				{editPass && <form id="save-password" onSubmit={editProfile}>
 				<TextField
 					id="password"
-					label="Password"
-					defaultValue={userData.password}
+					label="New Password"
 					type="password"
 					error={passError!==''}
 					helperText={passError.replace('Error: ', '')}
 				/>
 				<Button type="submit">Save</Button>
 				</form>}
-				<Button id="edit-password" onClick={toggleEdit}>{editPass ? 'Discard' : 'Edit'}</Button>
+				<Button id="edit-password" className={editPass ? 'discard-password' : 'change-password'} onClick={toggleEdit}>{editPass ? 'Discard' : 'Change Password'}</Button>
 			</Grid>
 			</Grid>
 
@@ -248,7 +314,7 @@ export default function Profile () {
 			</List>
 			</div>
 
-			<Button color="error" onClick={deleteUser}>Delete Account</Button>
+			<Button color="error" onClick={triggerDeleteUser}>Delete Account</Button>
 		</div>
 	)
 }

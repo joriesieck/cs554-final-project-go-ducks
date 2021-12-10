@@ -53,6 +53,11 @@
 
 .profile-reauth-box h1 {
 	margin: 0;
+	text-align: center;
+}
+
+#profile-reauth-close {
+	cursor: pointer;
 }
 
 #reauth-user-form {
@@ -60,4 +65,8 @@
 	flex-direction: column;
 	justify-content: space-between;
 	height: 175px;
+}
+
+.change-password {
+	width: 100%;
 }
