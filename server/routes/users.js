@@ -10,9 +10,9 @@ const {
 } = require('../inputChecks');
 
 // get user
-router.get('/:username', async (req, res) => {
+router.get('/username', async (req, res) => {
   // get the username from req.params
-  let username = req.params.username;
+  let { username } = req.body;
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
@@ -34,7 +34,30 @@ router.get('/:username', async (req, res) => {
   // send back to front end
   res.json(user);
 });
+router.get('/email', async (req, res) => {
+  // get the username from req.params
+  let { email } = req.body;
+  // make sure it's a string, nonempty, etc
+  try {
+    email = checkString(email, 'Email', false);
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
 
+  // get the user
+  let user;
+  try {
+    user = await userData.getUserByEmail(email);
+    if (!user.username) throw 'No user found.';
+  } catch (e) {
+    res.status(404).json({ error: e.message || e.toString() });
+    return;
+  }
+
+  // send back to front end
+  res.json(user);
+});
 // create user
 router.post('/', async (req, res) => {
   // get variables from req body

@@ -8,6 +8,12 @@ const exportedMethods = {
     if (!user) throw `User with username ${username} not found`;
     return user;
   },
+  async getUserByEmail(email) {
+    const userCollection = await users();
+    const user = await userCollection.findOne({ email: email });
+    if (!user) throw `User with email ${email} not found`;
+    return user;
+  },
   async addUser(username, email, optedForLeaderboard) {
     const userCollection = await users();
     const insertInfo = await userCollection.insertOne({
