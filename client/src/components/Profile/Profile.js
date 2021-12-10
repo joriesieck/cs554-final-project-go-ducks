@@ -33,6 +33,7 @@ export default function Profile () {
 	const [passError, setPassError] = useState('');
 
 	const [openModal, setOpenModal] = useState(false);
+	const [loginErrors, setLoginErrors] = useState(null);
 
 	const user = useSelector((state) => state.user);
 	// if user is not logged in, redirect to login
@@ -57,6 +58,7 @@ export default function Profile () {
 
 	const editProfile = async (e) => {
 		e.preventDefault();
+		//TODO check if anything actually changed
 
 		// get the field we're editing
 		const fieldToEdit = e.target.id;
@@ -99,8 +101,6 @@ export default function Profile () {
 			}
 			userData.email = newValue;
 			setEditEmail(false);
-			// TODO - what if user signed in with gmail but is trying to change to a non-gmail address?
-			
 		}
 		if (fieldToEdit==='save-password') {
 			userData.password = newValue;
@@ -120,8 +120,6 @@ export default function Profile () {
 
 	const reAuth = async (e) => {
 		e.preventDefault();
-		setOpenModal(false);
-		//TODO style modal!!
 
 		let email = e.target[0].value;
 		const password = e.target[2].value;
@@ -141,12 +139,13 @@ export default function Profile () {
 
 		// if there were errors, set errors
 		if (errorList.length>0) {
-			console.log(errorList);	//TODO
+			setLoginErrors(errorList);
 			return;
 		}
 
 		console.log(email, password);
 		//TODO finish
+		setOpenModal(false);
 	}
 
 	return (
@@ -155,16 +154,25 @@ export default function Profile () {
 				open={openModal}
 				// onClose={handleClose}
 				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"	
+				aria-describedby="modal-modal-description"
+				className={`profile-reauth-modal${loginErrors ? ' profile-reauth-modal-errors' : ''}`}	
 			>
 				<Box className='profile-reauth-box'>
 					<h1 id="modal-modal-title">Log In</h1>
 					<Alert id="modal-modal-description" severity="info">Please log in again to save changes.</Alert>
 					<form onSubmit={reAuth} id="reauth-user-form">
-						<TextField id="reauth-email" required type="email" label="Email" />
-						<TextField id="reauth-password" required type="password" label="Password" />
+						<TextField id="reauth-email"  label="Email" />
+						<TextField id="reauth-password" type="password" label="Password" />
 						<Button type="submit" variant="contained">Log in</Button>
 					</form>
+					{loginErrors && <Alert severity="error" className="create-user-errors">
+						<ul>
+							{loginErrors.map((error) => {
+								error = error.replace('Error: ', '');
+								return <li key={error}>{error}</li>
+							})}
+						</ul>
+					</Alert>}
 				</Box>
 			</Modal>
 
