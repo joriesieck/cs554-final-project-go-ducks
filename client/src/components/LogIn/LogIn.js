@@ -2,11 +2,16 @@ import { auth } from "../../firebase/firebaseSetup";
 import { signInWithEmailAndPassword } from "@firebase/auth";
 import { Redirect } from "react-router-dom";
 import {Button, TextField} from '@mui/material';
+import { useDispatch, useSelector } from "react-redux";
+
 import './LogIn.css';
 
 export default function LogIn() {
+	const user = useSelector((state) => state.user);
+	const dispatch = useDispatch();
+
 	// if user is already logged in, redirect to home
-	if (auth.currentUser) return <Redirect to="/home" />;
+	if (user) return <Redirect to="/home" />;
 
 	const logUserIn = async (e) => {
 		e.preventDefault();
