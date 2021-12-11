@@ -1,9 +1,9 @@
 import { auth, fbProvider, gitProvider, googleProvider } from "../../firebase/firebaseSetup";
 import { signInWithEmailAndPassword, signInWithPopup } from "@firebase/auth";
+import { useState } from 'react';
 import { Redirect } from "react-router-dom";
-import {Alert, Button, TextField} from '@mui/material';
+import { Alert, Button, TextField } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
 import inputChecks from '../../inputChecks';
 
 import googleLogo from '../../imgs/google-logo.png';
@@ -13,6 +13,7 @@ import './LogIn.css';
 
 export default function LogIn() {
 	const [errors, setErrors] = useState(null);
+	const [loggedIn, setLoggedIn] = useState(false);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -41,16 +42,23 @@ export default function LogIn() {
 		// if there were errors, set errors
 		if (errorList.length>0) {
 			setErrors(errorList);
+			//clear fields
+			document.getElementById('email').value = '';
+			document.getElementById('password').value = '';
 			return;
 		}
 
 		let result;
 		try {
 			result = await signInWithEmailAndPassword(auth, email, password);
-			console.log('user should be logged in');
 			console.log(result);
+			if (result.user.uid) setLoggedIn(true);
+			else throw Error('couldnt log in');
 		} catch (e) {
 			setErrors(['Invalid login credentials.']);
+			//clear fields
+			document.getElementById('email').value = '';
+			document.getElementById('password').value = '';
 			return;
 		}
 
@@ -100,6 +108,8 @@ export default function LogIn() {
 		});
 	}
 
+	if (loggedIn) return <Redirect to="/home" />
+
 	return (
 		<div id="login-user">
 			<h1>Log In</h1>
@@ -134,7 +144,6 @@ export default function LogIn() {
 			</Alert>}
 
 			<p>Test user: email: testing@test.com, password: test12</p>
-
 			<p>Not a user yet? <a href="/create-user">Create Account</a></p>
 		</div>
 	)
