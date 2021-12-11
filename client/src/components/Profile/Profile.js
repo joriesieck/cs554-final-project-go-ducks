@@ -434,9 +434,9 @@ export default function Profile () {
 				{!editLeaderboard && <Grid item xs={8}>{`You are${userData.optedForLeaderboard ? '' : ' not'} participating in the leaderboard`}</Grid>}
 				{editLeaderboard && <form id="save-leaderboard" onSubmit={toggleLeaderboard}>
 					<FormControlLabel label={`${userData.optedForLeaderboard ? 'Remove me from' : 'Add me to'} the leaderboard`} control={<Checkbox />} />
-					<Button type="submit">Save</Button>
+					<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? 'Discard' : 'Change'}</Button>
+				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? <CloseIcon /> : 'Change'}</Button>
 			</Grid>
 			{userData.high_scores.length>0 && <List>
 				{userData.high_scores.map((score, i) => (
