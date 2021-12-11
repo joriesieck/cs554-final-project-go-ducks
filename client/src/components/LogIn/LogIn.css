@@ -12,3 +12,19 @@
 	margin-right: auto;
 	max-width: 500px;
 }
+
+.provider-logo {
+	margin-top: 10px !important;
+}
+.provider-logo img {
+	margin-right: 5px;
+}
+
+.provider-logos {
+	display: flex;
+	flex-direction: column;
+}
+
+.login-error {
+	margin-top: 10px;
+}

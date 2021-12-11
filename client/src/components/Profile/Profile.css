@@ -26,3 +26,58 @@
 	justify-content: space-between;
 	width: 100%;
 }
+
+.profile-reauth-modal {
+	max-width: 300px;
+	height: 300px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 100px;
+}
+
+.profile-reauth-modal-errors {
+	height: 450px;
+}
+
+.profile-reauth-box {
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	padding: 20px;
+	border-radius: 5%;
+}
+
+.profile-reauth-box h1 {
+	margin: 0;
+	text-align: center;
+}
+
+#profile-reauth-close {
+	cursor: pointer;
+}
+
+#reauth-user-form {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 175px;
+}
+
+.change-password {
+	width: 100%;
+}
+
+.profile-provider {
+	display: flex;
+}
+
+.profile-loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 90vh;
+}
