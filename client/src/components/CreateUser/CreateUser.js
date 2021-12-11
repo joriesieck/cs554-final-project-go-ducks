@@ -4,11 +4,12 @@ import { Alert, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { checkString } from "../../utils/inputChecks";
+import { getUserByName } from "../../utils/backendCalls";
 
 import './CreateUser.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-import inputChecks from "../../inputChecks";
 
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
@@ -32,17 +33,17 @@ export default function CreateUser() {
 		// error checking
 		const errorList = [];
 		try {
-			username = inputChecks.checkString(username, 'Username', true, false);
+			username = checkString(username, 'Username', true, false);
 		} catch (e) {
 			errorList.push(e.toString());
 		}
 		try {
-			email = inputChecks.checkString(email, 'Email', true, false);
+			email = checkString(email, 'Email', true, false);
 		} catch (e) {
 			errorList.push(e.toString());
 		}
 		try {
-			inputChecks.checkString(password, 'Password', false, true);
+			checkString(password, 'Password', false, true);
 		} catch (e) {
 			errorList.push(e.toString());
 		}
@@ -66,6 +67,12 @@ export default function CreateUser() {
 		}
 
 		// DBTODO - make sure username not already in db
+		const dbRes = await getUserByName(username);
+		if (dbRes.error) {
+			console.log(dbRes.error);
+		}
+		console.log(dbRes);
+		return;
 
 		let result;
 		try {
@@ -130,7 +137,7 @@ export default function CreateUser() {
 		let username = e.target[0].value;
 		// error checking
 		try {
-			username = inputChecks.checkString(username, 'Username', true, false);
+			username = checkString(username, 'Username', true, false);
 		} catch (e) {
 			setErrors([e]);
 		}

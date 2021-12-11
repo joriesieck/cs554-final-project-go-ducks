@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser, fetchSignInMethodsForEmail, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 import { auth, gitProvider, googleProvider } from "../../firebase/firebaseSetup";
-import inputChecks from "../../inputChecks";
+import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
@@ -91,7 +91,7 @@ export default function Profile () {
 			const isPW = fieldToEdit==='save-password';
 			const firstChar = fieldToEdit.charAt(5);
 			const fieldName = fieldToEdit.replace('save-', '').replace(firstChar, firstChar.toUpperCase());
-			newValue = inputChecks.checkString(newValue, fieldName, !isPW, isPW);
+			newValue = checkString(newValue, fieldName, !isPW, isPW);
 			if (isPW && newValue.length<6) throw Error('Password must be at least 6 characters.');
 		} catch (e) {
 			if (fieldToEdit==='save-username') setUsernameError(e.toString());
@@ -207,12 +207,12 @@ export default function Profile () {
 		const errorList = [];
 		// error checking
 		try {
-			email = inputChecks.checkString(email, 'Email', true, false);
+			email = checkString(email, 'Email', true, false);
 		} catch (e) {
 			errorList.push(e.toString());
 		}
 		try {
-			inputChecks.checkString(password, 'Password', false, false);
+			checkString(password, 'Password', false, false);
 		} catch (e) {
 			errorList.push(e.toString());
 		}

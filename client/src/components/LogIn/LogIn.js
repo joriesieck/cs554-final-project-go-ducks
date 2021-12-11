@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Redirect } from "react-router-dom";
 import { Alert, Button, TextField } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
-import inputChecks from '../../inputChecks';
+import { checkString } from '../../utils/inputChecks';
 
 import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
@@ -29,12 +29,12 @@ export default function LogIn() {
 		const errorList = [];
 		// error checking
 		try {
-			email = inputChecks.checkString(email, 'Email', true, false);
+			email = checkString(email, 'Email', true, false);
 		} catch (e) {
 			errorList.push(e.toString());
 		}
 		try {
-			inputChecks.checkString(password, 'Password', false, false);
+			checkString(password, 'Password', false, false);
 		} catch (e) {
 			errorList.push(e.toString());
 		}
