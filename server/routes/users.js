@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const data = require('../data');
-const userData = require('../data/users'); // change to data.users when db funcs are done
+const userData = data.users; // change to data.users when db funcs are done
 const {
   checkString,
   checkBool,
@@ -10,9 +10,9 @@ const {
 } = require('../inputChecks');
 
 // get user
-router.get('/username', async (req, res) => {
+router.get('/username/:username', async (req, res) => {
   // get the username from req.params
-  let { username } = req.body;
+  let { username } = req.params;
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
@@ -34,9 +34,9 @@ router.get('/username', async (req, res) => {
   // send back to front end
   res.json(user);
 });
-router.get('/email', async (req, res) => {
-  // get the username from req.params
-  let { email } = req.body;
+router.get('/email/:email', async (req, res) => {
+  // get the email from req.params
+  let { email } = req.params;
   // make sure it's a string, nonempty, etc
   try {
     email = checkString(email, 'Email', false);
