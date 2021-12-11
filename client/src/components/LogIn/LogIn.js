@@ -84,7 +84,7 @@ export default function LogIn() {
 	}
 
 	const providerSignIn = async (provider) => {
-		// DBTODO - email already exists as regular user?
+		// TODO - email already exists as regular user?
 
 		let result;
 		try {
@@ -99,7 +99,7 @@ export default function LogIn() {
 		if (result && result.user && result.user.email) setErrors(null);
 		else return;
 		console.log(result);
-		// DBTODO - make sure we have a record for this person in the db. otherwise we need to get a username from them & store info -> so maybe redirect to create-user page & make them "sign in" w google again?
+		// TODO - make sure we have a record for this person in the db. otherwise we need to get a username from them & store info -> so maybe redirect to create-user page & make them "sign in" w google again?
 
 		// store email in redux
 		dispatch({

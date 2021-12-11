@@ -7,6 +7,12 @@ function checkString (str, varName, doTrim, whiteSpcAllowed) {
 	return str;
 }
 
+function checkBool (bool, varName) {
+	if (bool===undefined || bool===null || arguments.length<2) throw Error(`Please provide a value for ${varName}.`);
+	if (typeof bool!=='boolean') throw Error(`${varName} must be a boolean`);
+}
+
 export {
-	checkString
+	checkString,
+	checkBool
 }

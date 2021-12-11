@@ -8,7 +8,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	height: 300px;
+	height: 325px;
 }
 
 .create-user-errors {
@@ -18,4 +18,9 @@
 .create-user-errors ul {
 	list-style-type: none;
 	padding: 0px;
+}
+
+.MuiCheckbox-root {
+	padding:0;
+	padding-left:9px !important;
 }

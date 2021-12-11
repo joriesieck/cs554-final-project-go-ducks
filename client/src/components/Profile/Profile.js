@@ -21,7 +21,7 @@ const userData = {
 	friends: ['fakeuser1', 'fakeuser2', 'fakeuser3']
 }
 
-// DBTODO pull data from database
+// TODO pull data from database
 
 export default function Profile () {
 	const [editUser, setEditUser] = useState(false);
@@ -140,7 +140,7 @@ export default function Profile () {
 	}
 
 	const providerReAuth = async () => {
-		// DBTODO - email already exists as regular user?
+		// TODO - email already exists as regular user?
 		let providerToAuth;
 		if (provider==='google.com') providerToAuth = googleProvider;
 		else if (provider==='github.com') providerToAuth = gitProvider;

@@ -1,11 +1,11 @@
 import { auth, googleProvider, gitProvider } from "../../firebase/firebaseSetup";
 import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithPopup } from "@firebase/auth";
-import { Alert, Button, TextField } from "@mui/material";
+import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { checkString } from "../../utils/inputChecks";
-import { getUserByName } from "../../utils/backendCalls";
+import { checkString, checkBool } from "../../utils/inputChecks";
+import { addUser, getUserByName } from "../../utils/backendCalls";
 
 import './CreateUser.css';
 import googleLogo from '../../imgs/google-logo.png';
@@ -29,6 +29,7 @@ export default function CreateUser() {
 		let username = e.target[0].value;
 		let email = e.target[2].value;
 		const password = e.target[4].value;
+		const optedForLeaderboard = e.target[6].checked;
 
 		// error checking
 		const errorList = [];
@@ -47,6 +48,11 @@ export default function CreateUser() {
 		} catch (e) {
 			errorList.push(e.toString());
 		}
+		try {
+			checkBool(optedForLeaderboard, 'optedForLeaderboard');
+		} catch (e) {
+			errorList.push(e.toString());
+		}
 		// make sure password is at least 6 characters
 		if (password.length<6) errorList.push('Password must be at least 6 characters.');
 
@@ -56,7 +62,7 @@ export default function CreateUser() {
 			return;
 		}
 
-		// make sure user doesn't exist
+		// make sure user doesn't exist in firebase
 		try {
 			const signInMethods = await fetchSignInMethodsForEmail(auth, email);
 			if (signInMethods.length>0) throw Error('Email address already associated with an account.');
@@ -66,13 +72,30 @@ export default function CreateUser() {
 			return;
 		}
 
-		// DBTODO - make sure username not already in db
-		const dbRes = await getUserByName(username);
-		if (dbRes.error) {
-			console.log(dbRes.error);
+		// make sure username not already in db
+		try {
+			const result = await getUserByName(username);
+			if (result && result._id) {
+				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
+				return;
+			}
+		} catch (e) {
+			// make sure error is doesn't exist
+			e = e.toString();
+			if (!e.includes('not found') && !e.includes('404')) {
+				setErrors([e.toString()]);
+				return;
+			}
 		}
-		console.log(dbRes);
-		return;
+
+		// add user to db
+		try {
+			const result = await addUser(username, email, optedForLeaderboard);
+			console.log(result);
+		} catch (e) {
+			setErrors([e.toString()]);
+			return;
+		}
 
 		let result;
 		try {
@@ -81,10 +104,9 @@ export default function CreateUser() {
 		} catch (e) {
 			console.log(e);
 			setErrors([e.toString()]);
+			// DBTODO delete db record
 			return;
 		}
-
-		// DBTODO add user to db
 
 		// store email in redux
 		dispatch({
@@ -106,6 +128,7 @@ export default function CreateUser() {
 	}
 
 	const providerSignIn = async (provider) => {
+		// TODO check if there are any other sign-in methods for this email
 		let result;
 		try {
 			// try pop up - some browsers block
@@ -122,7 +145,7 @@ export default function CreateUser() {
 			return;
 		}
 
-		// DBTODO - check if email already exists in db. if it does, delete that db record, i guess??
+		// TODO - check if email already exists in db. if it does, delete that db record, i guess??
 
 		// store email
 		setEmail(result.user.email);
@@ -142,9 +165,9 @@ export default function CreateUser() {
 			setErrors([e]);
 		}
 
-		// DBTODO - check if username already exists in db
+		// TODO - check if username already exists in db
 		
-		// DBTODO - add user to database
+		// TODO - add user to database
 
 		dispatch({
 			type: 'LOG_IN',
@@ -164,6 +187,7 @@ export default function CreateUser() {
 				<TextField id="username" required label="Username" />
 				<TextField id="email" required type="email" label="Email" />
 				<TextField id="password" required type="password" label="Password" helperText="Must be at least 6 characters." />
+				<FormControlLabel control={<Checkbox id="optedForLeaderboard" />} label="Include me in the leaderboard (you can change this later)" />
 				<Button type="submit" variant="contained">Create User</Button>
 			</form>}
 
