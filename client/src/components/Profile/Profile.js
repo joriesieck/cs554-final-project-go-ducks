@@ -1,9 +1,10 @@
-import { Alert, Button, CircularProgress, Grid, List, ListItem, ListItemIcon, ListItemText, Modal, TextField } from "@mui/material"
+import { Alert, Button, Checkbox, CircularProgress, FormControlLabel, Grid, List, ListItem, ListItemIcon, ListItemText, Modal, TextField } from "@mui/material"
 import { useEffect, useState } from "react";
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import { useSelector, useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser, fetchSignInMethodsForEmail, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
@@ -19,6 +20,7 @@ export default function Profile () {
 	const [editUser, setEditUser] = useState(false);
 	const [editEmail, setEditEmail] = useState(false);
 	const [editPass, setEditPass] = useState(false);
+	const [editLeaderboard, setEditLeaderboard] = useState(false);
 	
 	const [usernameError, setUsernameError] = useState('');
 	const [emailError, setEmailError] = useState('');
@@ -87,6 +89,9 @@ export default function Profile () {
 			setPassError('');
 			setEditPass(!editPass);
 		}
+		else if (e.target.id==='edit-leaderboard') {
+			setEditLeaderboard(!editLeaderboard);
+		}
 	}
 
 	const editProfile = async (e) => {
@@ -118,6 +123,7 @@ export default function Profile () {
 		// edit the user and toggle edit
 		if (fieldToEdit==='save-username') {
 			userData.username = newValue;
+			// DBTODO edit user in db
 			setEditUser(false);
 		}
 		if (fieldToEdit==='save-email') {
@@ -137,8 +143,19 @@ export default function Profile () {
 			});
 			return;
 		}
+	}
+
+	const toggleLeaderboard = (e) => {
+		e.preventDefault();
 		
-		// DBTODO edit user in db
+		const clickedCheckbox = e.target[0].checked;
+
+		if (clickedCheckbox) {
+			userData.optedForLeaderboard = !userData.optedForLeaderboard;
+			// DBTODO edit user in database
+			
+		}
+		setEditLeaderboard(false);
 	}
 
 	const triggerDeleteUser = (e) => {
@@ -238,7 +255,6 @@ export default function Profile () {
 			return;
 		}
 
-		console.log(email, password);
 		let result;
 		try {
 			const cred = EmailAuthProvider.credential(email,password);
@@ -256,23 +272,22 @@ export default function Profile () {
 		}
 
 		if (fieldToUpdate.field==='email') {
+			// DBTODO update email in database
 			try {
-				await updateEmail(auth.currentUser, fieldToUpdate.value);
+				console.log('update email in firebase - commented out since it doesnt work in db yet');
+				// await updateEmail(auth.currentUser, fieldToUpdate.value);
 			} catch (e) {
-				console.log(e);
 				setLoginErrors([e.toString()]);
 				setDeleting(false);
 				return;
 			}
 			userData.email = fieldToUpdate.value;
-			// DBTODO update email in database
 			setEditEmail(false);
 			setOpenModal(false);
 		} else if (fieldToUpdate.field==='pass') {
 			try {
 				await updatePassword(auth.currentUser, fieldToUpdate.value);
 			} catch (e) {
-				console.log(e);
 				setLoginErrors([e.toString()]);
 				setDeleting(false);
 				return;
@@ -280,9 +295,10 @@ export default function Profile () {
 			setEditPass(false);
 			setOpenModal(false);
 		} else if (fieldToUpdate.field==='delete') {
+			//DBTODO delete user from database
 			try {
-				const result = await deleteUser(auth.currentUser);
-				console.log(result);
+				console.log('delete user in firebase - commented out since it doesnt work in db yet');
+				// await deleteUser(auth.currentUser);
 				dispatch({
 					type: 'LOG_OUT'
 				})
@@ -290,7 +306,6 @@ export default function Profile () {
 				setDeleting(false);
 				return;
 			} catch (e) {
-				console.log(e);
 				setLoginErrors([e.toString()]);
 			}
 		}
@@ -345,6 +360,7 @@ export default function Profile () {
 
 			<h1>Profile</h1>
 			<Grid className="profile-list">
+			<h2>Login Credentials</h2>
 			<Grid item xs={12} className="profile-editable">
 				{!editUser && <><Grid item xs={2}>Username:</Grid><Grid item xs={6}>{userData.username}</Grid></>}
 				{editUser && <form id="save-username" onSubmit={editProfile}>
@@ -377,7 +393,6 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? 'Discard' : 'Edit'}</Button>
 			</Grid>
-			{/* TODO add optedForLeaderboard */}
 			<Grid item xs={12} className="profile-editable">
 				{editPass && <form id="save-password" onSubmit={editProfile}>
 				<TextField
@@ -409,11 +424,19 @@ export default function Profile () {
 			{provider==='no-account' && <Alert severity="error">
 				Looks like you don't have an account. <a href='/create-user'>Create one here</a>.
 			</Alert>}
-
 			</Grid>
 
 			<div className="profile-list">
-			<span>High Scores</span>
+			<h2>High Scores</h2>
+			<Grid item className="profile-editable profile-leaderboard">
+				<Grid item xs={1}><LeaderboardIcon /></Grid>
+				{!editLeaderboard && <Grid item xs={8}>{`You are${userData.optedForLeaderboard ? '' : ' not'} participating in the leaderboard`}</Grid>}
+				{editLeaderboard && <form id="save-leaderboard" onSubmit={toggleLeaderboard}>
+					<FormControlLabel label={`${userData.optedForLeaderboard ? 'Remove me from' : 'Add me to'} the leaderboard`} control={<Checkbox />} />
+					<Button type="submit">Save</Button>
+				</form>}
+				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? 'Discard' : 'Change'}</Button>
+			</Grid>
 			{userData.high_scores.length>0 && <List>
 				{userData.high_scores.map((score, i) => (
 					<ListItem disablePadding key={i}>
@@ -426,7 +449,7 @@ export default function Profile () {
 			</div>
 
 			<div className="profile-list">
-			<span>Friends</span>
+			<h2>Friends</h2>
 			{userData.friends.length>0 && <List>
 				{userData.friends.map((friend, i) => (
 					<ListItem disablePadding key={i}>
@@ -437,9 +460,9 @@ export default function Profile () {
 			</List>}
 			{userData.friends.length<=0 && <p>No friends to show.</p>}
 			</div>
-
+			{/* DBTODO remove friends/pending friends */}
 			<div className="profile-list">
-			<span>Pending Friends</span>
+			<h2>Pending Friends</h2>
 			{userData.pending_friends.length>0 && <List>
 				{userData.pending_friends.map((friend, i) => (
 					<ListItem disablePadding key={i}>

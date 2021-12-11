@@ -14,11 +14,21 @@
 	padding: 10px;
 }
 
+.profile-list h2 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-size: 18px;
+}
+
 .profile-editable {
 	display: flex;
 	justify-content: space-between;
 	min-height: 75px;
 	align-items: center;
+}
+
+.profile-leaderboard {
+	min-height: 0;
 }
 
 .profile-editable form {
