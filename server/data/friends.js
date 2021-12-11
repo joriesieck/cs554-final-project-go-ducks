@@ -134,10 +134,48 @@ async function addFriend(requesterId, requesteeId){
     return res;
 }
 
-// accept friend
+// accept friend -> must be in pending array (as received), remove from pending of both
 async function acceptFriend(userId, pendingId){
+    checkObjId(userId);
+    checkObjId(pendingId);
 
+    const uid = ObjectId(userId);
+    const pid = ObjectId(pendingId);
+
+    // check exist
+    const user = userData.getUserById(userId);
+    await userData.getUserById(pendingId);
+
+    const inPending = user.pending_friends.some((e) => e[0] === pid && e[1] === 'received');
+    
+    if (!inPending){
+        throw `Unable to accept User ${pendingId} as friend, User ${userId} has not received a request from them`;
+    }
+
+    // update friends and pending of both, this seems janky
+    const userUpdate = await userCollection.updateOne(
+        {_id: uid},
+        { $pull: {pending_friends: [pid, 'received']}},
+        { $addToSet: { friends: pid}}
+    );
+    if (!userUpdate.matchedCount && !userUpdate.modifiedCount){
+        throw `Unable to add User ${pendingId} to friends of User ${userId}`;
+    }
+
+    const pendingUpdate = await userCollection.updateOne(
+        {_id: pid},
+        { $pull: {pending_friends: [uid, 'sent']}},
+        { $addToSet: { friends: uid}}
+    );
+    if (!pendingUpdate.matchedCount && !pendingUpdate.modifiedCount){
+        throw `Unable to add User ${userId} to friends of User ${pendingId}`;
+    }
+
+    let res = await userData.getUserById(userId);
+    return res;
 }
+
+// remove addFriend request
 
 // remove friend
 async function removeFriend(userId, friendId){
@@ -153,5 +191,6 @@ module.exports = {
     getFriendById,
     getAllFriends,
     getPendingFriendById,
-    getAllPending
+    getAllPending,
+    addFriend
 }
