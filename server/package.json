@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend for CS554 final project",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "seed": "node tasks/seed.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joriesieck/cs554-final-project-go-ducks.git"
+  },
+  "author": "Elias Frieling, Jorie Sieck, Jack Brummer, Ava Engstrom, Corinne Wisniewski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joriesieck/cs554-final-project-go-ducks/issues"
+  },
+  "homepage": "https://github.com/joriesieck/cs554-final-project-go-ducks#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongodb": "^4.2.0",
+    "prettier": "^2.4.1"
+  }
+}

@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+
+/*Landing Page */
+.landingButtonGroup
+{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.landingButton
+{
+  width: 30%;
+  height: 75px;
+  margin: 5px;
+}
+
