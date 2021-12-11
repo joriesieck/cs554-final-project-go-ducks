@@ -3,6 +3,13 @@ const { checkString } = require('../inputChecks');
 const users = mongoCollections.users;
 
 const exportedMethods = {
+  async getUserById(id){
+    checkObjId(id, "User ID");
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: id});
+    if (!user) throw `User with ID ${id} not found`;
+    return user;
+  },
   async getUserByName(username) {
     checkString(username, 'Username', false);
     const userCollection = await users();
