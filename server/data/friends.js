@@ -71,14 +71,13 @@ async function getAllPending(userId) {
     checkObjId(userId);
     const user = await userData.getUserById(userId);
     const userCollection = await users();
-    const fids = user.friends.map(e => e[0])
+    const fids = user.pending_friends.map(e => e[0])
     const friends = await userCollection.find({_id: {$in : fids}});
-    // put friends together w/ pending status
+    // put friends together w/ pending status, this seems like there's probably a better way to do it
     for (const friend in friends){
-        
+        let element = user.pending_friends.find((e) => e[0] === friend._id);
+        friend.pending_status = element[1];
     }
-
-    // will simply be empty array if none
     return friends;
 }
 
