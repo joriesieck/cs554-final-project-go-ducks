@@ -1,5 +1,6 @@
 const mongoCollections = require('../config/mongoCollections');
 const { checkObjId } = require('../inputChecks');
+const userData = require('./users');
 const users = mongoCollections.users;
 
 // get friend
@@ -8,52 +9,78 @@ async function getFriendById(userId, friendId){
     checkObjId(userId);
     checkObjId(friendId);
 
-    // ids as actual objId
+    // ids as actual objId, unsure if need uid
     let uid = ObjectId(userId);
     let fid = ObjectId(friendId);
 
-    const userCollection = await users();
-    // get user
-    const user = await userCollection.findOne({_id: uid});
-    if (!user){
-        throw `User with ID ${userId} not found`;
-    }
-
+    const user = await userData.getUserById(userId);
+    
     // check if friend in friend array
-    const [ inFriends ] = user.friends.filter(e => e[0] === fid);
+    const inFriends = user.friends.some(e => e[0] === fid);
     if (!inFriends){
         throw  `User with ID ${userId} has no friend with ID ${friendId}`;
     }
 
-    // get user by id, not implemented in user file, will just implement here for now
-
+    // get friend obj by doing getuserbyid
+    const friend = await userData.getUserById(friendId);
 
     return friend;
 }
 
 // get all friends
 async function getAllFriends(userId){
-    // check Ids, assuming input as string versions of ids
+    // check Ids, assuming input as string versions of id
     checkObjId(userId);
-    checkObjId(friendId);
 
-    // ids as actual objId
+    // ids as actual objId, dont think needed
     let uid = ObjectId(userId);
-    let fid = ObjectId(friendId);
 
-    const userCollection = await users();
-    // get user
-    const user = await userCollection.findOne({_id: uid});
-    if (!user){
-        throw `User with ID ${userId} not found`;
-    }
+    const user = await userData.getUserById(userId);
 
     // grab all friends
-    const friends = user.friends.map(e => e[0])
+    const userCollection = await users();
+    const friends = await userCollection.find({_id: {$in : user.friends}});
 
+    // will simply be empty array if none
+    return friends;
 }
 
-// should there be get pending friend and get all pending as well? might as well
+// pretty much same as getfriendbyid, see those comments, addition of pending field: sent vs received
+async function getPendingFriendById(userId, friendId){
+    checkObjId(userId);
+    checkObjId(friendId);
+    let fid = ObjectId(friendId);
+    let status;
+    const user = await userData.getUserById(userId);
+    const inPending = user.pending_friends.some(function(e) {
+        if (e[0] === userId){
+            status = e[1];
+            return true;
+        }
+    });
+    if (!inPending){
+        throw  `User with ID ${userId} has no pending friend with ID ${friendId}`;
+    }
+    const friend = await userData.getUserById(friendId);
+    friend.pending_status = status;
+    return friend;    
+}
+
+// see getallfriends for details, will return 2d arr of [[friend info, pending status]]
+async function getAllPending(userId) {
+    checkObjId(userId);
+    const user = await userData.getUserById(userId);
+    const userCollection = await users();
+    const fids = user.friends.map(e => e[0])
+    const friends = await userCollection.find({_id: {$in : fids}});
+    // put friends together w/ pending status
+    for (const friend in friends){
+        
+    }
+
+    // will simply be empty array if none
+    return friends;
+}
 
 // add friend by id -> add to pending array
 // pending array will fn as 2d array in form [ [id: 'sent'], [id: 'received']] differentiates
@@ -89,5 +116,8 @@ async function inviteFriend(userId, friendId){
 }
 
 module.exports = {
-
+    getFriendById,
+    getAllFriends,
+    getPendingFriendById,
+    getAllPending
 }
