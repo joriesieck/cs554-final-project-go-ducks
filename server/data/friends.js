@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const mongoCollections = require('../config/mongoCollections');
 const { checkObjId } = require('../inputChecks');
 const userData = require('./users');
@@ -90,13 +91,47 @@ async function addFriend(requesterId, requesteeId){
     checkObjId(requesterId, 'Requester Id');
     checkObjId(requesteeId, "Requestee Id");
 
-    // check if friend already in pending
-    
+    let parsedRequester = ObjectId(requesterId);
+    let parsedRequestee = ObjectId(requesteeId);
 
+    // check if both exist
+    let requester = await userData.getUserById(requesterId);
+    let requestee = await userData.getUserById(requesteeId);
+
+    // check if friend already in pending
+    const inPending = requester.pending_friends.findIndex((e) => e[0] === parsedRequestee);
     // if yes, check if request sent or received, if received then accept friend
+    // else throw saying already requested? for now
+    if (inPending !== -1){
+        if (requester.pending_friends[inPending][1] === 'received'){
+            acceptFriend(requesterId, requesteeId);
+        }else {
+            throw `User ${requesterId} has already requested to friend User ${requesteeId}`;
+        }
+    }
+
+    const userCollection = await users();
 
     // update pending arrays with relevant info
+    const requesterUpdate = await userCollection.updateOne(
+        {_id: parsedRequester},
+        { $addToSet: { pending_friends: [parsedRequestee, 'sent']}}
+    )
+    if (!requesterUpdate.matchedCount && !requesterUpdate.modifiedCount){
+        throw `Unable to add User ${requesteeId} to pending friends of User ${requesterId}`;
+    }
 
+    const requesteeUpdate = await userCollection.updateOne(
+        {_id: parsedRequestee},
+        { $addToSet: { pending_friends: [parsedRequester, 'received']}}
+    )
+    if (!requesteeUpdate.matchedCount && !requesteeUpdate.modifiedCount){
+        throw `Unable to add User ${requesterId} to pending friends of User ${requesteeId}`;
+    }
+
+    // return updated requester
+    const res = userCollection.getFriendById(requesterId);
+    return res;
 }
 
 // accept friend
