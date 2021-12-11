@@ -5,7 +5,7 @@ import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 
-import './Profile.css';
+import './Profile.module.css';
 
 const userData = {
 	username: 'fakeuser',

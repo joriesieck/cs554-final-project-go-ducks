@@ -5,7 +5,7 @@ import { signOut } from '@firebase/auth';
 import { auth } from '../../firebase/firebaseSetup';
 import { useDispatch } from 'react-redux';
 
-import './Nav.css';
+import './Nav.module.css';
 
 export default function NavBar() {
 	const [value, setValue] = useState(window.location.href.match(/\/[a-zA-Z]+\/?$/)[0].substr(1).toLowerCase());

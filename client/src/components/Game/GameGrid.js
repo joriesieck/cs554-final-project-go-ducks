@@ -1,7 +1,7 @@
 import { Grid, Button } from '@mui/material';
 import React, {useState, useEffect} from 'react';
 import GameFinished from './GameFinished';
-import './Game.css'
+import './Game.module.css'
 
 export default function GameGrid(props)
 {
