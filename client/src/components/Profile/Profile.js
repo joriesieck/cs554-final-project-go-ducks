@@ -4,6 +4,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import CheckIcon from '@mui/icons-material/Check';
 import { useSelector, useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser, fetchSignInMethodsForEmail, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
@@ -339,9 +340,9 @@ export default function Profile () {
 					error={usernameError!==''}
 					helperText={usernameError.replace('Error: ', '')}
 				/>
-				<Button type="submit">Save</Button>
+				<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-username" onClick={toggleEdit}>{editUser ? 'Discard' : 'Edit'}</Button>
+				<Button id="edit-username" onClick={toggleEdit}>{editUser ? <CloseIcon /> : 'Edit'}</Button>
 			</Grid>
 
 			{/* password */}
@@ -357,9 +358,9 @@ export default function Profile () {
 					error={emailError!==''}
 					helperText={emailError.replace('Error: ', '')}
 				/>
-				<Button type="submit">Save</Button>
+				<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? 'Discard' : 'Edit'}</Button>
+				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? <CloseIcon /> : 'Edit'}</Button>
 			</Grid>
 			<Grid item xs={12} className="profile-editable">
 				{editPass && <form id="save-password" onSubmit={editProfile}>
@@ -370,9 +371,9 @@ export default function Profile () {
 					error={passError!==''}
 					helperText={passError.replace('Error: ', '')}
 				/>
-				<Button type="submit">Save</Button>
+				<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-password" className={editPass ? 'discard-password' : 'change-password'} onClick={toggleEdit}>{editPass ? 'Discard' : 'Change Password'}</Button>
+				<Button id="edit-password" className={editPass ? 'discard-password' : 'change-password'} onClick={toggleEdit}>{editPass ? <CloseIcon /> : 'Change Password'}</Button>
 			</Grid>
 			</>}
 
