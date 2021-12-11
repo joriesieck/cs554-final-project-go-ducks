@@ -10,18 +10,10 @@ import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePas
 import { auth, gitProvider, googleProvider } from "../../firebase/firebaseSetup";
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
+import { getUserByEmail } from '../../utils/backendCalls';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 import './Profile.css';
-
-const userData = {
-	username: 'fakeuser',
-	email: 'fakeuser@gmail.com',
-	highScores: [10, 25],
-	friends: ['fakeuser1', 'fakeuser2', 'fakeuser3']
-}
-
-// TODO pull data from database
 
 export default function Profile () {
 	const [editUser, setEditUser] = useState(false);
@@ -41,6 +33,9 @@ export default function Profile () {
 	const [providerError, setProviderError] = useState(null);
 	const [deleting, setDeleting] = useState(false);
 
+	const [userData, setUserData] = useState(null);
+	const [error, setError] = useState(null);
+
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -52,6 +47,26 @@ export default function Profile () {
 			setProvider(result[0] || 'no-account');
 		}
 		fetchProviders();
+	}, []);
+
+	// get the user from the db
+	useEffect(() => {
+		async function fetchUserData () {
+			let data;
+			try {
+				data = await getUserByEmail(user);
+				console.log(data);
+				setUserData(data);
+			} catch (e) {
+				if (!e.response || !e.response.data || !e.response.data.error) {
+					setError(e.toString());
+					return;
+				}
+				setError(e.response.data.error);
+				return;
+			}
+		}
+		fetchUserData();
 	}, []);
 
 	// if user is not logged in, redirect to login
@@ -140,7 +155,6 @@ export default function Profile () {
 	}
 
 	const providerReAuth = async () => {
-		// TODO - email already exists as regular user?
 		let providerToAuth;
 		if (provider==='google.com') providerToAuth = googleProvider;
 		else if (provider==='github.com') providerToAuth = gitProvider;
@@ -292,7 +306,9 @@ export default function Profile () {
 
 	if (redirect) return <Redirect to='/' />;
 
-	if (!provider || deleting) return <div className="profile-loading"><CircularProgress /></div>;
+	if (error) return <Alert severity="error">{error}</Alert>;
+
+	if (!provider || deleting || !userData) return <div className="profile-loading"><CircularProgress /></div>;
 
 	return (
 		<div id="profile">
@@ -344,7 +360,7 @@ export default function Profile () {
 				<Button id="edit-username" onClick={toggleEdit}>{editUser ? 'Discard' : 'Edit'}</Button>
 			</Grid>
 
-			{/* password */}
+			{/* email/password */}
 			{provider==='password' && <>
 			<Grid item xs={12} className="profile-editable">
 				{!editEmail && <><Grid item xs={2}>Email:</Grid><Grid item xs={6}>{userData.email}</Grid></>}
@@ -361,6 +377,7 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? 'Discard' : 'Edit'}</Button>
 			</Grid>
+			{/* TODO add optedForLeaderboard */}
 			<Grid item xs={12} className="profile-editable">
 				{editPass && <form id="save-password" onSubmit={editProfile}>
 				<TextField
@@ -397,26 +414,41 @@ export default function Profile () {
 
 			<div className="profile-list">
 			<span>High Scores</span>
-			<List>
-				{userData.highScores.map((score, i) => (
+			{userData.high_scores.length>0 && <List>
+				{userData.high_scores.map((score, i) => (
 					<ListItem disablePadding key={i}>
 						<ListItemIcon><SportsScoreIcon /></ListItemIcon>
 						<ListItemText primary={score} />
 					</ListItem>
 				))}
-			</List>
+			</List>}
+			{userData.high_scores.length<=0 && <p>No high scores to show.</p>}
 			</div>
 
 			<div className="profile-list">
 			<span>Friends</span>
-			<List>
+			{userData.friends.length>0 && <List>
 				{userData.friends.map((friend, i) => (
 					<ListItem disablePadding key={i}>
 						<ListItemIcon><PersonIcon /></ListItemIcon>
 						<ListItemText primary={friend} />
 					</ListItem>
 				))}
-			</List>
+			</List>}
+			{userData.friends.length<=0 && <p>No friends to show.</p>}
+			</div>
+
+			<div className="profile-list">
+			<span>Pending Friends</span>
+			{userData.pending_friends.length>0 && <List>
+				{userData.pending_friends.map((friend, i) => (
+					<ListItem disablePadding key={i}>
+						<ListItemIcon><PersonIcon /></ListItemIcon>
+						<ListItemText primary={friend} />
+					</ListItem>
+				))}
+			</List>}
+			{userData.pending_friends.length<=0 && <p>No pending friends to show.</p>}
 			</div>
 
 			{providerError && <Alert severity="error" className="create-user-errors">

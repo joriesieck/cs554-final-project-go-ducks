@@ -8,6 +8,12 @@ async function getUserByName (username) {
 	return data;
 }
 
+async function getUserByEmail (email) {
+	let data;
+	({data} = await axios.get(`${siteUrl}/users/email/${email}`));
+	return data;
+}
+
 async function addUser (username, email, optedForLeaderboard) {
 	let data;
 	({data} = await axios.post(`${siteUrl}/users`, {
@@ -20,5 +26,6 @@ async function addUser (username, email, optedForLeaderboard) {
 
 export {
 	getUserByName,
+	getUserByEmail,
 	addUser
 }

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { checkString, checkBool } from "../../utils/inputChecks";
-import { addUser, getUserByName } from "../../utils/backendCalls";
+import { addUser, getUserByEmail, getUserByName } from "../../utils/backendCalls";
 
 import './CreateUser.css';
 import googleLogo from '../../imgs/google-logo.png';
@@ -16,6 +16,7 @@ export default function CreateUser() {
 	const [created, setCreated] = useState(false);
 	const [displayButton, setDisplayButton] = useState(true);
 	const [email, setEmail] = useState(null);
+	const [emailExists, setEmailExists] = useState(false);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -81,9 +82,12 @@ export default function CreateUser() {
 			}
 		} catch (e) {
 			// make sure error is doesn't exist
-			e = e.toString();
-			if (!e.includes('not found') && !e.includes('404')) {
-				setErrors([e.toString()]);
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return;
+			}
+			if (!e.response.data.error.includes('not found') && !e.status!==404) {
+				setErrors([e.response.data.error]);
 				return;
 			}
 		}
@@ -93,7 +97,11 @@ export default function CreateUser() {
 			const result = await addUser(username, email, optedForLeaderboard);
 			console.log(result);
 		} catch (e) {
-			setErrors([e.toString()]);
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return;
+			}
+			setErrors([e.response.data.error]);
 			return;
 		}
 
@@ -128,7 +136,6 @@ export default function CreateUser() {
 	}
 
 	const providerSignIn = async (provider) => {
-		// TODO check if there are any other sign-in methods for this email
 		let result;
 		try {
 			// try pop up - some browsers block
@@ -145,29 +152,86 @@ export default function CreateUser() {
 			return;
 		}
 
-		// TODO - check if email already exists in db. if it does, delete that db record, i guess??
+		// check if email already exists in db
+		let user
+		try {
+			user = await getUserByEmail(result.user.email);
+			if (user && user._id) {
+				// store email
+				setEmail(result.user.email);
+				setEmailExists(true);
+				return;
+			}
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return
+			}
+			if (!e.response.data.error.includes('not found') && !e.status!==404) {
+				setErrors([e.response.data.error]);
+				return;
+			}
+		}
 
 		// store email
 		setEmail(result.user.email);
-
 		// prompt for username
 		setDisplayButton(false);
 	}
 
-	const storeProviderInfo = (e) => {
+	const storeProviderInfo = async (e) => {
 		e.preventDefault();
 		
 		let username = e.target[0].value;
+		const optedForLeaderboard = e.target[2].checked;
 		// error checking
+		const errorList = [];
 		try {
 			username = checkString(username, 'Username', true, false);
 		} catch (e) {
-			setErrors([e]);
+			errorList.push(e.toString());
+		}
+		try {
+			checkBool(optedForLeaderboard, 'OptedForLeaderboard');
+		} catch (e) {
+			errorList.push(e.toString());
+		}
+		if (errorList.length>0) {
+			setErrors(errorList);
+			return;
 		}
 
-		// TODO - check if username already exists in db
+		// make sure username not already in db
+		try {
+			const result = await getUserByName(username);
+			if (result && result._id) {
+				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
+				return;
+			}
+		} catch (e) {
+			// make sure error is doesn't exist
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return
+			}
+			if (!e.response.data.error.includes('not found') && !e.status!==404) {
+				setErrors([e.response.data.error]);
+				return;
+			}
+		}
 		
-		// TODO - add user to database
+		// add user to database
+		try {
+			const result = await addUser(username, email, optedForLeaderboard);
+			console.log(result);
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return;
+			}
+			setErrors([e.response.data.error]);
+			return;
+		}
 
 		dispatch({
 			type: 'LOG_IN',
@@ -176,6 +240,23 @@ export default function CreateUser() {
 
 		// redirect to homepage
 		setCreated(true);
+	}
+
+	const preserveOldAccount = () => {
+		dispatch({
+			type: 'LOG_IN',
+			payload: email
+		});
+
+		// redirect to homepage
+		setCreated(true);
+	}
+
+	const dontPreserveOldAccount = () => {
+		// DBTODO - delete old record in database
+		// note that this will not actually work until the record is deleted
+		setDisplayButton(false);
+		setEmailExists(false)
 	}
 
 	if (created) return <Redirect to="/home" />;
@@ -205,12 +286,20 @@ export default function CreateUser() {
 				Sign up with GitHub
 			</Button>
 			</div>}
+
 			{!displayButton && <>
 				<p>Thanks for signing up! We still need a username to complete your registration.</p>
 				<form onSubmit={storeProviderInfo}>
 					<TextField id="provider-username" required label="Username" />
+					<FormControlLabel control={<Checkbox id="provider-optedForLeaderboard" />} label="Include me in the leaderboard (you can change this later)" />
 					<Button type="submit" variant="contained">Complete signup</Button>
 				</form>
+			</>}
+
+			{emailExists && <>
+				<p>Looks like you previously had an account associated with this email address. Do you want to transfer your data to this account, or start over?</p>
+				<Button onClick={dontPreserveOldAccount}>Start over</Button>
+				<Button onClick={preserveOldAccount}>Transfer data</Button>
 			</>}
 
 			{errors && <Alert severity="error" className="create-user-errors">

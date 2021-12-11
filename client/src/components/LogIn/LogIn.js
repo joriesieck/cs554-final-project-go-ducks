@@ -2,9 +2,10 @@ import { auth, fbProvider, gitProvider, googleProvider } from "../../firebase/fi
 import { signInWithEmailAndPassword, signInWithPopup } from "@firebase/auth";
 import { useState } from 'react';
 import { Redirect } from "react-router-dom";
-import { Alert, Button, TextField } from '@mui/material';
+import { Alert, Button, TextField, FormControlLabel, Checkbox } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
-import { checkString } from '../../utils/inputChecks';
+import { checkString, checkBool } from '../../utils/inputChecks';
+import { getUserByName, getUserByEmail, addUser } from "../../utils/backendCalls";
 
 import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
@@ -14,6 +15,8 @@ import './LogIn.css';
 export default function LogIn() {
 	const [errors, setErrors] = useState(null);
 	const [loggedIn, setLoggedIn] = useState(false);
+	const [displaySignUp, setDisplaySignUp] = useState(false);
+	const [email, setEmail] = useState(null);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -51,9 +54,7 @@ export default function LogIn() {
 		let result;
 		try {
 			result = await signInWithEmailAndPassword(auth, email, password);
-			console.log(result);
-			if (result.user.uid) setLoggedIn(true);
-			else throw Error('couldnt log in');
+			if (!result.user.uid) throw Error('couldnt log in');
 		} catch (e) {
 			setErrors(['Invalid login credentials.']);
 			//clear fields
@@ -62,11 +63,33 @@ export default function LogIn() {
 			return;
 		}
 
+		// make sure we have a record for this person in the db - otherwise just give them the chance to sign up
+		try {
+			result = await getUserByEmail(email);
+			if (!result._id) {
+				setEmail(email);
+				setDisplaySignUp(true);
+				return;
+			}
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return
+			}
+			if (e.response.data.error.includes('not found') || e.status!==404) {
+				setEmail(email);
+				setDisplaySignUp(true);
+				return;
+			}
+		}
+
 		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
 			payload: email
 		});
+
+		setLoggedIn(true);
 	}
 
 	const googleProviderSignIn = (e) => {
@@ -84,8 +107,6 @@ export default function LogIn() {
 	}
 
 	const providerSignIn = async (provider) => {
-		// TODO - email already exists as regular user?
-
 		let result;
 		try {
 			// try pop up - some browsers block
@@ -99,13 +120,95 @@ export default function LogIn() {
 		if (result && result.user && result.user.email) setErrors(null);
 		else return;
 		console.log(result);
-		// TODO - make sure we have a record for this person in the db. otherwise we need to get a username from them & store info -> so maybe redirect to create-user page & make them "sign in" w google again?
+		
+		// make sure we have a record for this person in the db - otherwise just give them the chance to sign up
+		let dbResult;
+		try {
+			dbResult = await getUserByEmail(result.user.email);
+			if (!dbResult._id) {
+				setEmail(result.user.email);
+				setDisplaySignUp(true);
+				return;
+			}
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return
+			}
+			if (e.response.data.error.includes('not found') || e.status!==404) {
+				setEmail(result.user.email);
+				setDisplaySignUp(true);
+				return;
+			}
+		}
 
 		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
 			payload: result.user.email
 		});
+	}
+
+	const signUserUp = async (e) => {
+		e.preventDefault();
+
+		let username = e.target[0].value;
+		const optedForLeaderboard = e.target[2].checked;
+		// error checking
+		const errorList = [];
+		try {
+			username = checkString(username, 'Username', true, false);
+		} catch (e) {
+			errorList.push(e.toString());
+		}
+		try {
+			checkBool(optedForLeaderboard, 'OptedForLeaderboard');
+		} catch (e) {
+			errorList.push(e.toString());
+		}
+		if (errorList.length>0) {
+			setErrors(errorList);
+			return;
+		}
+
+		// make sure username not already in db
+		try {
+			const result = await getUserByName(username);
+			if (result && result._id) {
+				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
+				return;
+			}
+		} catch (e) {
+			// make sure error is doesn't exist
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return
+			}
+			if (!e.response.data.error.includes('not found') && !e.status!==404) {
+				setErrors([e.response.data.error]);
+				return;
+			}
+		}
+		
+		// add user to database
+		try {
+			const result = await addUser(username, email, optedForLeaderboard);
+			console.log(result);
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setErrors(([e.toString()]));
+				return;
+			}
+			setErrors([e.response.data.error]);
+			return;
+		}
+
+		dispatch({
+			type: 'LOG_IN',
+			payload: email
+		});
+
+		setLoggedIn(true);
 	}
 
 	if (loggedIn) return <Redirect to="/home" />
@@ -133,6 +236,15 @@ export default function LogIn() {
 				Sign in with GitHub
 			</Button>
 			</div>
+
+			{displaySignUp && <>
+				<p>Looks like you don't have an account yet. Please fill out this short form and we'll create one for you.</p>
+				<form onSubmit={signUserUp}>
+					<TextField id="username" required label="Username" />
+					<FormControlLabel control={<Checkbox id="optedForLeaderboard" />} label="Include me in the leaderboard (you can change this later)" />
+					<Button type="submit" variant="contained">Complete signup</Button>
+				</form>
+			</>}
 
 			{errors && <Alert severity="error" className="create-user-errors">
 				<ul>
