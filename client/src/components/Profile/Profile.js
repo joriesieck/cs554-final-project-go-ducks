@@ -1,17 +1,18 @@
-import { Alert, Button, Grid, List, ListItem, ListItemIcon, ListItemText, Modal, TextField } from "@mui/material"
-import { useState } from "react";
+import { Alert, Button, CircularProgress, Grid, List, ListItem, ListItemIcon, ListItemText, Modal, TextField } from "@mui/material"
+import { useEffect, useState } from "react";
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import CloseIcon from '@mui/icons-material/Close';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useSelector, useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
-
-import './Profile.css';
-import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser } from "firebase/auth";
-import { auth } from "../../firebase/firebaseSetup";
+import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser, fetchSignInMethodsForEmail, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
+import { auth, gitProvider, googleProvider } from "../../firebase/firebaseSetup";
 import inputChecks from "../../inputChecks";
-import LogIn from "../LogIn/LogIn";
 import { Box } from "@mui/system";
+import googleLogo from '../../imgs/google-logo.png';
+import gitLogo from '../../imgs/github-logo.png';
+import './Profile.css';
 
 const userData = {
 	username: 'fakeuser',
@@ -23,7 +24,6 @@ const userData = {
 // DBTODO pull data from database
 
 export default function Profile () {
-	// TODO if provider, only allow editing username, and display a thing that says provider instead of email/pass
 	const [editUser, setEditUser] = useState(false);
 	const [editEmail, setEditEmail] = useState(false);
 	const [editPass, setEditPass] = useState(false);
@@ -37,8 +37,22 @@ export default function Profile () {
 	const [fieldToUpdate, setFieldToUpdate] = useState(null);
 	const [redirect, setRedirect] = useState(false);
 
+	const [provider, setProvider] = useState(null);
+	const [providerError, setProviderError] = useState(null);
+	const [deleting, setDeleting] = useState(false);
+
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
+
+	// check if the user logged in with a provider
+	useEffect(() => {
+		async function fetchProviders () {
+			const result = await fetchSignInMethodsForEmail(auth, user);
+			console.log(result);
+			setProvider(result[0] || 'no-account');
+		}
+		fetchProviders();
+	}, []);
 
 	// if user is not logged in, redirect to login
 	if (!user) return <Redirect to="/" />;
@@ -62,7 +76,6 @@ export default function Profile () {
 
 	const editProfile = async (e) => {
 		e.preventDefault();
-		//TODO check if anything actually changed
 
 		// get the field we're editing
 		const fieldToEdit = e.target.id;
@@ -115,10 +128,72 @@ export default function Profile () {
 
 	const triggerDeleteUser = (e) => {
 		e.preventDefault();
+		// loading screen
+		setDeleting(true);
 		// trigger reauth
 		setFieldToUpdate({field:'delete'});
-		setOpenModal(true);
+		// if an email user, open modal
+		if (provider==='password') setOpenModal(true);
+		// otherwise just directly trigger the popup
+		providerReAuth();
 		// DBTODO delete user in DB
+	}
+
+	const providerReAuth = async () => {
+		// DBTODO - email already exists as regular user?
+		let providerToAuth;
+		if (provider==='google.com') providerToAuth = googleProvider;
+		else if (provider==='github.com') providerToAuth = gitProvider;
+		else {
+			setDeleting(false);
+			return;
+		}
+
+		let result;
+		try {
+			// try pop up - some browsers block
+			result = await signInWithPopup(auth, providerToAuth);
+		} catch (e) {
+			console.log(e);
+			// print a message asking to allow popups
+			setProviderError('Please allow pop-ups and try again to sign in with a provider.');
+		}
+		if (result && result.user && result.user.email) setProviderError(null);
+		console.log(result);
+		// get the credential
+		try {
+			let cred;
+			if (provider==='google.com') cred = GoogleAuthProvider.credentialFromResult(result);
+			else if (provider==='github.com') cred = GithubAuthProvider.credentialFromResult(result);
+			result = await reauthenticateWithCredential(auth.currentUser, cred);
+			console.log(result);
+		} catch (e) {
+			console.log(e);
+			setProviderError('Invalid login credentials.');
+			setDeleting(false);
+			return;
+		}
+		// make sure we got the token
+		if (!result || !result.operationType==='reauthenticate') {
+			setProviderError('Something went wrong. Please try again.');
+			setDeleting(false);
+			return;
+		}
+		// delete the user
+		try {
+			const result = await deleteUser(auth.currentUser);
+			console.log(result);
+			dispatch({
+				type: 'LOG_OUT'
+			})
+			setRedirect(true);
+			setDeleting(false);
+			return;
+		} catch (e) {
+			console.log(e);
+			setProviderError(e.toString());
+		}
+		setFieldToUpdate(null);
 	}
 
 	const reAuth = async (e) => {
@@ -145,6 +220,7 @@ export default function Profile () {
 		// if there were errors, set errors
 		if (errorList.length>0) {
 			setLoginErrors(errorList);
+			setDeleting(false);
 			return;
 		}
 
@@ -155,11 +231,13 @@ export default function Profile () {
 			result = await reauthenticateWithCredential(auth.currentUser, cred);
 		} catch (e) {
 			setLoginErrors(['Invalid login credentials.']);
+			setDeleting(false);
 			return;
 		}
 		// make sure we got the token
 		if (!result || !result.operationType==='reauthenticate') {
 			setLoginErrors(['Something went wrong. Please try again.']);
+			setDeleting(false);
 			return;
 		}
 
@@ -169,6 +247,7 @@ export default function Profile () {
 			} catch (e) {
 				console.log(e);
 				setLoginErrors([e.toString()]);
+				setDeleting(false);
 				return;
 			}
 			userData.email = fieldToUpdate.value;
@@ -181,12 +260,12 @@ export default function Profile () {
 			} catch (e) {
 				console.log(e);
 				setLoginErrors([e.toString()]);
+				setDeleting(false);
 				return;
 			}
 			setEditPass(false);
 			setOpenModal(false);
 		} else if (fieldToUpdate.field==='delete') {
-			alert('Are you sure you want to delete your account?');
 			try {
 				const result = await deleteUser(auth.currentUser);
 				console.log(result);
@@ -194,22 +273,26 @@ export default function Profile () {
 					type: 'LOG_OUT'
 				})
 				setRedirect(true);
+				setDeleting(false);
 				return;
 			} catch (e) {
 				console.log(e);
 				setLoginErrors([e.toString()]);
 			}
 		}
+		setDeleting(false);
 		setFieldToUpdate(null);
-		//TODO make sure all states are updating/resetting correctly
 	}
 
 	const handleClose = () => {
 		setLoginErrors(null);
 		setOpenModal(false);
+		setDeleting(false);
 	}
 
 	if (redirect) return <Redirect to='/' />;
+
+	if (!provider || deleting) return <div className="profile-loading"><CircularProgress /></div>;
 
 	return (
 		<div id="profile">
@@ -260,6 +343,9 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-username" onClick={toggleEdit}>{editUser ? 'Discard' : 'Edit'}</Button>
 			</Grid>
+
+			{/* password */}
+			{provider==='password' && <>
 			<Grid item xs={12} className="profile-editable">
 				{!editEmail && <><Grid item xs={2}>Email:</Grid><Grid item xs={6}>{userData.email}</Grid></>}
 				{editEmail && <form id="save-email" onSubmit={editProfile}>
@@ -288,6 +374,25 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-password" className={editPass ? 'discard-password' : 'change-password'} onClick={toggleEdit}>{editPass ? 'Discard' : 'Change Password'}</Button>
 			</Grid>
+			</>}
+
+			{/* google */}
+			{provider==='google.com' && <div className='profile-provider'>
+				<img src={googleLogo} alt='google logo' height={50} width={50} />
+				<p>Edit your sign-in information on <a href='https://www.google.com/' target='_blank' rel='noreferrer'>Google <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
+			</div>}
+
+			{/* github */}
+			{provider==='github.com' && <div className='profile-provider'>
+				<img src={gitLogo} alt='github logo' height={50} width={50} />
+				<p>Edit your sign-in information on <a href='https://github.com/' target='_blank' rel='noreferrer'>GitHub <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
+			</div>}
+
+			{/* no account */}
+			{provider==='no-account' && <Alert severity="error">
+				Looks like you don't have an account. <a href='/create-user'>Create one here</a>.
+			</Alert>}
+
 			</Grid>
 
 			<div className="profile-list">
@@ -313,6 +418,10 @@ export default function Profile () {
 				))}
 			</List>
 			</div>
+
+			{providerError && <Alert severity="error" className="create-user-errors">
+				{providerError}
+			</Alert>}
 
 			<Button color="error" onClick={triggerDeleteUser}>Delete Account</Button>
 		</div>

@@ -85,9 +85,11 @@ export default function LogIn() {
 		} catch (e) {
 			console.log(e);
 			// print a message asking to allow popups
-			setErrors(['Please allow pop-ups and try again to sign in with a provider.']);
+			setErrors(['Please try again to sign in with a provider. You may have to allow pop-ups.']);
+			return;
 		}
 		if (result && result.user && result.user.email) setErrors(null);
+		else return;
 		console.log(result);
 		// DBTODO - make sure we have a record for this person in the db. otherwise we need to get a username from them & store info -> so maybe redirect to create-user page & make them "sign in" w google again?
 

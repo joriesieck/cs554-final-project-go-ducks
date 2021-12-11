@@ -74,6 +74,7 @@ export default function CreateUser() {
 		} catch (e) {
 			console.log(e);
 			setErrors([e.toString()]);
+			return;
 		}
 
 		// DBTODO add user to db
@@ -105,6 +106,7 @@ export default function CreateUser() {
 		} catch (e) {
 			// print a message asking to allow popups
 			setErrors(['Please allow pop-ups and try again to sign in with a provider.']);
+			return;
 		}
 		if (result && result.user && result.user.email) setErrors(null);
 		else {

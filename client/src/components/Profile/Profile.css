@@ -70,3 +70,14 @@
 .change-password {
 	width: 100%;
 }
+
+.profile-provider {
+	display: flex;
+}
+
+.profile-loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 90vh;
+}
