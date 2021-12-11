@@ -18,6 +18,7 @@ import { getUserByName } from '../../utils/backendCalls';
 import './CreateUser.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
+import './CreateUser.module.css';
 
 export default function CreateUser() {
   const [errors, setErrors] = useState(null);

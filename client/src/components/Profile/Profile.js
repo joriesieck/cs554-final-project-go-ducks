@@ -40,6 +40,8 @@ import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 import './Profile.css';
 
+import './Profile.module.css';
+
 const userData = {
   username: 'fakeuser',
   email: 'fakeuser@gmail.com',

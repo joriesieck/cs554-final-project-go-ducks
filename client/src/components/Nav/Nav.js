@@ -5,6 +5,8 @@ import { signOut } from '@firebase/auth';
 import { auth } from '../../firebase/firebaseSetup';
 import { useDispatch } from 'react-redux';
 
+import './Nav.module.css';
+
 export default function NavBar() {
   const [value, setValue] = useState(
     window.location.href
