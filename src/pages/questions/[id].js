@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { getQuestionData } from '../../../lib/questions';
+
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -11,7 +11,7 @@ export default function QuestionPage({ data }) {
       <Head>
         <h1>
           {data.map((category) => {
-            return <p>{category.id}</p>;
+            return category.id;
           })}
         </h1>
       </Head>
