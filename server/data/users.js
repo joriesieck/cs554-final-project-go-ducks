@@ -1,14 +1,19 @@
 const { ObjectId } = require('mongodb');
 const mongoCollections = require('../config/mongoCollections');
-const { checkString, checkObjId, checkBool, checkEmail } = require('../inputChecks');
+const {
+  checkString,
+  checkObjId,
+  checkBool,
+  checkEmail,
+} = require('../inputChecks');
 const users = mongoCollections.users;
 
 const exportedMethods = {
-  async getUserById(id){
-    checkObjId(id, "User ID");
+  async getUserById(id) {
+    checkObjId(id, 'User ID');
     const parsedId = ObjectId(id);
     const userCollection = await users();
-    const user = await userCollection.findOne({ _id: parsedId});
+    const user = await userCollection.findOne({ _id: parsedId });
     if (!user) throw `User with ID ${id} not found`;
     return user;
   },
@@ -76,6 +81,13 @@ const exportedMethods = {
       { $set: updatedFields }
     );
     return await this.getUserByEmail(email ?? originalEmail);
+  },
+  async removeUser(username) {
+    checkString(username, 'Username', false);
+    const userCollection = await users();
+    const userByUsername = await userCollection.findOne({ username: username });
+    if (!userByUsername) throw `User with username ${username} doesn't exist`;
+    return await userCollection.deleteOne({ username: username });
   },
 };
 module.exports = exportedMethods;
