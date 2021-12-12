@@ -198,7 +198,32 @@ async function acceptFriend(userId, pendingId){
 
 // remove friend
 async function removeFriend(userId, friendId){
+    checkObjId(userId, "User ID");
+    checkObjId(friendId, "Friend ID");
 
+    const user = await userData.getUserById(userId);
+    const friend = await userData.getUserById(friendId);
+    const userCollection = await users();
+
+    const userUpdate = await userCollection.updateOne(
+        {_id: user._id},
+        { $pull: {friends: friend._id}}
+    );
+    if (!userUpdate.matchedCount && !userUpdate.modifiedCount){
+        throw `Unable to remove User ${friendId} from friends of User ${userId}`;
+    }
+    console.log(userUpdate.matchedCount)
+    console.log(userUpdate.modifiedCount)
+
+    const friendUpdate = await userCollection.updateOne(
+        {_id: friend._id},
+        { $pull: {friends: user._id}}
+    );
+    if (!friendUpdate.matchedCount && !friendUpdate.modifiedCount){
+        throw `Unable to remove User ${userId} from friends of User ${friendId}`;
+    }
+    // doesn't throw so long as it finds doc, maybe shouldchange
+    return true;
 }
 
 // invite friend to game?
@@ -212,5 +237,6 @@ module.exports = {
     getPendingFriendById,
     getAllPending,
     addFriend,
-    acceptFriend
+    acceptFriend,
+    removeFriend
 }
