@@ -1,5 +1,4 @@
 const { ObjectId } = require('mongodb');
-const { check } = require('prettier');
 const mongoCollections = require('../config/mongoCollections');
 const { checkObjId, checkString } = require('../inputChecks');
 const userData = require('./users');
