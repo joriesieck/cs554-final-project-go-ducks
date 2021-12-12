@@ -7,6 +7,7 @@ const {
   checkBool,
   checkObjId,
   checkNum,
+  checkEmail,
 } = require('../inputChecks');
 
 // get user
@@ -39,7 +40,7 @@ router.get('/email/:email', async (req, res) => {
   let { email } = req.params;
   // make sure it's a string, nonempty, etc
   try {
-    email = checkString(email, 'Email', false);
+    email = checkEmail(email, 'Email');
   } catch (e) {
     res.status(400).json({ error: e });
     return;
@@ -65,7 +66,7 @@ router.post('/', async (req, res) => {
   // make sure exists, type, etc
   try {
     username = checkString(username, 'Username', false);
-    email = checkString(email, 'Email', false);
+    email = checkEmail(email, 'Email');
     checkBool(optedForLeaderboard, 'optedForLeaderboard');
   } catch (e) {
     res.status(400).json({ error: e });
@@ -84,7 +85,43 @@ router.post('/', async (req, res) => {
   // send the new user to the front end
   res.status(201).json(user);
 });
-
+router.patch('/edit-user', async (req, res) => {
+  let { originalEmail, username, newEmail, optedForLeaderboard } = req.body;
+  //originalEmail will be used to find the user we are updating
+  let updatedFields = {};
+  try {
+    const user = await userData.getUserByEmail(originalEmail);
+    if (username !== undefined && username !== user.username) {
+      username = checkString(username, 'Username', false);
+      updatedFields.username = username;
+    }
+    if (newEmail !== undefined && newEmail !== user.email) {
+      email = checkEmail(newEmail, 'newEmail');
+      updatedFields.email = email;
+    }
+    if (
+      optedForLeaderboard !== undefined &&
+      optedForLeaderboard !== user.optedForLeaderboard
+    ) {
+      checkBool(optedForLeaderboard, 'optedForLeaderboard');
+      updatedFields.optedForLeaderboard = optedForLeaderboard;
+    }
+  } catch (e) {
+    res.status(400).json({ error: `Error in request: ${e}` });
+    return;
+  }
+  if (Object.keys(updatedFields).length === 0) {
+    //No fields updated
+    res.status(400).json({ error: 'Minimum of one field must be updated' });
+  } else {
+    try {
+      updatedUser = await userData.updateUser(originalEmail, updatedFields);
+      res.status(201).json(updatedUser);
+    } catch (e) {
+      res.status(400).json({ error: `Could not update user. Error: ${e}` });
+    }
+  }
+});
 // remove user
 router.delete('/:username', async (req, res) => {
   // get the username from req.params
