@@ -4,6 +4,8 @@ const { checkObjId } = require('../inputChecks');
 const userData = require('./users');
 const users = mongoCollections.users;
 
+// may need to change at least addFriend to take username of user doing adding instead of id
+
 // get friend
 async function getFriendById(userId, friendId){
     // check Ids, assuming input as string versions of ids
