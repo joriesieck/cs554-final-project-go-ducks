@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import CreateUser from './components/CreateUser/CreateUser';
@@ -9,9 +8,12 @@ function App() {
   return (
     <>
       <Router>
-        <Route exact path='/' component={LogIn} />
-        <Route exact path='/create-user' component={CreateUser} />
-        <Route path={['/home', '/profile', '/game']} component={AuthContainer} />
+        <Route exact path="/" component={LogIn} />
+        <Route exact path="/create-user" component={CreateUser} />
+        <Route
+          path={['/home', '/profile', '/game']}
+          component={AuthContainer}
+        />
       </Router>
     </>
   );
