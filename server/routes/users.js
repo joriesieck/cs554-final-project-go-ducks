@@ -7,6 +7,7 @@ const {
   checkBool,
   checkObjId,
   checkNum,
+  checkEmail,
 } = require('../inputChecks');
 
 // get user
@@ -39,7 +40,7 @@ router.get('/email/:email', async (req, res) => {
   let { email } = req.params;
   // make sure it's a string, nonempty, etc
   try {
-    email = checkString(email, 'Email', false);
+    email = checkEmail(email, 'Email');
   } catch (e) {
     res.status(400).json({ error: e });
     return;
@@ -65,7 +66,7 @@ router.post('/', async (req, res) => {
   // make sure exists, type, etc
   try {
     username = checkString(username, 'Username', false);
-    email = checkString(email, 'Email', false);
+    email = checkEmail(email, 'Email');
     checkBool(optedForLeaderboard, 'optedForLeaderboard');
   } catch (e) {
     res.status(400).json({ error: e });
@@ -95,7 +96,7 @@ router.patch('/edit-user', async (req, res) => {
       updatedFields.username = username;
     }
     if (newEmail !== undefined && newEmail !== user.email) {
-      email = checkString(newEmail, 'Email', false);
+      email = checkEmail(newEmail, 'newEmail');
       updatedFields.email = email;
     }
     if (

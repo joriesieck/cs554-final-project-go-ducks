@@ -1,5 +1,5 @@
 const mongoCollections = require('../config/mongoCollections');
-const { checkString, checkBool } = require('../inputChecks');
+const { checkString, checkBool, checkEmail } = require('../inputChecks');
 const users = mongoCollections.users;
 
 const exportedMethods = {
@@ -11,7 +11,7 @@ const exportedMethods = {
     return user;
   },
   async getUserByEmail(email) {
-    checkString(email, 'email', false);
+    checkEmail(email, 'Email');
     const userCollection = await users();
     const user = await userCollection.findOne({ email: email });
     if (!user) throw `User with email ${email} not found`;
@@ -19,7 +19,7 @@ const exportedMethods = {
   },
   async doesUserExist(username, email) {
     checkString(username, 'Username', false);
-    checkString(email, 'email', false);
+    checkEmail(email, 'Email');
     const userCollection = await users();
     const userByUsername = await userCollection.findOne({ username: username });
     if (userByUsername) throw `User with username ${username} already exists`;
@@ -28,7 +28,7 @@ const exportedMethods = {
   },
   async addUser(username, email, optedForLeaderboard) {
     checkString(username, 'Username', false);
-    checkString(email, 'email', false);
+    checkEmail(email, 'Email');
     checkBool(optedForLeaderboard, 'optedForLeaderboard');
     await this.doesUserExist(username, email);
     const userCollection = await users();
@@ -55,7 +55,7 @@ const exportedMethods = {
     }
     if (email !== undefined) {
       //If new email is supplied, check its valid and does not exist elsewhere
-      checkString(email, 'email', false);
+      checkEmail(email, 'Email');
       const userByEmail = await userCollection.findOne({ email: email });
       if (userByEmail) throw `User with email ${email} already exists`;
     }
