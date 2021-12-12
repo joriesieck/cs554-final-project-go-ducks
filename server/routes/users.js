@@ -224,7 +224,7 @@ router.patch('/accept-friend', async (req, res) => {
 });
 
 // remove pending friend
-router.patch('/remove-pending', async (req, res) => {
+router.patch('/remove-pending-friend', async (req, res) => {
   // get the variables from req.body
   let { username, pendingToRemove } = req.body;
   // make sure it's a string, nonempty, etc
