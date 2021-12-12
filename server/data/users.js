@@ -44,9 +44,6 @@ const exportedMethods = {
   },
   async updateUser(originalEmail, updatedFields) {
     const { username, email, optedForLeaderboard } = updatedFields;
-    console.log(username);
-    console.log(email);
-    console.log(optedForLeaderboard);
     const userCollection = await users();
     if (username !== undefined) {
       //If new username is supplied, check its valid and does not exist elsewhere
