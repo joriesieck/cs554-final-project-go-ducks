@@ -102,8 +102,11 @@ async function addFriend(requesterId, requesteeId){
     let requester = await userData.getUserById(requesterId);
     await userData.getUserById(requesteeId);
 
-    // check if already in friends, should prob do in accept as well
-    // ....................
+    // check if already in friends, throwing for now
+    const inFriends = requester.friends.some((e) => e.equals(parsedRequestee));
+    if (inFriends){
+        throw `User ${requesterId} and ${requesteeId} are already friends`;
+    }
 
     // check if friend already in pending
     const inPending = requester.pending_friends.findIndex((e) => e[0].equals(parsedRequestee));
@@ -153,6 +156,12 @@ async function acceptFriend(userId, pendingId){
     // check exist
     const user = await userData.getUserById(userId);
     await userData.getUserById(pendingId);
+
+    // check if already in friends, throwing for now
+    const inFriends = user.friends.some((e) => e.equals(pid));
+    if (inFriends){
+        throw `User ${userId} and ${pendingId} are already friends`;
+    }
 
     const inPending = user.pending_friends.some((e) => e[0].equals(pid) && e[1] === 'received');
     
