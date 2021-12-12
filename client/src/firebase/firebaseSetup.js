@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider } from 'firebase/auth';
+import env from 'react-dotenv';
 
 // add our API keys
 const firebaseConfig = {
@@ -17,6 +18,14 @@ const firebaseApp = initializeApp(firebaseConfig);
 // set up auth
 const auth = getAuth(firebaseApp);
 
-export default firebaseApp;
+// set up google
+const googleProvider = new GoogleAuthProvider();
 
-export { auth };
+// set up facebook
+const fbProvider = new FacebookAuthProvider();
+
+// set up github
+const gitProvider = new GithubAuthProvider();
+
+export default firebaseApp;
+export { auth, googleProvider, fbProvider, gitProvider };

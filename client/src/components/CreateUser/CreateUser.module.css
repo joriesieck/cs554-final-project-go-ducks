@@ -11,11 +11,11 @@
 	height: 300px;
 }
 
-#create-user-errors {
+.create-user-errors {
 	margin-top: 20px;
 }
 
-#create-user-errors ul {
+.create-user-errors ul {
 	list-style-type: none;
 	padding: 0px;
 }
