@@ -133,17 +133,13 @@ router.delete('/:username', async (req, res) => {
     res.status(400).json({ error: e });
     return;
   }
-
   // delete the user
-  let result;
   try {
-    result = await userData.removeUser(username);
-    if (!result.success) throw 'Error deleting user.';
+    await userData.removeUser(username);
   } catch (e) {
     res.status(400).json({ error: e });
     return;
   }
-
   // return success
   res.status(200).json({ message: `${username} successfully deleted` });
 });

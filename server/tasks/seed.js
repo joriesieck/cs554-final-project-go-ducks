@@ -40,39 +40,39 @@ const main = async () => {
 		console.log(e);
 	}
 	try {
-		await friends.addFriend(user4.insertedId.toString(), user5.insertedId.toString());
+		await friends.addFriend('user4', "user5");
 	} catch(e){
 		console.log(e);
 	}
 	try {
-		await friends.addFriend(user4.insertedId.toString(), user6.insertedId.toString());
+		await friends.addFriend('user4', 'user6');
 	} catch(e){
 		console.log(e);
 	}
 	try {
-		await friends.addFriend(user5.insertedId.toString(), user4.insertedId.toString());
+		await friends.addFriend('user5', 'user4');
 	} catch(e){
 		console.log(e);
 	}
 	try {
-		await friends.acceptFriend(user6.insertedId.toString(), user4.insertedId.toString());
+		await friends.acceptFriend('user6', 'user4');
 	} catch(e){
 		console.log(e);
 	}
 	try {
-		await friends.addFriend(user5.insertedId.toString(), user6.insertedId.toString());
+		await friends.addFriend('user5', 'user6');
 	} catch(e){
 		console.log(e);
 	}
 	// removals, can get rid of
 	try {
-		let res = await friends.removeFriend(user4.insertedId.toString(), user6.insertedId.toString());
+		let res = await friends.removeFriend('user4', 'user6');
 		console.log(res);
 	} catch(e){
 		console.log(e)
 	}
 	try {
-		let res = await friends.removePending(user5.insertedId.toString(), user6.insertedId.toString());
+		let res = await friends.removePending('user5', 'user6');
 		console.log(res);
 	} catch(e){
 		console.log(e)
