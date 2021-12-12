@@ -14,7 +14,7 @@ import { checkString } from '../../utils/inputChecks';
 import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-import './LogIn.module.css';
+import styles from './LogIn.module.css';
 
 export default function LogIn() {
   const [errors, setErrors] = useState(null);

@@ -61,5 +61,8 @@
       "FIREBASE_SENDER_ID",
       "FIREBASE_APP_ID"
     ]
+  },
+  "devDependencies": {
+    "@zeit/next-css": "^1.0.1"
   }
 }
