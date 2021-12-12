@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-
 // add our API keys
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -10,7 +9,6 @@ const firebaseConfig = {
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.FIREBASE_SENDER_ID,
   appId: process.env.FIREBASE_APP_ID,
-
 };
 
 // initialize the app

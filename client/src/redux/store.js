@@ -9,15 +9,18 @@ import userReducer from './userReducer';
  */
 
 const persistConfig = {
-	key: 'user',
-	storage	// default is localStorage
-}
+  key: 'user',
+  storage, // default is localStorage
+};
 
 const store = createStore(
-	persistReducer(persistConfig, userReducer),
-	window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+  persistReducer(persistConfig, userReducer),
+  typeof window === undefined
+    ? window.__REDUX_DEVTOOLS_EXTENSION__ &&
+        window.__REDUX_DEVTOOLS_EXTENSION__()
+    : null
 );
 
 const persistor = persistStore(store);
 
-export {store, persistor};
+export { store, persistor };
