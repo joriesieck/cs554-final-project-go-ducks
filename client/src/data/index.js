@@ -3,5 +3,5 @@ const friendData = require('./friends');
 
 module.exports = {
   users: userData,
-  friends: friendData
+  friends: friendData,
 };

@@ -38,7 +38,7 @@ import { checkString } from '../../utils/inputChecks';
 import { Box } from '@mui/system';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-import './Profile.css';
+import './Profile.module.css';
 
 import './Profile.module.css';
 

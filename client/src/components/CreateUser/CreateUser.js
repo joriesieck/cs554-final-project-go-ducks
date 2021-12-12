@@ -15,7 +15,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { checkString } from '../../utils/inputChecks';
 import { getUserByName } from '../../utils/backendCalls';
 
-import './CreateUser.css';
+import './CreateUser.module.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 import './CreateUser.module.css';
