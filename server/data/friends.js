@@ -5,24 +5,16 @@ const { checkObjId, checkString } = require('../inputChecks');
 const userData = require('./users');
 const users = mongoCollections.users;
 
-// may need to change at least addFriend to take username of user doing adding instead of id
-
 // get friend
 async function getFriendByName(username, friendName){
-    // check Ids, assuming input as string versions of ids
-    //checkObjId(userId, "User ID");
+    // check unames
     checkString(username, "Username", false);
     checkString(friendName, "Friend Name", false);
-    //checkObjId(friendId, "Friend ID");
-
-    // ids as actual objId, unsure if need uid
-    //let uid = ObjectId(userId);
-    //let fid = ObjectId(friendId);
 
     const user = await userData.getUserByName(username);
     
     // check if friend in friend array
-    const inFriends = user.friends.some(e => e.equals(friendName));
+    const inFriends = user.friends.some(e => e === friendName);
     if (!inFriends){
         throw  `User ${username} has no friend ${friendName}`;
     }
@@ -35,12 +27,8 @@ async function getFriendByName(username, friendName){
 
 // get all friends
 async function getAllFriends(username){
-    // check Ids, assuming input as string versions of id
-    //checkObjId(userId, "User ID");
+    // check username
     checkString(username, "Username", false);
-
-    // ids as actual objId, dont think needed
-    //let uid = ObjectId(userId);
 
     const user = await userData.getUserByName(username);
 
@@ -55,18 +43,15 @@ async function getAllFriends(username){
 
 // pretty much same as getfriendbyName, see those comments, addition of pending field: sent vs received
 async function getPendingFriendByName(username, friendName){
-    //checkObjId(userId, "User ID");
     checkString(username, "Username", false);
     checkString(friendName, "Friend Name", false);
-    // checkObjId(friendId, "Friend ID");
-    // let fid = ObjectId(friendId);
     let status;
     const user = await userData.getUserByName(username);
-    const inPending = user.pending_friends.findIndex( e => e.pendingName.equals(friendName))
-    status = user.pending_friends[inPending].status;
+    const inPending = user.pending_friends.findIndex( e => e.pendingName === friendName)
     if (inPending === -1){
         throw  `User ${username} has no pending friend ${friendName}`;
     }
+    status = user.pending_friends[inPending].status;
     const friend = await userData.getUserByName(friendName);
     friend.pending_status = status;
     return friend;    
@@ -74,7 +59,6 @@ async function getPendingFriendByName(username, friendName){
 
 // see getallfriends for details, will return 2d arr of [[friend info, pending status]]
 async function getAllPending(username) {
-    //checkObjId(userId, "User ID");
     checkString(username, "Username", false);
     const user = await userData.getUserByName(username);
     const userCollection = await users();
@@ -83,7 +67,7 @@ async function getAllPending(username) {
     friends = await friends.toArray();
     // put friends together w/ pending status, this seems like there's probably a better way to do it
     for (const i in friends){
-        let element = user.pending_friends.find((e) => e.pendingName.equals(friends[i].username));
+        let element = user.pending_friends.find((e) => e.pendingName === friends[i].username);
         friends[i].pending_status = element.status;
     }
     return friends;
@@ -94,27 +78,22 @@ async function getAllPending(username) {
 // whether request needs approval from given user 
 // could also refactor this as instead of single pending array, one sent array and one received array
 async function addFriend(requesterName, requesteeName){
-    // check ids
-    // checkObjId(requesterId, 'Requester Id');
-    // checkObjId(requesteeId, "Requestee Id");
+    // check uname
     checkString(requesterName, "Requester Name", false);
     checkString(requesteeName, "Requesteee Name", false)
-
-    // let parsedRequester = ObjectId(requesterId);
-    // let parsedRequestee = ObjectId(requesteeId);
 
     // check if both exist
     let requester = await userData.getUserByName(requesterName);
     await userData.getUserByName(requesterName);
 
     // check if already in friends, throwing for now
-    const inFriends = requester.friends.some((e) => e.equals(requesteeName));
+    const inFriends = requester.friends.some((e) => e === requesteeName);
     if (inFriends){
         throw `User ${requesterName} and ${requesteeName} are already friends`;
     }
 
     // check if friend already in pending
-    const inPending = requester.pending_friends.findIndex((e) => e.pendingName.equals(requesteeName));
+    const inPending = requester.pending_friends.findIndex((e) => e.pendingName === requesteeName);
     // if yes, check if request sent or received, if received then accept friend
     // else throw saying already requested? for now
     if (inPending !== -1){
@@ -152,25 +131,20 @@ async function addFriend(requesterName, requesteeName){
 
 // accept friend -> must be in pending array (as received), remove from pending of both
 async function acceptFriend(username, pendingName){
-    // checkObjId(userId, "User ID");
-    // checkObjId(pendingId, "Pending Friend ID");
     checkString(username, "Username", false);
     checkString(pendingName, "Pending Friend Name", false);
-
-    // const uid = ObjectId(userId);
-    // const pid = ObjectId(pendingId);
 
     // check exist
     const user = await userData.getUserByName(username);
     await userData.getUserByName(pendingName);
 
     // check if already in friends, throwing for now
-    const inFriends = user.friends.some((e) => e.equals(pendingName));
+    const inFriends = user.friends.some((e) => e === pendingName );
     if (inFriends){
         throw `User ${username} and ${pendingName} are already friends`;
     }
 
-    const inPending = user.pending_friends.some((e) => e.pendingName.equals(pendingName) && e.status === 'received');
+    const inPending = user.pending_friends.some((e) => e.pendingName === pendingName && e.status === 'received');
     
     if (!inPending){
         throw `Unable to accept User ${pendingName} as friend, User ${username} has not received a request from them`;
@@ -203,13 +177,11 @@ async function acceptFriend(username, pendingName){
 
 // remove pending friend (either sent or received)
 async function removePending(username, pendingName){
-    // checkObjId(userId, "User ID");
-    // checkObjId(pendingId, "Pending ID");
     checkString(username, "Username", false);
     checkString(pendingName, "Pending Friend Name", false);
 
-    const user = await userData.getUserByName(username);
-    const pending = await userData.getUserByName(pendingName);
+    await userData.getUserByName(username);
+    await userData.getUserByName(pendingName);
 
     const userCollection = await users();
 
@@ -235,13 +207,11 @@ async function removePending(username, pendingName){
 
 // remove friend
 async function removeFriend(username, friendName){
-    // checkObjId(userId, "User ID");
-    // checkObjId(friendId, "Friend ID");
     checkString(username, "Username", false);
     checkString(friendName, "Friend Name", false);
 
-    const user = await userData.getUserByName(username);
-    const friend = await userData.getUserByName(friendName);
+    await userData.getUserByName(username);
+    await userData.getUserByName(friendName);
     const userCollection = await users();
 
     const userUpdate = await userCollection.updateOne(
@@ -271,7 +241,7 @@ async function inviteFriend(userId, friendId){
 module.exports = {
     getFriendByName,
     getAllFriends,
-    getPendingFriendById,
+    getPendingFriendByName,
     getAllPending,
     addFriend,
     acceptFriend,
