@@ -1,8 +1,17 @@
+const { ObjectId } = require('mongodb');
 const mongoCollections = require('../config/mongoCollections');
-const { checkString } = require('../inputChecks');
+const { checkString, checkObjId } = require('../inputChecks');
 const users = mongoCollections.users;
 
 const exportedMethods = {
+  async getUserById(id){
+    checkObjId(id, "User ID");
+    const parsedId = ObjectId(id);
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: parsedId});
+    if (!user) throw `User with ID ${id} not found`;
+    return user;
+  },
   async getUserByName(username) {
     checkString(username, 'Username', false);
     const userCollection = await users();
