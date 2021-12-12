@@ -12,7 +12,7 @@ import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePas
 import { auth, gitProvider, googleProvider } from "../../firebase/firebaseSetup";
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
-import { getUserByEmail } from '../../utils/backendCalls';
+import { editUserInfo, getUserByEmail, removeUser } from '../../utils/backendCalls';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 import './Profile.css';
@@ -77,20 +77,21 @@ export default function Profile () {
 
 	const toggleEdit = (e) => {
 		e.preventDefault();
+		const id = e.target.id || e.target.parentElement.id;
 
-		if (e.target.id==='edit-username') {
+		if (id==='edit-username') {
 			setUsernameError('');
 			setEditUser(!editUser);
 		}
-		else if (e.target.id==='edit-email') {
+		else if (id==='edit-email') {
 			setEmailError('');
 			setEditEmail(!editEmail);
 		}
-		else if (e.target.id==='edit-password') {
+		else if (id==='edit-password') {
 			setPassError('');
 			setEditPass(!editPass);
 		}
-		else if (e.target.id==='edit-leaderboard') {
+		else if (id==='edit-leaderboard') {
 			setEditLeaderboard(!editLeaderboard);
 		}
 	}
@@ -123,8 +124,22 @@ export default function Profile () {
 
 		// edit the user and toggle edit
 		if (fieldToEdit==='save-username') {
-			userData.username = newValue;
-			// DBTODO edit user in db
+			// edit user in db
+			let newUser;
+			try {
+				newUser = await editUserInfo({
+					originalEmail: userData.email,
+					username: newValue
+				});
+			} catch (e) {
+				if (!e.response || !e.response.data || !e.response.data.error) {
+					setProviderError(`Something went wrong updating your username: ${e.toString()}`);
+					return;
+				}
+				setProviderError(`Something went wrong updating your username: ${e.response.data.error}`);
+				return;
+			}
+			userData.username = newUser.username;
 			setEditUser(false);
 		}
 		if (fieldToEdit==='save-email') {
@@ -146,15 +161,28 @@ export default function Profile () {
 		}
 	}
 
-	const toggleLeaderboard = (e) => {
+	const toggleLeaderboard = async (e) => {
 		e.preventDefault();
 		
 		const clickedCheckbox = e.target[0].checked;
 
 		if (clickedCheckbox) {
-			userData.optedForLeaderboard = !userData.optedForLeaderboard;
-			// DBTODO edit user in database
-			
+			// edit user in database
+			let newUser;
+			try {
+				newUser = await editUserInfo({
+					originalEmail: userData.email,
+					optedForLeaderboard: !userData.optedForLeaderboard
+				});
+			} catch (e) {
+				if (!e.response || !e.response.data || !e.response.data.error) {
+					setProviderError(`Something went wrong updating your leaderboard opt: ${e.toString()}`);
+					return;
+				}
+				setProviderError(`Something went wrong updating your leaderboard opt: ${e.response.data.error}`);
+				return;
+			}
+			userData.optedForLeaderboard = newUser.optedForLeaderboard;
 		}
 		setEditLeaderboard(false);
 	}
@@ -169,7 +197,6 @@ export default function Profile () {
 		if (provider==='password') setOpenModal(true);
 		// otherwise just directly trigger the popup
 		providerReAuth();
-		// DBTODO delete user in DB
 	}
 
 	const providerReAuth = async () => {
@@ -213,8 +240,9 @@ export default function Profile () {
 		}
 		// delete the user
 		try {
-			const result = await deleteUser(auth.currentUser);
-			console.log(result);
+			await removeUser(userData.username);
+			await deleteUser(auth.currentUser);
+			
 			dispatch({
 				type: 'LOG_OUT'
 			})
@@ -273,16 +301,25 @@ export default function Profile () {
 		}
 
 		if (fieldToUpdate.field==='email') {
-			// DBTODO update email in database
+			// update email in database
+			let newUser;
 			try {
-				console.log('update email in firebase - commented out since it doesnt work in db yet');
-				// await updateEmail(auth.currentUser, fieldToUpdate.value);
+				newUser = await editUserInfo({
+					originalEmail: userData.email,
+					newEmail: fieldToUpdate.value
+				});
+				await updateEmail(auth.currentUser, fieldToUpdate.value);
 			} catch (e) {
 				setLoginErrors([e.toString()]);
 				setDeleting(false);
 				return;
 			}
-			userData.email = fieldToUpdate.value;
+			userData.email = newUser.email;
+			// re-login with the new email
+			dispatch({
+				type: 'LOG_IN',
+				payload: newUser.email
+			});
 			setEditEmail(false);
 			setOpenModal(false);
 		} else if (fieldToUpdate.field==='pass') {
@@ -296,10 +333,10 @@ export default function Profile () {
 			setEditPass(false);
 			setOpenModal(false);
 		} else if (fieldToUpdate.field==='delete') {
-			//DBTODO delete user from database
+			// delete user from database
 			try {
-				console.log('delete user in firebase - commented out since it doesnt work in db yet');
-				// await deleteUser(auth.currentUser);
+				await removeUser(userData.username);
+				await deleteUser(auth.currentUser);
 				dispatch({
 					type: 'LOG_OUT'
 				})

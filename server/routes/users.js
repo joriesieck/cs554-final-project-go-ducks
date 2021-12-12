@@ -151,7 +151,7 @@ router.patch('/add-friend', async (req, res) => {
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
-    checkObjId(friendToAdd, 'friendToAdd');
+    friendToAdd = checkString(friendToAdd, 'friendToAdd', false);
   } catch (e) {
     res.status(400).json({ error: e });
     return;
@@ -177,7 +177,7 @@ router.patch('/remove-friend', async (req, res) => {
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
-    checkObjId(friendToRemove, 'friendToRemove');
+    friendToRemove = checkString(friendToRemove, 'friendToRemove', false);
   } catch (e) {
     res.status(400).json({ error: e });
     return;

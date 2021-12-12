@@ -24,8 +24,34 @@ async function addUser (username, email, optedForLeaderboard) {
 	return data;
 }
 
+async function removeUser (username) {
+	let {data} = await axios.delete(`${siteUrl}/users/${username}`);
+	return data;
+}
+
+async function editUserInfo ({originalEmail, username, newEmail, optedForLeaderboard}) {
+	let {data} = await axios.patch(`${siteUrl}/users/edit-user`, {
+		originalEmail,
+		username,
+		newEmail,
+		optedForLeaderboard
+	});
+	return data;
+}
+
+async function removeFriend (username, friendToRemove) {
+	let {data} = await axios.patch(`${siteUrl}/users/remove-friend`, {
+		username,
+		friendToRemove
+	});
+	return data;
+}
+
 export {
 	getUserByName,
 	getUserByEmail,
-	addUser
+	addUser,
+	removeUser,
+	editUserInfo,
+	removeFriend
 }

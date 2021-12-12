@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { checkString, checkBool } from "../../utils/inputChecks";
-import { addUser, getUserByEmail, getUserByName } from "../../utils/backendCalls";
+import { addUser, getUserByEmail, getUserByName, removeUser } from "../../utils/backendCalls";
 
 import './CreateUser.css';
 import googleLogo from '../../imgs/google-logo.png';
@@ -16,6 +16,7 @@ export default function CreateUser() {
 	const [created, setCreated] = useState(false);
 	const [displayButton, setDisplayButton] = useState(true);
 	const [email, setEmail] = useState(null);
+	const [username, setUsername] = useState(null);
 	const [emailExists, setEmailExists] = useState(false);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
@@ -112,7 +113,13 @@ export default function CreateUser() {
 		} catch (e) {
 			console.log(e);
 			setErrors([e.toString()]);
-			// DBTODO delete db record
+			// delete db record
+			try {
+				await removeUser(username);
+			} catch (e) {
+				// just console it
+				console.log(e);
+			}
 			return;
 		}
 
@@ -159,6 +166,7 @@ export default function CreateUser() {
 			if (user && user._id) {
 				// store email
 				setEmail(result.user.email);
+				setUsername(user.username);
 				setEmailExists(true);
 				return;
 			}
@@ -252,9 +260,14 @@ export default function CreateUser() {
 		setCreated(true);
 	}
 
-	const dontPreserveOldAccount = () => {
-		// DBTODO - delete old record in database
-		// note that this will not actually work until the record is deleted
+	const dontPreserveOldAccount = async () => {
+		// delete old record in database
+		try {
+			await removeUser(username);
+		} catch (e) {
+			setErrors([`Sorry, something went wrong deleting your old account: ${e.toString()}. Please try again later.`]);
+			return;
+		}
 		setDisplayButton(false);
 		setEmailExists(false)
 	}
