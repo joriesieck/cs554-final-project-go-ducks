@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const data = require('../data');
 const userData = data.users; // change to data.users when db funcs are done
+const friendData = data.friends;
 const {
   checkString,
   checkBool,
@@ -151,7 +152,7 @@ router.patch('/add-friend', async (req, res) => {
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
-    checkObjId(friendToAdd, 'friendToAdd');
+    friendToAdd = checkString(friendToAdd, 'friendToAdd', false);
   } catch (e) {
     res.status(400).json({ error: e });
     return;
@@ -160,7 +161,7 @@ router.patch('/add-friend', async (req, res) => {
   // add the friend
   let user;
   try {
-    user = await userData.addFriend(username, friendToAdd);
+    user = await friendData.addFriend(username, friendToAdd);
     if (!user.username) throw 'Error adding friend.';
   } catch (e) {
     res.status(400).json({ error: e });
@@ -177,7 +178,7 @@ router.patch('/remove-friend', async (req, res) => {
   // make sure it's a string, nonempty, etc
   try {
     username = checkString(username, 'Username', false);
-    checkObjId(friendToRemove, 'friendToRemove');
+    friendToRemove = checkString(friendToRemove, 'friendToRemove', false);
   } catch (e) {
     res.status(400).json({ error: e });
     return;
@@ -186,8 +187,60 @@ router.patch('/remove-friend', async (req, res) => {
   // remove the friend
   let user;
   try {
-    user = await userData.removeFriend(username, friendToRemove);
+    user = await friendData.removeFriend(username, friendToRemove);
     if (!user.username) throw 'Error removing friend.';
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  res.status(200).json(user);
+});
+
+// accept friend
+router.patch('/accept-friend', async (req, res) => {
+  // get the variables from req.body
+  let { username, friendToAccept } = req.body;
+  // make sure it's a string, nonempty, etc
+  try {
+    username = checkString(username, 'Username', false);
+    friendToAccept = checkString(friendToAccept, 'friendToAccept', false);
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  // accept the friend
+  let user;
+  try {
+    user = await friendData.acceptFriend(username, friendToAccept);
+    if (!user.username) throw 'Error accepting friend.';
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  res.status(200).json(user);
+});
+
+// remove pending friend
+router.patch('/remove-pending', async (req, res) => {
+  // get the variables from req.body
+  let { username, pendingToRemove } = req.body;
+  // make sure it's a string, nonempty, etc
+  try {
+    username = checkString(username, 'Username', false);
+    pendingToRemove = checkString(pendingToRemove, 'pendingToRemove', false);
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  // remove the pending friend
+  let user;
+  try {
+    user = await friendData.removePending(username, pendingToRemove);
+    if (!user.username) throw 'Error removing pending friend.';
   } catch (e) {
     res.status(400).json({ error: e });
     return;
