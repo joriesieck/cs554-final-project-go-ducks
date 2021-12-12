@@ -118,9 +118,9 @@ export default function LogIn() {
   if (loggedIn) return <Redirect to="/home" />;
 
   return (
-    <div id="login-user">
+    <div className={styles.loginUser}>
       <h1>Log In</h1>
-      <form onSubmit={logUserIn} id="login-user-form">
+      <form onSubmit={logUserIn} className={styles.loginUserForm}>
         <TextField id="email" required type="email" label="Email" />
         <TextField id="password" required type="password" label="Password" />
         <Button type="submit" variant="contained">
@@ -128,10 +128,10 @@ export default function LogIn() {
         </Button>
       </form>
 
-      <div className="provider-logos">
+      <div className={styles.providerLogos}>
         <Button
           variant="contained"
-          className="provider-logo"
+          className={styles.providerLogo}
           onClick={googleProviderSignIn}
         >
           <img
@@ -148,7 +148,7 @@ export default function LogIn() {
 			</Button> */}
         <Button
           variant="contained"
-          className="provider-logo"
+          className={styles.providerLogo}
           onClick={gitProviderSignIn}
         >
           <img src={gitLogo} alt="sign in with github" height={50} width={50} />
@@ -157,7 +157,7 @@ export default function LogIn() {
       </div>
 
       {errors && (
-        <Alert severity="error" className="create-user-errors">
+        <Alert severity="error" className={styles.createUserErrors}>
           <ul>
             {errors.map((error) => {
               error = error.replace('Error: ', '');

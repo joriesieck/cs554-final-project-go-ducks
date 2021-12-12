@@ -38,9 +38,8 @@ import { checkString } from '../../utils/inputChecks';
 import { Box } from '@mui/system';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-import './Profile.module.css';
+import styles from './Profile.module.css';
 
-import './Profile.module.css';
 
 const userData = {
   username: 'fakeuser',
@@ -49,6 +48,7 @@ const userData = {
   friends: ['fakeuser1', 'fakeuser2', 'fakeuser3'],
 };
 
+// TODO fix create user stuff
 // DBTODO pull data from database
 
 export default function Profile() {
@@ -333,31 +333,31 @@ export default function Profile() {
     );
 
   return (
-    <div id="profile">
+    <div className={styles.profile}>
       <Modal
         open={openModal}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-        className={`profile-reauth-modal${
-          loginErrors ? ' profile-reauth-modal-errors' : ''
+        className={`${styles.profileReauthModal}${
+          loginErrors ? ` ${styles.profileReauthModalErrors}` : ''
         }`}
       >
-        <Box className="profile-reauth-box">
+        <Box className={styles.profileReauthBox}>
           <Grid container>
             <Grid item xs={1}></Grid>
             <Grid item xs={10}>
               <h1 id="modal-modal-title">Log In</h1>
             </Grid>
             <Grid item xs={1}>
-              <CloseIcon id="profile-reauth-close" onClick={handleClose} />
+              <CloseIcon className={styles.profileReauthClose} onClick={handleClose} />
             </Grid>
           </Grid>
 
           <Alert id="modal-modal-description" severity="info">
             Please log in again to save changes.
           </Alert>
-          <form onSubmit={reAuth} id="reauth-user-form">
+          <form onSubmit={reAuth} className={styles.reauthUserForm}>
             <TextField id="reauth-email" required type="email" label="Email" />
             <TextField
               id="reauth-password"
@@ -370,7 +370,7 @@ export default function Profile() {
             </Button>
           </form>
           {loginErrors && (
-            <Alert severity="error" className="create-user-errors">
+            <Alert severity="error" className={styles.createUserErrors}>
               <ul>
                 {loginErrors.map((error) => {
                   error = error.replace('Error: ', '');
@@ -383,8 +383,8 @@ export default function Profile() {
       </Modal>
 
       <h1>Profile</h1>
-      <Grid className="profile-list">
-        <Grid item xs={12} className="profile-editable">
+      <Grid className={styles.profileList}>
+        <Grid item xs={12} className={styles.profileEditable}>
           {!editUser && (
             <>
               <Grid item xs={2}>
@@ -417,7 +417,7 @@ export default function Profile() {
         {/* password */}
         {provider === 'password' && (
           <>
-            <Grid item xs={12} className="profile-editable">
+            <Grid item xs={12} className={styles.profileEditable}>
               {!editEmail && (
                 <>
                   <Grid item xs={2}>
@@ -447,7 +447,7 @@ export default function Profile() {
                 {editEmail ? <CloseIcon /> : 'Edit'}
               </Button>
             </Grid>
-            <Grid item xs={12} className="profile-editable">
+            <Grid item xs={12} className={styles.profileEditable}>
               {editPass && (
                 <form id="save-password" onSubmit={editProfile}>
                   <TextField
@@ -464,7 +464,7 @@ export default function Profile() {
               )}
               <Button
                 id="edit-password"
-                className={editPass ? 'discard-password' : 'change-password'}
+                className={editPass ? 'discard-password' : `${styles.changePassword}`}
                 onClick={toggleEdit}
               >
                 {editPass ? <CloseIcon /> : 'Change Password'}
@@ -475,7 +475,7 @@ export default function Profile() {
 
         {/* google */}
         {provider === 'google.com' && (
-          <div className="profile-provider">
+          <div className={styles.profileProvider}>
             <img src={googleLogo} alt="google logo" height={50} width={50} />
             <p>
               Edit your sign-in information on{' '}
@@ -493,7 +493,7 @@ export default function Profile() {
 
         {/* github */}
         {provider === 'github.com' && (
-          <div className="profile-provider">
+          <div className={styles.profileProvider}>
             <img src={gitLogo} alt="github logo" height={50} width={50} />
             <p>
               Edit your sign-in information on{' '}
@@ -514,7 +514,7 @@ export default function Profile() {
         )}
       </Grid>
 
-      <div className="profile-list">
+      <div className={styles.profileList}>
         <span>High Scores</span>
         <List>
           {userData.highScores.map((score, i) => (
@@ -528,7 +528,7 @@ export default function Profile() {
         </List>
       </div>
 
-      <div className="profile-list">
+      <div className={styles.profileList}>
         <span>Friends</span>
         <List>
           {userData.friends.map((friend, i) => (
@@ -543,7 +543,7 @@ export default function Profile() {
       </div>
 
       {providerError && (
-        <Alert severity="error" className="create-user-errors">
+        <Alert severity="error" className={styles.createUserErrors}>
           {providerError}
         </Alert>
       )}
