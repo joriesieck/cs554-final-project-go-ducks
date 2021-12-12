@@ -64,8 +64,15 @@ const main = async () => {
 	} catch(e){
 		console.log(e);
 	}
+	// removals, can get rid of
 	try {
 		let res = await friends.removeFriend(user4.insertedId.toString(), user6.insertedId.toString());
+		console.log(res);
+	} catch(e){
+		console.log(e)
+	}
+	try {
+		let res = await friends.removePending(user5.insertedId.toString(), user6.insertedId.toString());
 		console.log(res);
 	} catch(e){
 		console.log(e)
