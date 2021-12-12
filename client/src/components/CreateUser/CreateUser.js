@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
+import './CreateUser.module.css';
+
 export default function CreateUser() {
   const [errors, setErrors] = useState(null);
   const [created, setCreated] = useState(false);

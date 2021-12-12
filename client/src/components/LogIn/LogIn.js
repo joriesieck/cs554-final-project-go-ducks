@@ -5,6 +5,8 @@ import { Redirect } from 'react-router-dom';
 import { Alert, Button, TextField } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 
+import './LogIn.module.css';
+
 export default function LogIn() {
   const [errors, setErrors] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
