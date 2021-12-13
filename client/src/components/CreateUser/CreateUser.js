@@ -10,15 +10,14 @@ import {
 } from '@firebase/auth';
 import { Alert, Button, TextField } from '@mui/material';
 import { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { checkString } from '../../utils/inputChecks';
 import { getUserByName } from '../../utils/backendCalls';
 
-import './CreateUser.module.css';
+import styles from './CreateUser.module.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-import './CreateUser.module.css';
 
 export default function CreateUser() {
   const [errors, setErrors] = useState(null);
@@ -176,10 +175,10 @@ export default function CreateUser() {
   if (created) return <Redirect to="/home" />;
 
   return (
-    <div id="create-user">
+    <div className={styles.createUser}>
       <h1>Create User</h1>
       {displayButton && (
-        <form onSubmit={createUser} id="create-user-form">
+        <form onSubmit={createUser} className={styles.createUserForm}>
           <TextField id="username" required label="Username" />
           <TextField id="email" required type="email" label="Email" />
           <TextField
@@ -196,10 +195,10 @@ export default function CreateUser() {
       )}
 
       {displayButton && (
-        <div className="provider-logos">
+        <div className={styles.providerLogos}>
           <Button
             variant="contained"
-            className="provider-logo"
+            className={styles.providerLogo}
             onClick={googleProviderSignIn}
           >
             <img
@@ -216,7 +215,7 @@ export default function CreateUser() {
 			</Button> */}
           <Button
             variant="contained"
-            className="provider-logo"
+            className={styles.providerLogo}
             onClick={gitProviderSignIn}
           >
             <img
@@ -245,7 +244,7 @@ export default function CreateUser() {
       )}
 
       {errors && (
-        <Alert severity="error" className="create-user-errors">
+        <Alert severity="error" className={styles.loginErrors}>
           <ul>
             {errors.map((error) => {
               error = error.replace('Error: ', '');
@@ -256,7 +255,7 @@ export default function CreateUser() {
       )}
 
       <p>
-        Already have an account? <a href="/">Log in</a> instead.
+        Already have an account? <Link to="/">Log in</Link> instead.
       </p>
     </div>
   );

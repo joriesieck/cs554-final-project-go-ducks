@@ -6,7 +6,7 @@ import {
 } from '../../firebase/firebaseSetup';
 import { signInWithEmailAndPassword, signInWithPopup } from '@firebase/auth';
 import { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { Alert, Button, TextField } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkString } from '../../utils/inputChecks';
@@ -157,7 +157,7 @@ export default function LogIn() {
       </div>
 
       {errors && (
-        <Alert severity="error" className={styles.createUserErrors}>
+        <Alert severity="error" className={styles.loginErrors}>
           <ul>
             {errors.map((error) => {
               error = error.replace('Error: ', '');
@@ -169,7 +169,7 @@ export default function LogIn() {
 
       <p>Test user: email: testing@test.com, password: test12</p>
       <p>
-        Not a user yet? <a href="/create-user">Create Account</a>
+        Not a user yet? <Link to="/create-user">Create Account</Link>
       </p>
     </div>
   );

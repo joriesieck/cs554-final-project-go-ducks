@@ -370,7 +370,7 @@ export default function Profile() {
             </Button>
           </form>
           {loginErrors && (
-            <Alert severity="error" className={styles.createUserErrors}>
+            <Alert severity="error" className={styles.profileErrors}>
               <ul>
                 {loginErrors.map((error) => {
                   error = error.replace('Error: ', '');
@@ -543,7 +543,7 @@ export default function Profile() {
       </div>
 
       {providerError && (
-        <Alert severity="error" className={styles.createUserErrors}>
+        <Alert severity="error" className={styles.profileErrors}>
           {providerError}
         </Alert>
       )}

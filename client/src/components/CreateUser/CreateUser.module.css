@@ -1,21 +1,33 @@
-#create-user {
+.createUser {
 	margin-left: auto;
 	margin-right: auto;
 	max-width: 500px;
 }
 
-#create-user-form {
+.createUserForm {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	height: 300px;
 }
 
-.create-user-errors {
+.createUserErrors {
 	margin-top: 20px;
 }
 
-.create-user-errors ul {
+.createUserErrors ul {
 	list-style-type: none;
 	padding: 0px;
+}
+
+.providerLogo {
+	margin-top: 10px !important;
+}
+.providerLogo img {
+	margin-right: 5px;
+}
+
+.providerLogos {
+	display: flex;
+	flex-direction: column;
 }

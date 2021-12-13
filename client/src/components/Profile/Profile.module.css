@@ -56,11 +56,11 @@
 	text-align: center;
 }
 
-#profileReauthClose {
+.profileReauthClose {
 	cursor: pointer;
 }
 
-#reauthUserForm {
+.reauthUserForm {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -80,4 +80,13 @@
 	justify-content: center;
 	align-items: center;
 	height: 90vh;
+}
+
+.profileErrors {
+	margin-top: 20px;
+}
+
+.profileErrors ul {
+	list-style-type: none;
+	padding: 0px;
 }

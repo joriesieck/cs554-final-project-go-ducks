@@ -28,3 +28,12 @@
 .loginError {
 	margin-top: 10px;
 }
+
+.loginErrors {
+	margin-top: 20px;
+}
+
+.loginErrors ul {
+	list-style-type: none;
+	padding: 0px;
+}
