@@ -7,23 +7,29 @@ const {
   checkEmail,
 } = require('../inputChecks');
 const users = mongoCollections.users;
+const bluebird = require('bluebird');
+const redis = require('redis');
+const client = redis.createClient();
 
-async function removeFriendAll(friendName){
-  checkString(friendName, "Friend Name", false);
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
+
+async function removeFriendAll(friendName) {
+  checkString(friendName, 'Friend Name', false);
   const userCollection = await users();
   const updateFriends = await userCollection.updateMany(
-      { friends: friendName },
-      { $pull: { friends: friendName }}
+    { friends: friendName },
+    { $pull: { friends: friendName } }
   );
-  if (!updateFriends.matchedCount && !updateFriends.modifiedCount){
-      throw `Unable to remove User ${friendName} from friends of users`;
+  if (!updateFriends.matchedCount && !updateFriends.modifiedCount) {
+    throw `Unable to remove User ${friendName} from friends of users`;
   }
   const updatePending = await userCollection.updateMany(
-      { 'pending_friends.pendingName': friendName},
-      { $pull: { pending_friends: {pendingName: friendName}}}
+    { 'pending_friends.pendingName': friendName },
+    { $pull: { pending_friends: { pendingName: friendName } } }
   );
-  if (!updatePending.matchedCount && !updatePending.modifiedCount){
-      throw `Unable to remove User ${friendName} from friends of users`;
+  if (!updatePending.matchedCount && !updatePending.modifiedCount) {
+    throw `Unable to remove User ${friendName} from friends of users`;
   }
   return true;
 }
@@ -39,10 +45,17 @@ const exportedMethods = {
   },
   async getUserByName(username) {
     checkString(username, 'Username', false);
-    const userCollection = await users();
-    const user = await userCollection.findOne({ username: username });
-    if (!user) throw `User with username ${username} not found`;
-    return user;
+    const cachedUser = await client.hgetAsync('usernameCache', username);
+    if (cachedUser) {
+      console.log('returned from cache');
+      return JSON.parse(cachedUser);
+    } else {
+      const userCollection = await users();
+      const user = await userCollection.findOne({ username: username });
+      if (!user) throw `User with username ${username} not found`;
+      await client.hmsetAsync('usernameCache', username, JSON.stringify(user));
+      return user;
+    }
   },
   async getUserByEmail(email) {
     checkEmail(email, 'Email');
