@@ -1,5 +1,18 @@
-import { Alert, Button, Checkbox, CircularProgress, FormControlLabel, Grid, List, ListItem, ListItemIcon, ListItemText, Modal, TextField } from "@mui/material"
 import { useEffect, useState } from "react";
+import {
+  Alert,
+  Button,
+  CircularProgress,
+  Checkbox,
+  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Modal,
+  TextField,
+  FormControlLabel
+} from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import CloseIcon from '@mui/icons-material/Close';
@@ -8,14 +21,30 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import CheckIcon from '@mui/icons-material/Check';
 import { useSelector, useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser, fetchSignInMethodsForEmail, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
-import { auth, gitProvider, googleProvider } from "../../firebase/firebaseSetup";
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
 import { editUserInfo, getUserByEmail, removeUser } from '../../utils/backendCalls';
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updateEmail,
+  updatePassword,
+  deleteUser,
+  fetchSignInMethodsForEmail,
+  signInWithPopup,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+} from 'firebase/auth';
+import {
+  auth,
+  gitProvider,
+  googleProvider,
+} from '../../firebase/firebaseSetup';
+import Image from 'next/image';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-import './Profile.css';
+import styles from './Profile.module.css';
+
 
 export default function Profile () {
 	const [editUser, setEditUser] = useState(false);
@@ -361,18 +390,18 @@ export default function Profile () {
 
 	if (error) return <Alert severity="error">{error}</Alert>;
 
-	if (!provider || deleting || !userData) return <div className="profile-loading"><CircularProgress /></div>;
+	if (!provider || deleting || !userData) return <div className={styles.profileLoading}><CircularProgress /></div>;
 
 	return (
-		<div id="profile">
+		<div className={styles.profile}>
 			<Modal
 				open={openModal}
 				onClose={handleClose}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
-				className={`profile-reauth-modal${loginErrors ? ' profile-reauth-modal-errors' : ''}`}	
+				className={`${styles.profileReauthModal}${loginErrors ? ` ${styles.profileReauthModalErrors}` : ''}`}	
 			>
-				<Box className='profile-reauth-box'>
+				<Box className={styles.profileReauthBox}>
 					<Grid container>
 						<Grid item xs={1}></Grid>
 						<Grid item xs={10}><h1 id="modal-modal-title">Log In</h1></Grid>
@@ -380,12 +409,12 @@ export default function Profile () {
 					</Grid>
 
 					<Alert id="modal-modal-description" severity="info">Please log in again to save changes.</Alert>
-					<form onSubmit={reAuth} id="reauth-user-form">
+					<form onSubmit={reAuth} id={styles.reauthUserForm}>
 						<TextField id="reauth-email" required type="email" label="Email" />
 						<TextField id="reauth-password" required type="password" label="Password" />
 						<Button type="submit" variant="contained">Log in</Button>
 					</form>
-					{loginErrors && <Alert severity="error" className="create-user-errors">
+					{loginErrors && <Alert severity="error" className={styles.profileErrors}>
 						<ul>
 							{loginErrors.map((error) => {
 								error = error.replace('Error: ', '');
@@ -397,9 +426,9 @@ export default function Profile () {
 			</Modal>
 
 			<h1>Profile</h1>
-			<Grid className="profile-list">
+			<Grid className={styles.profileList}>
 			<h2>Login Credentials</h2>
-			<Grid item xs={12} className="profile-editable">
+			<Grid item xs={12} className={styles.profileEditable}>
 				{!editUser && <><Grid item xs={2}>Username:</Grid><Grid item xs={6}>{userData.username}</Grid></>}
 				{editUser && <form id="save-username" onSubmit={editProfile}>
 				<TextField
@@ -416,7 +445,7 @@ export default function Profile () {
 
 			{/* email/password */}
 			{provider==='password' && <>
-			<Grid item xs={12} className="profile-editable">
+			<Grid item xs={12} className={styles.profileEditable}>
 				{!editEmail && <><Grid item xs={2}>Email:</Grid><Grid item xs={6}>{userData.email}</Grid></>}
 				{editEmail && <form id="save-email" onSubmit={editProfile}>
 				<TextField
@@ -431,7 +460,7 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? <CloseIcon /> : 'Edit'}</Button>
 			</Grid>
-			<Grid item xs={12} className="profile-editable">
+			<Grid item xs={12} className={styles.profileEditable}>
 				{editPass && <form id="save-password" onSubmit={editProfile}>
 				<TextField
 					id="password"
@@ -442,31 +471,31 @@ export default function Profile () {
 				/>
 				<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-password" className={editPass ? 'discard-password' : 'change-password'} onClick={toggleEdit}>{editPass ? <CloseIcon /> : 'Change Password'}</Button>
+				<Button id="edit-password" className={editPass ? 'discard-password' : `${styles.changePassword}`} onClick={toggleEdit}>{editPass ? <CloseIcon /> : 'Change Password'}</Button>
 			</Grid>
 			</>}
 
 			{/* google */}
-			{provider==='google.com' && <div className='profile-provider'>
+			{provider==='google.com' && <div className={styles.profileProvider}>
 				<img src={googleLogo} alt='google logo' height={50} width={50} />
 				<p>Edit your sign-in information on <a href='https://www.google.com/' target='_blank' rel='noreferrer'>Google <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
 			</div>}
 
 			{/* github */}
-			{provider==='github.com' && <div className='profile-provider'>
+			{provider==='github.com' && <div className={styles.profileProvider}>
 				<img src={gitLogo} alt='github logo' height={50} width={50} />
 				<p>Edit your sign-in information on <a href='https://github.com/' target='_blank' rel='noreferrer'>GitHub <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
 			</div>}
 
 			{/* no account */}
 			{provider==='no-account' && <Alert severity="error">
-				Looks like you don't have an account. <a href='/create-user'>Create one here</a>.
+				Looks like you don't have an account. <Link to='/create-user'>Create one here</Link>.
 			</Alert>}
 			</Grid>
 
-			<div className="profile-list">
+			<div className={styles.profileList}>
 			<h2>High Scores</h2>
-			<Grid item className="profile-editable profile-leaderboard">
+			<Grid item className={`${styles.profileEditable} ${styles.profileLeaderboard}`}>
 				<Grid item xs={1}><LeaderboardIcon /></Grid>
 				{!editLeaderboard && <Grid item xs={8}>{`You are${userData.optedForLeaderboard ? '' : ' not'} participating in the leaderboard`}</Grid>}
 				{editLeaderboard && <form id="save-leaderboard" onSubmit={toggleLeaderboard}>
@@ -486,7 +515,7 @@ export default function Profile () {
 			{userData.high_scores.length<=0 && <p>No high scores to show.</p>}
 			</div>
 
-			<div className="profile-list">
+			<div className={styles.profileList}>
 			<h2>Friends</h2>
 			{userData.friends.length>0 && <List>
 				{userData.friends.map((friend, i) => (
@@ -498,8 +527,8 @@ export default function Profile () {
 			</List>}
 			{userData.friends.length<=0 && <p>No friends to show.</p>}
 			</div>
-			{/* DBTODO remove friends/pending friends */}
-			<div className="profile-list">
+			{/* TODO remove friends/pending friends */}
+			<div className={styles.profileList}>
 			<h2>Pending Friends</h2>
 			{userData.pending_friends.length>0 && <List>
 				{userData.pending_friends.map((friend, i) => (
@@ -512,7 +541,7 @@ export default function Profile () {
 			{userData.pending_friends.length<=0 && <p>No pending friends to show.</p>}
 			</div>
 
-			{providerError && <Alert severity="error" className="create-user-errors">
+			{providerError && <Alert severity="error" className={styles.profileErrors}>
 				{providerError}
 			</Alert>}
 

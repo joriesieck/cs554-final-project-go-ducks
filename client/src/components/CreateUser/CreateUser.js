@@ -1,13 +1,22 @@
-import { auth, googleProvider, gitProvider } from "../../firebase/firebaseSetup";
-import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithPopup } from "@firebase/auth";
 import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { useState } from "react";
-import { Redirect } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { checkString, checkBool } from "../../utils/inputChecks";
 import { addUser, getUserByEmail, getUserByName, removeUser } from "../../utils/backendCalls";
+import {
+  auth,
+  googleProvider,
+  gitProvider,
+} from '../../firebase/firebaseSetup';
+import {
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+  signInWithPopup,
+} from '@firebase/auth';
+import { Link, Redirect } from 'react-router-dom';
+import Image from 'next/image';
 
-import './CreateUser.css';
+import styles from './CreateUser.module.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 
@@ -275,9 +284,9 @@ export default function CreateUser() {
 	if (created) return <Redirect to="/home" />;
 
 	return (
-		<div id="create-user">
+		<div className={styles.createUser}>
 			<h1>Create User</h1>
-			{displayButton && <form onSubmit={createUser} id="create-user-form">
+			{displayButton && <form onSubmit={createUser} className={styles.createUserForm}>
 				<TextField id="username" required label="Username" />
 				<TextField id="email" required type="email" label="Email" />
 				<TextField id="password" required type="password" label="Password" helperText="Must be at least 6 characters." />
@@ -285,17 +294,17 @@ export default function CreateUser() {
 				<Button type="submit" variant="contained">Create User</Button>
 			</form>}
 
-			{displayButton&& <div className="provider-logos">
-			<Button variant="contained" className='provider-logo' onClick={googleProviderSignIn}>
-				<img src={googleLogo} alt="sign in with google" height={50} width={50} />
+			{displayButton&& <div className={styles.providerLogos}>
+			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn}>
+				<Image src={googleLogo} alt="sign in with google" height={50} width={50} />
 				Sign up with Google
 			</Button>
 			{/* <Button variant="contained" className='provider-logo' onClick={fbProviderSignIn}>
 				<img src={fbLogo} alt="sign in with facebook" height={50} width={50} />
 				Sign in with Facebook
 			</Button> */}
-			<Button variant="contained" className='provider-logo' onClick={gitProviderSignIn}>
-				<img src={gitLogo} alt="sign in with github" height={50} width={50} />
+			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn}>
+				<Image src={gitLogo} alt="sign in with github" height={50} width={50} />
 				Sign up with GitHub
 			</Button>
 			</div>}
@@ -315,7 +324,7 @@ export default function CreateUser() {
 				<Button onClick={preserveOldAccount}>Transfer data</Button>
 			</>}
 
-			{errors && <Alert severity="error" className="create-user-errors">
+			{errors && <Alert severity="error" className={styles.createUserErrors}>
 				<ul>
 					{errors.map((error) => {
 						error = error.replace('Error: ', '');

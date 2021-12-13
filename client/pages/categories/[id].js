@@ -5,7 +5,7 @@ import axios from "axios";
 
 const baseUrl = "http://jservice.io/api";
 
-export default function QuestionPage({ data }) {
+export default function CategoryPage({ data }) {
   return (
     <div>
       <Head>

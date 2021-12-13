@@ -1,33 +1,18 @@
-/*
-import layout things
-*/
-import Head from "next/head";
+import React from "react";
+import App from "../src/App";
 
-export default function Home({ questionData }) {
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "../src/redux/store";
+
+const Index = () => {
   return (
-    <div>
-      <title>Jeopardy</title>
-    </div>
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
   );
-}
+};
 
-// Won't be necessary due to server rendering
-
-// export async function getStaticPaths() {
-//   const paths = getAllQuestionIds();
-//   return {
-//     paths,
-//     fallback: false,
-//   };
-// }
-
-//
-export async function getServerSideProps(context) {
-  // Make calls to API
-  const questionData = await getQuestionData(context.id);
-  return {
-    props: {
-      questionData,
-    },
-  };
-}
+export default Index;

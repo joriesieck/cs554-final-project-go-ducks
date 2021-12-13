@@ -20,6 +20,11 @@
 .env.test.local
 .env.production.local
 .env
+next.config.js
+
+next.config.js
+
+
 
 npm-debug.log*
 yarn-debug.log*
@@ -27,4 +32,6 @@ yarn-error.log*
 
 package-lock.json
 
-next.config.js
+
+.next/*
+package-lock.json

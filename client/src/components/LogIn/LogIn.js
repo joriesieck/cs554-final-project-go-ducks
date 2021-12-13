@@ -1,16 +1,22 @@
-import { auth, fbProvider, gitProvider, googleProvider } from "../../firebase/firebaseSetup";
-import { signInWithEmailAndPassword, signInWithPopup } from "@firebase/auth";
+import {
+  auth,
+  fbProvider,
+  gitProvider,
+  googleProvider,
+} from '../../firebase/firebaseSetup';
+import { signInWithEmailAndPassword, signInWithPopup } from '@firebase/auth';
 import { useState } from 'react';
-import { Redirect } from "react-router-dom";
 import { Alert, Button, TextField, FormControlLabel, Checkbox } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
 import { checkString, checkBool } from '../../utils/inputChecks';
 import { getUserByName, getUserByEmail, addUser } from "../../utils/backendCalls";
+import { Link, Redirect } from 'react-router-dom';
+import Image from 'next/image';
 
 import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-import './LogIn.css';
+import styles from './LogIn.module.css';
 
 export default function LogIn() {
 	const [errors, setErrors] = useState(null);
@@ -214,25 +220,25 @@ export default function LogIn() {
 	if (loggedIn) return <Redirect to="/home" />
 
 	return (
-		<div id="login-user">
+		<div className={styles.loginUser}>
 			<h1>Log In</h1>
-			<form onSubmit={logUserIn} id="login-user-form">
+			<form onSubmit={logUserIn} className={styles.loginUserForm}>
 				<TextField id="email" required type="email" label="Email" />
 				<TextField id="password" required type="password" label="Password" />
 				<Button type="submit" variant="contained">Log in</Button>
 			</form>
 			
-			<div className="provider-logos">
-			<Button variant="contained" className='provider-logo' onClick={googleProviderSignIn}>
-				<img src={googleLogo} alt="sign in with google" height={50} width={50} />
+			<div className={styles.providerLogos}>
+			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn}>
+				<Image src={googleLogo} alt="sign in with google" height={50} width={50} />
 				Sign in with Google
 			</Button>
 			{/* <Button variant="contained" className='provider-logo' onClick={fbProviderSignIn}>
 				<img src={fbLogo} alt="sign in with facebook" height={50} width={50} />
 				Sign in with Facebook
 			</Button> */}
-			<Button variant="contained" className='provider-logo' onClick={gitProviderSignIn}>
-				<img src={gitLogo} alt="sign in with github" height={50} width={50} />
+			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn}>
+				<Image src={gitLogo} alt="sign in with github" height={50} width={50} />
 				Sign in with GitHub
 			</Button>
 			</div>
@@ -246,7 +252,7 @@ export default function LogIn() {
 				</form>
 			</>}
 
-			{errors && <Alert severity="error" className="create-user-errors">
+			{errors && <Alert severity="error" className={styles.loginErrors}>
 				<ul>
 					{errors.map((error) => {
 						error = error.replace('Error: ', '');
@@ -256,10 +262,10 @@ export default function LogIn() {
 			</Alert>}
 
 			<p>Test user: email: testing@test.com, password: test12</p>
-			<p>Not a user yet? <a href="/create-user">Create Account</a></p>
+			<p>Not a user yet? <Link to="/create-user">Create Account</Link></p>
 		</div>
 	)
 }
 
-// google logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freepngimg.com%2Fthumb%2Fgoogle%2F66903-google-pay-gboard-platform-logo-cloud.png&f=1&nofb=1 
+// google logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freepngimg.com%2Fthumb%2Fgoogle%2F66903-google-pay-gboard-platform-logo-cloud.png&f=1&nofb=1
 // fb logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freepngimg.com%2Fthumb%2Ffacebook%2F65310-icons-media-fb-computer-facebook-social.png&f=1&nofb=1

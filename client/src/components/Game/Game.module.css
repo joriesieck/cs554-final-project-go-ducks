@@ -1,4 +1,4 @@
-#gamePlay
+.gamePlay
 {
     height: 100vh;
 }
@@ -8,7 +8,7 @@
     height: 100vh;
 }
 
-#statusBar
+.statusBar
 {
     height: 6vh;
 }
