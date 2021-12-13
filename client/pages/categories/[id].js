@@ -1,35 +1,46 @@
 import Head from "next/head";
+import { Button } from '@mui/material'
 
-import { useEffect, useState } from "react";
 import axios from "axios";
 
 const baseUrl = "http://jservice.io/api";
 
-export default function CategoryPage({ data }) {
+export default function CategoryPage({ categoryData }) {
   return (
     <div>
       <Head>
         <h1>
-          {data.map((category) => {
-            return category.id;
-          })}
+          Category: {categoryData.title}
         </h1>
       </Head>
+      <div>
+        <Button>Random question</Button>
+        <Button>Practice Sequence</Button>
+        <ul>
+          {categoryData.clues.map((question) => {
+            return <li>{question.question}</li>
+          })}
+        </ul>
+      </div>
     </div>
   );
 }
 
-async function getCategories() {
-  const { data } = await axios.get("http://jservice.io/api/categories");
+async function getCategories(id) {
+  const { data } = await axios.get(`${baseUrl}/category/?id=${id}`);
   return data;
 }
 
 export async function getServerSideProps({ params }) {
-  const data = await getCategories();
-  console.log(data);
+  let categoryData = await getCategories(params.id);
+
+  categoryData.clues = categoryData.clues.filter((question) => {
+    return (question.question !== "")
+  })
+  
   return {
     props: {
-      data,
+      categoryData,
     },
   };
 }
