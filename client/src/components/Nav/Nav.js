@@ -5,7 +5,7 @@ import { signOut } from '@firebase/auth';
 import { auth } from '../../firebase/firebaseSetup';
 import { useDispatch } from 'react-redux';
 
-import './Nav.module.css';
+import styles from './Nav.module.css';
 
 export default function NavBar() {
   const [value, setValue] = useState(
@@ -32,7 +32,7 @@ export default function NavBar() {
   if (logout) return <Redirect to="/" />;
 
   return (
-    <div className="nav">
+    <div className={styles.nav}>
       <div className="reg-nav">
         <Tabs
           value={value}
