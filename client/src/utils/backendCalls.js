@@ -45,7 +45,19 @@ async function removeFriend (username, friendToRemove) {
 }
 
 async function removePendingFriend (username, pendingToRemove) {
-	const {data} = await axios.patch(`${siteUrl}`)
+	const {data} = await axios.patch(`${siteUrl}/users/remove-pending-friend`, {
+		username,
+		pendingToRemove
+	});
+	return data;
+}
+
+async function acceptPendingFriend (username, friendToAccept) {
+	const {data} = await axios.patch(`${siteUrl}/users/accept-friend`, {
+		username,
+		friendToAccept
+	});
+	return data;
 }
 
 export {
@@ -54,5 +66,7 @@ export {
 	addUser,
 	removeUser,
 	editUserInfo,
-	removeFriend
+	removeFriend,
+	removePendingFriend,
+	acceptPendingFriend
 }

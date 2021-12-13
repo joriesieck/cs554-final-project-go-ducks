@@ -23,7 +23,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
-import { editUserInfo, getUserByEmail, removeUser } from '../../utils/backendCalls';
+import { editUserInfo, getUserByEmail, removeFriend, removeUser, removePendingFriend, acceptPendingFriend } from '../../utils/backendCalls';
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -67,6 +67,7 @@ export default function Profile () {
 
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
+	const [friendLoading, setFriendLoading] = useState(false);
 
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
@@ -104,9 +105,10 @@ export default function Profile () {
 	// if user is not logged in, redirect to login
 	if (!user) return <Redirect to="/" />;
 
-	const toggleEdit = (e) => {
+	const toggleEdit = (e, id) => {
 		e.preventDefault();
-		const id = e.target.id || e.target.parentElement.id;
+		console.log(e.target);
+		if (!id) id = e.target.id;
 
 		if (id==='edit-username') {
 			setUsernameError('');
@@ -386,6 +388,65 @@ export default function Profile () {
 		setDeleting(false);
 	}
 
+	const triggerRemoveFriend = async (e) => {
+		e.preventDefault();
+		let friendToRemove = e.target.id;
+		setFriendLoading(true);	// TODO - maybe make an obj of bools with the usernames, and do each line? dk why this wouldnt work tho
+		let result;
+		try {
+			friendToRemove = checkString(friendToRemove, 'friendToRemove', true, false);
+			result = await removeFriend(userData.username, friendToRemove);
+			// if the friend was removed successfully, remove them on the front end too
+			if (result.friends.length<userData.friends.length) {
+				userData.pending_friends = result.pending_friends
+			}
+			// TODO else case
+			setFriendLoading(false);
+		} catch (e) {
+			console.log(e);	// TODO
+			return;
+		}
+	}
+
+	const triggerRemovePendingFriend = async (e, pendingToRemove) => {
+		e.preventDefault();
+		if (!e.target.id && !pendingToRemove) return;
+		if (!pendingToRemove) pendingToRemove = e.target.id;
+		let result;
+		try {
+			pendingToRemove = checkString(pendingToRemove, 'pendingToRemove', true, false);
+			result = await removePendingFriend(userData.username, pendingToRemove);
+			// if the friend was removed successfully, remove them on the front end too
+			if (result.pending_friends.length<userData.pending_friends.length) {
+				userData.pending_friends = result.pending_friends
+			}
+			// TODO else case
+		} catch (e) {
+			console.log(e);	// TODO
+			return;
+		}
+	}
+
+	const triggerAddPendingFriend = async (e, friendToAccept) => {
+		e.preventDefault();
+		if (!e.target.id && !friendToAccept) return;
+		if (!friendToAccept) friendToAccept = e.target.id;
+		let result;
+		try {
+			friendToAccept = checkString(friendToAccept, 'friendToAccept', true, false);
+			result = await acceptPendingFriend(userData.username, friendToAccept);
+			// if the friend was added successfully, add them on the front end too
+			if (result.pending_friends.length<userData.pending_friends.length && result.friends.length>userData.friends.length) {
+				userData.pending_friends = result.pending_friends
+				userData.friends = result.friends;
+			}
+			// TODO else case
+		} catch (e) {
+			console.log(e);	// TODO
+			return;
+		}
+	}
+
 	if (redirect) return <Redirect to='/' />;
 
 	if (error) return <Alert severity="error">{error}</Alert>;
@@ -405,11 +466,11 @@ export default function Profile () {
 					<Grid container>
 						<Grid item xs={1}></Grid>
 						<Grid item xs={10}><h1 id="modal-modal-title">Log In</h1></Grid>
-						<Grid item xs={1}><CloseIcon id='profile-reauth-close' onClick={handleClose} /></Grid>
+						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={handleClose} /></Grid>
 					</Grid>
 
 					<Alert id="modal-modal-description" severity="info">Please log in again to save changes.</Alert>
-					<form onSubmit={reAuth} id={styles.reauthUserForm}>
+					<form onSubmit={reAuth} className={styles.reauthUserForm}>
 						<TextField id="reauth-email" required type="email" label="Email" />
 						<TextField id="reauth-password" required type="password" label="Password" />
 						<Button type="submit" variant="contained">Log in</Button>
@@ -440,7 +501,7 @@ export default function Profile () {
 				/>
 				<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-username" onClick={toggleEdit}>{editUser ? <CloseIcon /> : 'Edit'}</Button>
+				<Button id="edit-username" onClick={toggleEdit}>{editUser ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-username')}} /> : 'Edit'}</Button>
 			</Grid>
 
 			{/* email/password */}
@@ -458,7 +519,7 @@ export default function Profile () {
 				/>
 				<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? <CloseIcon /> : 'Edit'}</Button>
+				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-email')}} /> : 'Edit'}</Button>
 			</Grid>
 			<Grid item xs={12} className={styles.profileEditable}>
 				{editPass && <form id="save-password" onSubmit={editProfile}>
@@ -471,7 +532,7 @@ export default function Profile () {
 				/>
 				<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-password" className={editPass ? 'discard-password' : `${styles.changePassword}`} onClick={toggleEdit}>{editPass ? <CloseIcon /> : 'Change Password'}</Button>
+				<Button id="edit-password" className={editPass ? 'discard-password' : `${styles.changePassword}`} onClick={toggleEdit}>{editPass ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-password')}} /> : 'Change Password'}</Button>
 			</Grid>
 			</>}
 
@@ -497,12 +558,12 @@ export default function Profile () {
 			<h2>High Scores</h2>
 			<Grid item className={`${styles.profileEditable} ${styles.profileLeaderboard}`}>
 				<Grid item xs={1}><LeaderboardIcon /></Grid>
-				{!editLeaderboard && <Grid item xs={8}>{`You are${userData.optedForLeaderboard ? '' : ' not'} participating in the leaderboard`}</Grid>}
+				{!editLeaderboard && <Grid item xs={10}>{`You are${userData.optedForLeaderboard ? '' : ' not'} participating in the leaderboard`}</Grid>}
 				{editLeaderboard && <form id="save-leaderboard" onSubmit={toggleLeaderboard}>
 					<FormControlLabel label={`${userData.optedForLeaderboard ? 'Remove me from' : 'Add me to'} the leaderboard`} control={<Checkbox />} />
 					<Button type="submit"><CheckIcon /></Button>
 				</form>}
-				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? <CloseIcon /> : 'Change'}</Button>
+				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-leaderboard')}} /> : 'Change'}</Button>
 			</Grid>
 			{userData.high_scores.length>0 && <List>
 				{userData.high_scores.map((score, i) => (
@@ -514,38 +575,54 @@ export default function Profile () {
 			</List>}
 			{userData.high_scores.length<=0 && <p>No high scores to show.</p>}
 			</div>
-
-			<div className={styles.profileList}>
+					{/*TODO align buttons */}
+			{friendLoading && <CircularProgress />}
+			{!friendLoading && <div className={styles.profileList}>
 			<h2>Friends</h2>
-			{userData.friends.length>0 && <List>
-				{userData.friends.map((friend, i) => (
-					<ListItem disablePadding key={i}>
-						<ListItemIcon><PersonIcon /></ListItemIcon>
-						<ListItemText primary={friend} />
-					</ListItem>
-				))}
-			</List>}
+			{userData.friends.length>0 && <Grid container xs={12}>
+				{userData.friends.map((friend, i) => (<>
+					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
+					<Grid item xs={8} className={styles.gridRow}>{friend}</Grid>
+					<Grid item xs={3} className={styles.gridRow}>
+					<Button color="error" id={friend} onClick={triggerRemoveFriend}>unfriend</Button>
+					</Grid>
+					</>))}
+			</Grid>}
 			{userData.friends.length<=0 && <p>No friends to show.</p>}
-			</div>
+			</div>}
 			{/* TODO remove friends/pending friends */}
-			<div className={styles.profileList}>
+			{friendLoading && <CircularProgress />}
+			{!friendLoading && <div className={styles.profileList}>
 			<h2>Pending Friends</h2>
-			{userData.pending_friends.length>0 && <List>
-				{userData.pending_friends.map((friend, i) => (
-					<ListItem disablePadding key={i}>
-						<ListItemIcon><PersonIcon /></ListItemIcon>
-						<ListItemText primary={friend} />
-					</ListItem>
+			{userData.pending_friends.length>0 && <><Grid container>
+					<Grid item xs={1}></Grid>
+					<Grid item xs={4}>Username</Grid>
+					<Grid item xs={3}>Status</Grid>
+					<Grid item xs={4}></Grid>
+					<Grid item xs={12}><hr className={styles.gridDivider} /></Grid>
+				{userData.pending_friends.map(({pendingName, status}, i) => (<>
+						<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
+						<Grid item xs={4} className={styles.gridRow}>{pendingName}</Grid>
+						<Grid item xs={3} className={styles.gridRow}>{status}</Grid>
+						<Grid item xs={1.5} className={styles.gridRow}>
+						{status==='received' && <Button onClick={triggerAddPendingFriend}id={pendingName}><CheckIcon onClick={(e) => {triggerAddPendingFriend(e,pendingName)}} /></Button>}
+						</Grid>
+						<Grid item xs={1.5} className={styles.gridRow}>
+						<Button color='error' onClick={triggerRemovePendingFriend} id={pendingName}><CloseIcon onClick={(e) => {triggerRemovePendingFriend(e,pendingName)}} /></Button>
+						</Grid>
+						<Grid xs={1} />
+						</>
 				))}
-			</List>}
+				</Grid>
+				</>}
 			{userData.pending_friends.length<=0 && <p>No pending friends to show.</p>}
-			</div>
+			</div>}
 
 			{providerError && <Alert severity="error" className={styles.profileErrors}>
 				{providerError}
 			</Alert>}
 
-			<Button color="error" onClick={triggerDeleteUser}>Delete Account</Button>
+			<Button color="error" className={styles.deleteAccount} onClick={triggerDeleteUser}>Delete Account</Button>
 		</div>
 	)
 }
