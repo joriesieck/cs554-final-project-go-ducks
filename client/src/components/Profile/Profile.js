@@ -36,6 +36,7 @@ import {
 } from '../../firebase/firebaseSetup';
 import { checkString } from '../../utils/inputChecks';
 import { Box } from '@mui/system';
+import Image from 'next/image';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 import styles from './Profile.module.css';
@@ -476,7 +477,7 @@ export default function Profile() {
         {/* google */}
         {provider === 'google.com' && (
           <div className={styles.profileProvider}>
-            <img src={googleLogo} alt="google logo" height={50} width={50} />
+            <Image src={googleLogo} alt="google logo" height={50} width={50} />
             <p>
               Edit your sign-in information on{' '}
               <a
@@ -494,7 +495,7 @@ export default function Profile() {
         {/* github */}
         {provider === 'github.com' && (
           <div className={styles.profileProvider}>
-            <img src={gitLogo} alt="github logo" height={50} width={50} />
+            <Image src={gitLogo} alt="github logo" height={50} width={50} />
             <p>
               Edit your sign-in information on{' '}
               <a href="https://github.com/" target="_blank" rel="noreferrer">

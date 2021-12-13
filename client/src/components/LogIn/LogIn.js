@@ -10,6 +10,7 @@ import { Link, Redirect } from 'react-router-dom';
 import { Alert, Button, TextField } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkString } from '../../utils/inputChecks';
+import Image from 'next/image';
 
 import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
@@ -134,7 +135,7 @@ export default function LogIn() {
           className={styles.providerLogo}
           onClick={googleProviderSignIn}
         >
-          <img
+          <Image
             src={googleLogo}
             alt="sign in with google"
             height={50}
@@ -151,7 +152,7 @@ export default function LogIn() {
           className={styles.providerLogo}
           onClick={gitProviderSignIn}
         >
-          <img src={gitLogo} alt="sign in with github" height={50} width={50} />
+          <Image src={gitLogo} alt="sign in with github" height={50} width={50} />
           Sign in with GitHub
         </Button>
       </div>

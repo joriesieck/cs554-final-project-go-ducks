@@ -14,6 +14,7 @@ import { Link, Redirect } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { checkString } from '../../utils/inputChecks';
 import { getUserByName } from '../../utils/backendCalls';
+import Image from 'next/image';
 
 import styles from './CreateUser.module.css';
 import googleLogo from '../../imgs/google-logo.png';
@@ -201,7 +202,7 @@ export default function CreateUser() {
             className={styles.providerLogo}
             onClick={googleProviderSignIn}
           >
-            <img
+            <Image
               src={googleLogo}
               alt="sign in with google"
               height={50}
@@ -218,7 +219,7 @@ export default function CreateUser() {
             className={styles.providerLogo}
             onClick={gitProviderSignIn}
           >
-            <img
+            <Image
               src={gitLogo}
               alt="sign in with github"
               height={50}
