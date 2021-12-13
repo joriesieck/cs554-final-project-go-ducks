@@ -1,5 +1,4 @@
 const { ObjectId } = require('mongodb');
-const { check } = require('prettier');
 const mongoCollections = require('../config/mongoCollections');
 const { checkObjId, checkString } = require('../inputChecks');
 const userData = require('./users');
@@ -98,8 +97,8 @@ async function addFriend(requesterName, requesteeName){
     // else throw saying already requested? for now
     if (inPending !== -1){
         if (requester.pending_friends[inPending].status === 'received'){
-            acceptFriend(requesterName, requesteeName);
-            return;
+            let res = acceptFriend(requesterName, requesteeName);
+            return res;
         }else {
             throw `User ${requesterName} has already requested to friend User ${requesteeName}`;
         }
@@ -180,8 +179,14 @@ async function removePending(username, pendingName){
     checkString(username, "Username", false);
     checkString(pendingName, "Pending Friend Name", false);
 
-    await userData.getUserByName(username);
+    let user = await userData.getUserByName(username);
     await userData.getUserByName(pendingName);
+
+    const inPending = user.pending_friends.some((e) => e.pendingName === pendingName);
+    
+    if (!inPending){
+        throw `Unable to remove User ${pendingName} from pending as User ${username} does not have them in their pending list`;
+    }
 
     const userCollection = await users();
 
@@ -202,7 +207,9 @@ async function removePending(username, pendingName){
         throw `Unable to remove User ${username} from pending of User ${pendingName}`;
     }
 
-    return true;
+    let res = await userData.getUserByName(username);
+
+    return res;
 }
 
 // remove friend
@@ -210,8 +217,14 @@ async function removeFriend(username, friendName){
     checkString(username, "Username", false);
     checkString(friendName, "Friend Name", false);
 
-    await userData.getUserByName(username);
+    let user = await userData.getUserByName(username);
     await userData.getUserByName(friendName);
+
+    let inFriends = user.friends.some(e => e === friendName );
+    if (!inFriends){
+        throw `Cannot remove User ${friendName} from User ${username}'s friends as they are not friends`;
+    }
+
     const userCollection = await users();
 
     const userUpdate = await userCollection.updateOne(
@@ -229,8 +242,9 @@ async function removeFriend(username, friendName){
     if (!friendUpdate.matchedCount && !friendUpdate.modifiedCount){
         throw `Unable to remove User ${username} from friends of User ${friendName}`;
     }
-    // doesn't throw so long as it finds doc, maybe shouldchange
-    return true;
+    let res = await userData.getUserByName(username);
+    // return requester
+    return res;
 }
 
 // invite friend to game?

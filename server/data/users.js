@@ -8,6 +8,26 @@ const {
 } = require('../inputChecks');
 const users = mongoCollections.users;
 
+async function removeFriendAll(friendName){
+  checkString(friendName, "Friend Name", false);
+  const userCollection = await users();
+  const updateFriends = await userCollection.updateMany(
+      { friends: friendName },
+      { $pull: { friends: friendName }}
+  );
+  if (!updateFriends.matchedCount && !updateFriends.modifiedCount){
+      throw `Unable to remove User ${friendName} from friends of users`;
+  }
+  const updatePending = await userCollection.updateMany(
+      { 'pending_friends.pendingName': friendName},
+      { $pull: { pending_friends: {pendingName: friendName}}}
+  );
+  if (!updatePending.matchedCount && !updatePending.modifiedCount){
+      throw `Unable to remove User ${friendName} from friends of users`;
+  }
+  return true;
+}
+
 const exportedMethods = {
   async getUserById(id) {
     checkObjId(id, 'User ID');
@@ -87,6 +107,7 @@ const exportedMethods = {
     const userCollection = await users();
     const userByUsername = await userCollection.findOne({ username: username });
     if (!userByUsername) throw `User with username ${username} doesn't exist`;
+    await removeFriendAll(username);
     return await userCollection.deleteOne({ username: username });
   },
 };

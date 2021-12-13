@@ -16,11 +16,10 @@
     "dotenv": "^10.0.0",
     "firebase": "^9.4.1",
     "mongodb": "^4.1.4",
-    "next": "^12.0.3",
+    "next": "^12.0.4",
     "prettier": "^2.4.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-dotenv": "^0.1.3",
     "react-redux": "^7.2.6",
     "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
@@ -28,10 +27,12 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "react-dotenv && react-scripts start",
-    "build": "react-dotenv && react-scripts build",
+    "start": "react-scripts start",
+    "build": "next build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "next dev",
+    "lint": "next lint"
   },
   "eslintConfig": {
     "extends": [
@@ -60,5 +61,8 @@
       "FIREBASE_SENDER_ID",
       "FIREBASE_APP_ID"
     ]
+  },
+  "devDependencies": {
+    "@zeit/next-css": "^1.0.1"
   }
 }
