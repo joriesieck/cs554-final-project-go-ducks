@@ -5,6 +5,8 @@ const {
   checkObjId,
   checkBool,
   checkEmail,
+  checkNum,
+  checkArray
 } = require('../inputChecks');
 const users = mongoCollections.users;
 
@@ -74,6 +76,7 @@ const exportedMethods = {
       friends: [],
       pending_friends: [],
       optedForLeaderboard: optedForLeaderboard,
+      recent_categories: []
     });
     return insertInfo;
   },
@@ -111,5 +114,48 @@ const exportedMethods = {
     await removeFriendAll(username);
     return await userCollection.deleteOne({ username: username });
   },
+  async saveGameInfo(username, categoryIds) {
+    checkString(username, 'Username', false);
+    checkArray(categoryIds, 'CategoryIds');
+    if (categoryIds.length<=0) throw 'Please pass in at least one category.';
+    for (let catId of categoryIds) {
+      checkNum(catId, 'CategoryId');
+    }
+    const userCollection = await users();
+    const user = await userCollection.findOne({username});
+    
+    // create the field if this is an old user that doesn't have it
+    if (!user.recent_categories) user.recent_categories = [];
+
+    // loop over categories
+    for (let categoryId of categoryIds) {
+      // if we've seen this before, remove the old category to preserve shifting order
+      if (user.recent_categories.includes(categoryId)) user.recent_categories.filter((catId) => catId!==categoryId);
+      user.recent_categories.push(categoryId);
+    }
+    // only keep at most 12 categories (2 games' worth)
+    while (user.recent_categories.length>12) user.recent_categories.shift()
+    
+    const result = await userCollection.updateOne({ username }, { $set: { recent_categories:user.recent_categories } });
+    if (!result.modifiedCount) throw `Error updating user ${username}`;
+    const updatedUser = await userCollection.findOne({username});
+    return updatedUser;
+  },
+  async addHighScore(username,highScore) {
+    checkString(username, 'Username', false);
+    checkNum(highScore, 'HighScore');
+    const userCollection = await users();
+    const user = await userCollection.findOne({username});
+
+    // make sure this is really a high score
+    if (user.high_scores.length>0 && Math.max(user.high_scores)>=highScore) throw 'This score is not higher than all previous scores.';
+
+    user.high_scores.push(highScore);
+    const result = await userCollection.updateOne({ username }, { $set: { high_scores:user.high_scores } });
+    if (!result.modifiedCount) throw `Error updating user ${username}`;
+    const updatedUser = await userCollection.findOne({username});
+    return updatedUser;
+  }
 };
+
 module.exports = exportedMethods;

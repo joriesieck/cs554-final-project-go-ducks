@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const data = require('../data');
-const userData = data.users; // change to data.users when db funcs are done
+const userData = data.users;
 const friendData = data.friends;
 const {
   checkString,
@@ -9,6 +9,7 @@ const {
   checkObjId,
   checkNum,
   checkEmail,
+  checkArray
 } = require('../inputChecks');
 
 // get user
@@ -342,6 +343,35 @@ router.patch('/add-highscore', async (req, res) => {
     if (!user.username) throw 'Error adding score.';
   } catch (e) {
     res.status(400).json({ error: e });
+    return;
+  }
+
+  res.status(200).json(user);
+});
+
+// save game info
+router.patch('/save-game-info', async (req, res) => {
+  // get the variables from req.body
+  let { username, categoryIds } = req.body;
+  // check inputs
+  try {
+    checkString(username, 'Username', false);
+    checkArray(categoryIds, 'CategoryIds');
+    if (categoryIds.length<=0) throw 'Please pass in at least one category.';
+    for (let catId of categoryIds) {
+      checkNum(catId, 'CategoryId');
+    }
+  } catch (e) {
+    res.status(400).json({error:e});
+    return;
+  }
+
+  // add the category
+  let user;
+  try {
+    user = await userData.saveGameInfo(username, categoryIds);
+  } catch (e) {
+    res.status(400).json({error:e});
     return;
   }
 
