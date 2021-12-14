@@ -69,6 +69,11 @@ export default function Profile () {
 	const [error, setError] = useState(null);
 	const [friendLoading, setFriendLoading] = useState(false);
 
+	const [openRemoveModal, setOpenRemoveModal] = useState(false);
+	const [openRejectModal, setOpenRejectModal] = useState(false);
+	const [openAcceptModal, setOpenAcceptModal] = useState(false);
+	const [toggleFriends, setToggleFriends] = useState({ friend:'' });
+
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -388,63 +393,75 @@ export default function Profile () {
 		setDeleting(false);
 	}
 
+	// const handleConfirmClose = () => {
+	// 	setOpenConfirmModal(false);
+	// }
+
+	const triggerConfirmModal = (e, action, friend) => {
+		const friendToToggle = e.target.id || friend;
+		setToggleFriends({ friend: friendToToggle });
+		if (action==='remove') setOpenRemoveModal(true);
+		else if (action==='reject') setOpenRejectModal(true);
+		else if (action==='accept') setOpenAcceptModal(true);
+	}
+
 	const triggerRemoveFriend = async (e) => {
 		e.preventDefault();
-		let friendToRemove = e.target.id;
+		let friendToRemove = toggleFriends.friend;
+		// let friendToRemove = e.target.id;
 		setFriendLoading(true);	// TODO - maybe make an obj of bools with the usernames, and do each line? dk why this wouldnt work tho
 		let result;
 		try {
 			friendToRemove = checkString(friendToRemove, 'friendToRemove', true, false);
 			result = await removeFriend(userData.username, friendToRemove);
-			// if the friend was removed successfully, remove them on the front end too
-			if (result.friends.length<userData.friends.length) {
-				userData.pending_friends = result.pending_friends
-			}
+			// remove them on the front end too
+			userData.friends = result.friends
 			// TODO else case
 			setFriendLoading(false);
 		} catch (e) {
 			console.log(e);	// TODO
 			return;
 		}
+		setOpenRemoveModal(false);
 	}
 
-	const triggerRemovePendingFriend = async (e, pendingToRemove) => {
+	const triggerRemovePendingFriend = async (e) => {
 		e.preventDefault();
-		if (!e.target.id && !pendingToRemove) return;
-		if (!pendingToRemove) pendingToRemove = e.target.id;
+		let pendingToRemove = toggleFriends.friend;
+		// if (!e.target.id && !pendingToRemove) return;
+		// if (!pendingToRemove) pendingToRemove = e.target.id;
 		let result;
 		try {
 			pendingToRemove = checkString(pendingToRemove, 'pendingToRemove', true, false);
 			result = await removePendingFriend(userData.username, pendingToRemove);
-			// if the friend was removed successfully, remove them on the front end too
-			if (result.pending_friends.length<userData.pending_friends.length) {
-				userData.pending_friends = result.pending_friends
-			}
+			// remove them on the front end too
+			userData.pending_friends = result.pending_friends
 			// TODO else case
 		} catch (e) {
 			console.log(e);	// TODO
 			return;
 		}
+		setOpenRejectModal(false);
 	}
 
-	const triggerAddPendingFriend = async (e, friendToAccept) => {
+	const triggerAddPendingFriend = async (e) => {
 		e.preventDefault();
-		if (!e.target.id && !friendToAccept) return;
-		if (!friendToAccept) friendToAccept = e.target.id;
+		let friendToAccept = toggleFriends.friend;
+		// if (!e.target.id && !friendToAccept) return;
+		// if (!friendToAccept) friendToAccept = e.target.id;
 		let result;
 		try {
 			friendToAccept = checkString(friendToAccept, 'friendToAccept', true, false);
 			result = await acceptPendingFriend(userData.username, friendToAccept);
-			// if the friend was added successfully, add them on the front end too
-			if (result.pending_friends.length<userData.pending_friends.length && result.friends.length>userData.friends.length) {
-				userData.pending_friends = result.pending_friends
-				userData.friends = result.friends;
-			}
+			// add them on the front end too
+			userData.pending_friends = result.pending_friends
+			userData.friends = result.friends;
 			// TODO else case
 		} catch (e) {
 			console.log(e);	// TODO
 			return;
 		}
+		setOpenAcceptModal(false);
 	}
 
 	if (redirect) return <Redirect to='/' />;
@@ -483,6 +500,69 @@ export default function Profile () {
 							})}
 						</ul>
 					</Alert>}
+				</Box>
+			</Modal>
+						{/*TODO maybe try to make this one component */}
+			<Modal
+				open={openRemoveModal}
+				onClose={() => {setOpenRemoveModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.profileReauthModal}
+			>
+				<Box className={styles.profileReauthBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={() => {setOpenRemoveModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Are you sure you want to remove {toggleFriends.friend} as a friend?</p>
+					
+					<Button variant='contained' onClick={triggerRemoveFriend}>Yes, unfriend</Button>
+					<Button onClick={() => {setOpenRemoveModal(false)}}>No, stay friends</Button>
+				</Box>
+			</Modal>
+
+			<Modal
+				open={openRejectModal}
+				onClose={() => {setOpenRejectModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.profileReauthModal}
+			>
+				<Box className={styles.profileReauthBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={() => {setOpenRejectModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Are you sure you want to reject {toggleFriends.friend} as a friend?</p>
+					
+					<Button variant='contained' onClick={triggerRemovePendingFriend}>Yes, reject</Button>
+					<Button onClick={() => {setOpenRemoveModal(false)}}>No, do noting</Button>
+				</Box>
+			</Modal>
+
+			<Modal
+				open={openAcceptModal}
+				onClose={() => {setOpenAcceptModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.profileReauthModal}
+			>
+				<Box className={styles.profileReauthBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={() => {setOpenAcceptModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Are you sure you want to add {toggleFriends.friend} as a friend?</p>
+					
+					<Button variant='contained' onClick={triggerAddPendingFriend}>Yes, add friend</Button>
+					<Button onClick={() => {setOpenAcceptModal(false)}}>No, do nothing</Button>
 				</Box>
 			</Modal>
 
@@ -538,13 +618,13 @@ export default function Profile () {
 
 			{/* google */}
 			{provider==='google.com' && <div className={styles.profileProvider}>
-				<img src={googleLogo} alt='google logo' height={50} width={50} />
+				<Image src={googleLogo} alt='google logo' height={50} width={50} />
 				<p>Edit your sign-in information on <a href='https://www.google.com/' target='_blank' rel='noreferrer'>Google <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
 			</div>}
 
 			{/* github */}
 			{provider==='github.com' && <div className={styles.profileProvider}>
-				<img src={gitLogo} alt='github logo' height={50} width={50} />
+				<Image src={gitLogo} alt='github logo' height={50} width={50} />
 				<p>Edit your sign-in information on <a href='https://github.com/' target='_blank' rel='noreferrer'>GitHub <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
 			</div>}
 
@@ -584,7 +664,7 @@ export default function Profile () {
 					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
 					<Grid item xs={8} className={styles.gridRow}>{friend}</Grid>
 					<Grid item xs={3} className={styles.gridRow}>
-					<Button color="error" id={friend} onClick={triggerRemoveFriend}>unfriend</Button>
+					<Button color="error" id={friend} onClick={(e) => {triggerConfirmModal(e,'remove')}}>unfriend</Button>
 					</Grid>
 					</>))}
 			</Grid>}
@@ -600,18 +680,18 @@ export default function Profile () {
 					<Grid item xs={3}>Status</Grid>
 					<Grid item xs={4}></Grid>
 					<Grid item xs={12}><hr className={styles.gridDivider} /></Grid>
-				{userData.pending_friends.map(({pendingName, status}, i) => (<>
+				{userData.pending_friends.map(({pendingName, status}, i) => (<Grid container id={`${pendingName}-row`} xs={12}>
 						<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
 						<Grid item xs={4} className={styles.gridRow}>{pendingName}</Grid>
 						<Grid item xs={3} className={styles.gridRow}>{status}</Grid>
 						<Grid item xs={1.5} className={styles.gridRow}>
-						{status==='received' && <Button onClick={triggerAddPendingFriend}id={pendingName}><CheckIcon onClick={(e) => {triggerAddPendingFriend(e,pendingName)}} /></Button>}
+						{status==='received' && <Button onClick={(e) => {triggerConfirmModal(e,'accept',pendingName)}}id={pendingName}><CheckIcon onClick={(e) => {triggerConfirmModal(e,'accept',pendingName)}} /></Button>}
 						</Grid>
 						<Grid item xs={1.5} className={styles.gridRow}>
-						<Button color='error' onClick={triggerRemovePendingFriend} id={pendingName}><CloseIcon onClick={(e) => {triggerRemovePendingFriend(e,pendingName)}} /></Button>
+						<Button color='error' onClick={(e) => {triggerConfirmModal(e,'reject',pendingName)}} id={pendingName}><CloseIcon onClick={(e) => {triggerConfirmModal(e,'reject',pendingName)}} /></Button>
 						</Grid>
 						<Grid xs={1} />
-						</>
+						</Grid>
 				))}
 				</Grid>
 				</>}
