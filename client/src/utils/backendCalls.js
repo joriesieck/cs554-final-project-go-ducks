@@ -60,6 +60,16 @@ async function acceptPendingFriend (username, friendToAccept) {
 	return data;
 }
 
+async function getAllFriends (username) {
+	const {data} = await axios.get(`${siteUrl}/users/friends/${username}`);
+	return data;
+}
+
+async function getAllPendingFriends (username) {
+	const {data} = await axios.get(`${siteUrl}/users/pending-friends/${username}`);
+	return data;
+}
+
 export {
 	getUserByName,
 	getUserByEmail,
@@ -68,5 +78,7 @@ export {
 	editUserInfo,
 	removeFriend,
 	removePendingFriend,
-	acceptPendingFriend
+	acceptPendingFriend,
+	getAllFriends,
+	getAllPendingFriends
 }
