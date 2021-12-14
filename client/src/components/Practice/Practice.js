@@ -1,14 +1,20 @@
 import React, {useState, useEffect} from 'react';
-import { TextField, Button, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { FormControl, TextField, Button, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
+
+const handleQuestionSubmit = (e) =>
+{
+
+}
 
 const PracticeQuestion = (props) =>
 {
     //id, answer, category
     return(
-        <div>
-
-        </div>
+        <FormControl>
+            <p>Question Information</p>
+            <TextField></TextField>
+        </FormControl>
     );
 }
 
@@ -22,10 +28,16 @@ const EndPracticeScreen = (props) =>
 
 export default function Practice()
 {
+    const [questionsCompleted, setQuestionsCompleted] = useState(0);
+    const [mode, setMode] = useState('setup');
     //select categories we want to do practice on
     //select a number of questions to have for practice or "free play"
     //toggle buttons, selection
     //then button to start the practice game
     //query the number of questions needed from the API
     //when it starts, then remove everything else from the page
+
+    return (
+
+    );
 }

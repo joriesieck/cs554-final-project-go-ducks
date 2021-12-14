@@ -60,7 +60,7 @@ export default function GameGrid(props)
 
     const handleQuestionModalClose = (e) =>
     {
-
+        //set the remaining number of questions to current - 1
     }
 
     //on click of quit button, what should happen?

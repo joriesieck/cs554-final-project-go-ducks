@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-export default function Leaderboard()
+export default function Friends()
 {
     
 }
