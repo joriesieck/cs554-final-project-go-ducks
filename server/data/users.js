@@ -39,7 +39,6 @@ const exportedMethods = {
     checkObjId(id, 'User ID');
     const cachedUser = await client.hgetAsync('idCache', id);
     if (cachedUser) {
-      console.log('returned from cache');
       return JSON.parse(cachedUser);
     } else {
       const parsedId = ObjectId(id);
@@ -71,10 +70,23 @@ const exportedMethods = {
   },
   async getUserByEmail(email) {
     checkEmail(email, 'Email');
-    const userCollection = await users();
-    const user = await userCollection.findOne({ email: email });
-    if (!user) throw `User with email ${email} not found`;
-    return user;
+    const cachedUserID = await client.hgetAsync('emailCache', email); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
+      return JSON.parse(cachedUser);
+    } else {
+      const userCollection = await users();
+      const user = await userCollection.findOne({ email: email });
+      if (!user) throw `User with email ${email} not found`;
+      await client.hmsetAsync('emailCache', email, user._id.toString());
+      await client.hmsetAsync(
+        'idCache',
+        user._id.toString(),
+        JSON.stringify(user)
+      );
+
+      return user;
+    }
   },
   async doesUserExist(username, email) {
     checkString(username, 'Username', false);
@@ -125,7 +137,22 @@ const exportedMethods = {
       { email: originalEmail },
       { $set: updatedFields }
     );
-    return await this.getUserByEmail(email ?? originalEmail);
+    await client.hdelAsync('emailCache', originalEmail); //If the user is stored in the cache, we need to make sure we dont get the old version from cache
+    const updatedUser = await this.getUserByEmail(email ?? originalEmail);
+
+    //updates or sets usernameCache with the current username value
+    await client.hmsetAsync(
+      'usernameCache',
+      updatedUser.username,
+      updatedUser._id.toString()
+    );
+    // if the user was cached, the cache with update with new values, otherwise it will just be added to the cache
+    await client.hmsetAsync(
+      'idCache',
+      updatedUser._id.toString(),
+      JSON.stringify(updatedUser)
+    );
+    return updatedUser;
   },
   async removeUser(username) {
     checkString(username, 'Username', false);
