@@ -3,6 +3,12 @@ const mongoCollections = require('../config/mongoCollections');
 const { checkObjId, checkString } = require('../inputChecks');
 const userData = require('./users');
 const users = mongoCollections.users;
+const bluebird = require('bluebird');
+const redis = require('redis');
+const client = redis.createClient();
+
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
 
 // get friend - should we also have by Id?
 async function getFriendByName(username, friendName){
@@ -112,6 +118,9 @@ async function addFriend(requesterName, requesteeName){
     if (!requesterUpdate.matchedCount && !requesterUpdate.modifiedCount){
         throw `Unable to add User ${requesteeName} to pending friends of User ${requesterName}`;
     }
+    // update redis cache of requester
+    requester.pending_friends.push({pendingId: requestee._id, status: 'sent'});
+    await client.hsetAsync('idCache', requester._id.toString(), JSON.stringify(requester));
 
     const requesteeUpdate = await userCollection.updateOne(
         { _id: requestee._id },
@@ -120,6 +129,9 @@ async function addFriend(requesterName, requesteeName){
     if (!requesteeUpdate.matchedCount && !requesteeUpdate.modifiedCount){
         throw `Unable to add User ${requesterName} to pending friends of User ${requesteeName}`;
     }
+    // update redis cache of requestee
+    requestee.pending_friends.push({pendingId: requester._id, status: 'received'});
+    await client.hsetAsync('idCache', requestee._id.toString(), JSON.stringify(requestee));
 
     // return updated requester
     const res = await userData.getUserById(requester._id.toString());
@@ -158,6 +170,10 @@ async function acceptFriend(username, pendingName){
     if (!userUpdate.matchedCount && !userUpdate.modifiedCount){
         throw `Unable to add User ${pendingName} to friends of User ${username}`;
     }
+    // update redis cache of user
+    user.friends.push(pending._id);
+    user.pending_friends = user.pending_friends.filter(e => !e.pendingId.equals(pending._id));
+    await client.hsetAsync('idCache', user._id.toString(), JSON.stringify(user));
 
     const pendingUpdate = await userCollection.updateOne(
         {_id: pending._id},
@@ -167,6 +183,10 @@ async function acceptFriend(username, pendingName){
     if (!pendingUpdate.matchedCount && !pendingUpdate.modifiedCount){
         throw `Unable to add User ${username} to friends of User ${pendingName}`;
     }
+    // update redis cache of pending
+    pending.friends.push(user._id);
+    pending.pending_friends = pending.pending_friends.filter(e => !e.pendingId.equals(user._id));
+    await client.hsetAsync('idCache', pending._id.toString(), JSON.stringify(pending));
 
     let res = await userData.getUserById(user._id.toString());
     return res;
@@ -179,7 +199,6 @@ async function removePending(username, pendingName){
 
     let user = await userData.getUserByName(username);
     let pending = await userData.getUserByName(pendingName);
-
     const inPending = user.pending_friends.some((e) => e.pendingId.equals(pending._id));
     
     if (!inPending){
@@ -196,6 +215,9 @@ async function removePending(username, pendingName){
     if (!userUpdate.matchedCount && !userUpdate.modifiedCount){
         throw `Unable to remove User ${pendingName} from pending of User ${username}`;
     }
+    // update user redis cache
+    user.pending_friends = user.pending_friends.filter(e => !e.pendingId.equals(pending._id));
+    await client.hsetAsync('idCache', user._id.toString(), JSON.stringify(user));
 
     const pendingUpdate = await userCollection.updateOne(
         {_id: pending._id},
@@ -204,6 +226,9 @@ async function removePending(username, pendingName){
     if (!pendingUpdate.matchedCount && !pendingUpdate.modifiedCount){
         throw `Unable to remove User ${username} from pending of User ${pendingName}`;
     }
+    // update pending cache
+    pending.pending_friends = pending.pending_friends.filter(e => !e.pendingId.equals(user._id));
+    await client.hsetAsync('idCache', pending._id.toString(), JSON.stringify(pending));
 
     let res = await userData.getUserById(user._id.toString());
 
@@ -232,6 +257,9 @@ async function removeFriend(username, friendName){
     if (!userUpdate.matchedCount && !userUpdate.modifiedCount){
         throw `Unable to remove User ${friendName} from friends of User ${username}`;
     }
+    // update user cache
+    user.friends = user.friends.filter(e => !e.equals(friend._id));
+    await client.hsetAsync('idCache', user._id.toString(), JSON.stringify(user));
 
     const friendUpdate = await userCollection.updateOne(
         { _id: friend._id},
@@ -240,6 +268,10 @@ async function removeFriend(username, friendName){
     if (!friendUpdate.matchedCount && !friendUpdate.modifiedCount){
         throw `Unable to remove User ${username} from friends of User ${friendName}`;
     }
+    // update friend cache
+    friend.friends = friend.friends.filter(e => !e.equals(user._id));
+    await client.hsetAsync('idCache', friend._id.toString(), JSON.stringify(friend));
+
     let res = await userData.getUserById(user._id.toString());
     // return requester
     return res;
