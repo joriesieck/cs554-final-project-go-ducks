@@ -237,7 +237,6 @@ router.patch('/add-friend', async (req, res) => {
     user = await friendData.addFriend(username, friendToAdd);
     if (!user.username) throw 'Error adding friend.';
   } catch (e) {
-    console.log(e)
     res.status(400).json({ error: e });
     return;
   }
@@ -316,7 +315,6 @@ router.patch('/remove-pending-friend', async (req, res) => {
     user = await friendData.removePending(username, pendingToRemove);
     if (!user.username) throw 'Error removing pending friend.';
   } catch (e) {
-    console.log(e);
     res.status(400).json({ error: e });
     return;
   }
