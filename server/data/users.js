@@ -65,10 +65,8 @@ const exportedMethods = {
     if (cachedUserID) {
       const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
       let parsedUser = JSON.parse(cachedUser);
-      // console.log(parsedUser)
       parsedUser._id = ObjectId(parsedUser._id);
       parsedUser.friends = parsedUser.friends.map(e => ObjectId(e));
-      //console.log(parsedUser)
       parsedUser.pending_friends = parsedUser.pending_friends.map(e => ({pendingId: ObjectId(e.pendingId), status: e.status}));
       return parsedUser;
     } else {
@@ -81,8 +79,6 @@ const exportedMethods = {
         user._id.toString(),
         JSON.stringify(user)
       );
-      console.log('get by username db')
-      console.log(user)
       return user;
     }
   },
