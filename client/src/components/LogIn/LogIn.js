@@ -148,11 +148,15 @@ export default function LogIn() {
 			}
 		}
 
+		// trigger page reload to get rid of weird iframe
+		window.location.reload();
+
 		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
 			payload: result.user.email
 		});
+		
 	}
 
 	const signUserUp = async (e) => {
@@ -275,3 +279,4 @@ export default function LogIn() {
 
 // google logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freepngimg.com%2Fthumb%2Fgoogle%2F66903-google-pay-gboard-platform-logo-cloud.png&f=1&nofb=1
 // fb logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freepngimg.com%2Fthumb%2Ffacebook%2F65310-icons-media-fb-computer-facebook-social.png&f=1&nofb=1
+// github logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpngimg.com%2Fuploads%2Fgithub%2Fgithub_PNG45.png&f=1&nofb=1
