@@ -230,7 +230,13 @@ export default function LogIn() {
 			
 			<div className={styles.providerLogos}>
 			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn}>
-				<Image src={googleLogo} alt="sign in with google" height={50} width={50} />
+				{/* TODO fix tota11y error */}
+				<Image
+					src={googleLogo}
+					alt="sign in with google"
+					height={50}
+					width={50}
+				/>
 				Sign in with Google
 			</Button>
 			{/* <Button variant="contained" className='provider-logo' onClick={fbProviderSignIn}>

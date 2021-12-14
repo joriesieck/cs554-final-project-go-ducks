@@ -1,4 +1,5 @@
 import React from "react";
+import Head from 'next/head';
 import App from "../src/App";
 
 import { Provider } from "react-redux";
@@ -9,6 +10,7 @@ const Index = () => {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
+        <Head><title>Jeopardy Trainer</title></Head>
         <App />
       </PersistGate>
     </Provider>

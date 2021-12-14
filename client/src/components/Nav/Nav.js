@@ -35,13 +35,33 @@ export default function NavBar() {
     <div className={styles.nav}>
       <div className="reg-nav">
         <Tabs
+          aria-label='navigation tabs'
+          id='navigation-tabs'
           value={value}
           onChange={(e) => {
             setValue(e.target.innerText.toLowerCase());
           }}
         >
-          <Tab value="home" label="Home" component={Link} to="/home" />
-          <Tab value="profile" label="Profile" component={Link} to="/profile" />
+          <Tab
+            value="home"
+            label="Home"
+            aria-label="Home"
+            component={Link}
+            to="/home"
+            id='home-tab'
+            aria-controls='navigation-tabs'
+            aria-labelledby='home-tab'
+          />
+          <Tab
+            value="profile"
+            label="Profile"
+            aria-label="Profile"
+            component={Link}
+            to="/profile"
+            id='profile-tab'
+            aria-controls='navigation-tabs'
+            aria-labelledby='profile-tab'
+          />
         </Tabs>
       </div>
       <div className="logout-nav">

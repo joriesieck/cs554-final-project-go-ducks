@@ -54,7 +54,7 @@ import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 import styles from './Profile.module.css';
 
-
+{/*TODO fix aria landmarks */}
 export default function Profile () {
 	const [editUser, setEditUser] = useState(false);
 	const [editEmail, setEditEmail] = useState(false);
@@ -105,8 +105,23 @@ export default function Profile () {
 				data = await getUserByEmail(user);
 				const friends = await getAllFriends(data.username);
 				const pendingFriends = await getAllPendingFriends(data.username);
-				data.friends = friends;
-				data.pending_friends = pendingFriends;
+				{/* TODO put back after this is fixed */}
+				// data.friends = friends;
+				// data.pending_friends = pendingFriends;
+				data.friends = [
+					{_id: "61b7edbbf5f69356c716b4ec",
+						username:'jorie'},
+					{_id: "61b7ed0faa5411ee4b635f68",
+						username: 'user5'}
+				]
+				data.pending_friends = [
+					{_id: '61b7ec199937fcd0d97a2811',
+					pending_status: 'sent',
+					username: 'user6'},
+					{_id: '61b7ec199937fcd0d97a2812',
+					pending_status: 'received',
+					username: 'user7'}
+				]
 				console.log(friends, pendingFriends);
 				setUserData(data);
 			} catch (e) {
@@ -120,21 +135,6 @@ export default function Profile () {
 		}
 		fetchUserData();
 	}, [user]);
-
-	// const fetchFriends = async () => {
-	// 	// let data;
-	// 	for (let friendId of userData.friends) {
-	// 		let data;
-	// 		try {
-	// 			data = await 
-	// 		}
-	// 	}
-	// }
-
-	// // get their friends
-	// useEffect(() => {
-
-	// }, [user]);
 
 	// if user is not logged in, redirect to login
 	if (!user) return <Redirect to="/" />;
@@ -524,7 +524,7 @@ export default function Profile () {
 					<Grid container>
 						<Grid item xs={1}></Grid>
 						<Grid item xs={10}><h1 id="modal-modal-title">Log In</h1></Grid>
-						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={handleClose} /></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.profileReauthClose} onClick={handleClose} /></Grid>
 					</Grid>
 
 					<Alert id="modal-modal-description" severity="info">Please log in again to save changes.</Alert>
@@ -554,7 +554,7 @@ export default function Profile () {
 					<Grid container>
 						<Grid item xs={1}></Grid>
 						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
-						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={() => {setOpenRemoveModal(false)}} /></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.profileReauthClose} onClick={() => {setOpenRemoveModal(false)}} /></Grid>
 					</Grid>
 
 					<p id="modal-modal-description">Are you sure you want to remove {toggleFriends.friendUser} as a friend?</p>
@@ -575,7 +575,7 @@ export default function Profile () {
 					<Grid container>
 						<Grid item xs={1}></Grid>
 						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
-						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={() => {setOpenRejectModal(false)}} /></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.profileReauthClose} onClick={() => {setOpenRejectModal(false)}} /></Grid>
 					</Grid>
 
 					<p id="modal-modal-description">Are you sure you want to {toggleFriends.message ? toggleFriends.message : `reject ${toggleFriends.friendUser} as a friend`}?</p>
@@ -596,7 +596,7 @@ export default function Profile () {
 					<Grid container>
 						<Grid item xs={1}></Grid>
 						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
-						<Grid item xs={1}><CloseIcon className={styles.profileReauthClose} onClick={() => {setOpenAcceptModal(false)}} /></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.profileReauthClose} onClick={() => {setOpenAcceptModal(false)}} /></Grid>
 					</Grid>
 
 					<p id="modal-modal-description">Are you sure you want to add {toggleFriends.friendUser} as a friend?</p>
@@ -619,9 +619,9 @@ export default function Profile () {
 					error={usernameError!==''}
 					helperText={usernameError.replace('Error: ', '')}
 				/>
-				<Button type="submit"><CheckIcon /></Button>
+				<Button type="submit"><CheckIcon aria-label='save changes' /></Button>
 				</form>}
-				<Button id="edit-username" onClick={toggleEdit}>{editUser ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-username')}} /> : 'Edit'}</Button>
+				<Button id="edit-username" onClick={toggleEdit}>{editUser ? <CloseIcon aria-label='discard edits' onClick={(e) => {toggleEdit(e,'edit-username')}} /> : 'Edit'}</Button>
 			</Grid>
 
 			{/* email/password */}
@@ -637,9 +637,9 @@ export default function Profile () {
 					error={emailError!==''}
 					helperText={emailError.replace('Error: ', '')}
 				/>
-				<Button type="submit"><CheckIcon /></Button>
+				<Button type="submit"><CheckIcon aria-label='save changes' /></Button>
 				</form>}
-				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-email')}} /> : 'Edit'}</Button>
+				<Button id="edit-email" onClick={toggleEdit}>{editEmail ? <CloseIcon aria-label='discard edits' onClick={(e) => {toggleEdit(e,'edit-email')}} /> : 'Edit'}</Button>
 			</Grid>
 			<Grid item xs={12} className={styles.profileEditable}>
 				{editPass && <form id="save-password" onSubmit={editProfile}>
@@ -650,9 +650,9 @@ export default function Profile () {
 					error={passError!==''}
 					helperText={passError.replace('Error: ', '')}
 				/>
-				<Button type="submit"><CheckIcon /></Button>
+				<Button type="submit"><CheckIcon aria-label='save changes' /></Button>
 				</form>}
-				<Button id="edit-password" className={editPass ? 'discard-password' : `${styles.changePassword}`} onClick={toggleEdit}>{editPass ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-password')}} /> : 'Change Password'}</Button>
+				<Button id="edit-password" className={editPass ? 'discard-password' : `${styles.changePassword}`} onClick={toggleEdit}>{editPass ? <CloseIcon aria-label='discard edits' onClick={(e) => {toggleEdit(e,'edit-password')}} /> : 'Change Password'}</Button>
 			</Grid>
 			</>}
 
@@ -681,18 +681,16 @@ export default function Profile () {
 				{!editLeaderboard && <Grid item xs={10}>{`You are${userData.optedForLeaderboard ? '' : ' not'} participating in the leaderboard`}</Grid>}
 				{editLeaderboard && <form id="save-leaderboard" onSubmit={toggleLeaderboard}>
 					<FormControlLabel label={`${userData.optedForLeaderboard ? 'Remove me from' : 'Add me to'} the leaderboard`} control={<Checkbox />} />
-					<Button type="submit"><CheckIcon /></Button>
+					<Button type="submit"><CheckIcon aria-label='save changes' /></Button>
 				</form>}
-				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? <CloseIcon onClick={(e) => {toggleEdit(e,'edit-leaderboard')}} /> : 'Change'}</Button>
+				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? <CloseIcon aria-label='discard edits' onClick={(e) => {toggleEdit(e,'edit-leaderboard')}} /> : 'Change'}</Button>
 			</Grid>
-			{userData.high_scores.length>0 && <List>
-				{userData.high_scores.map((score, i) => (
-					<ListItem disablePadding key={i}>
-						<ListItemIcon><SportsScoreIcon /></ListItemIcon>
-						<ListItemText primary={score} />
-					</ListItem>
-				))}
-			</List>}
+			{userData.high_scores.length>0 && <Grid container xs={12}>
+				{userData.high_scores.map((score, i) => (<>
+					<Grid item className={styles.gridRow} xs={1}><SportsScoreIcon /></Grid>
+					<Grid item className={styles.gridRow} xs={11}>{score}</Grid>
+					</>))}
+			</Grid>}
 			{userData.high_scores.length<=0 && <p>No high scores to show.</p>}
 			</div>
 					{/*TODO align buttons */}
@@ -703,7 +701,7 @@ export default function Profile () {
 					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
 					<Grid item xs={8.5} className={styles.gridRow}>{username}</Grid>
 					<Grid item xs={2.5} className={styles.gridRow}>
-					<Button color="error" id={_id} onClick={(e) => {triggerConfirmModal(e,'remove', _id, username)}}>unfriend</Button>
+					<Button color="error" onClick={(e) => {triggerConfirmModal(e,'remove', _id, username)}}>unfriend</Button>
 					</Grid>
 					</>))}
 			</Grid>}
@@ -723,10 +721,10 @@ export default function Profile () {
 						<Grid item xs={5} className={styles.gridRow}>{username}</Grid>
 						<Grid item xs={3} className={styles.gridRow}>{pending_status}</Grid>
 						<Grid item xs={1.5} className={styles.gridRow}>
-						{pending_status==='received' && <Button onClick={(e) => {triggerConfirmModal(e,'accept',_id, username)}}id={_id}><CheckIcon onClick={(e) => {triggerConfirmModal(e,'accept',_id, username)}} /></Button>}
+						{pending_status==='received' && <Button onClick={(e) => {triggerConfirmModal(e,'accept',_id, username)}}><CheckIcon aria-label='accept friend' onClick={(e) => {triggerConfirmModal(e,'accept',_id, username)}} /></Button>}
 						</Grid>
 						<Grid item xs={1.5} className={styles.gridRow}>
-						<Button color='error' onClick={(e) => {triggerConfirmModal(e,'reject',_id, username, pending_status)}} id={_id}><CloseIcon onClick={(e) => {triggerConfirmModal(e,'reject',_id, username, pending_status)}} /></Button>
+						<Button color='error' onClick={(e) => {triggerConfirmModal(e,'reject',_id, username, pending_status)}}><CloseIcon aria-label='reject friend' onClick={(e) => {triggerConfirmModal(e,'reject',_id, username, pending_status)}} /></Button>
 						</Grid>
 						</Grid>
 				))}
