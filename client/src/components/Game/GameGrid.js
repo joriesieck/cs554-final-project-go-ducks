@@ -1,7 +1,7 @@
 import { Grid, Button } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import GameFinished from './GameFinished';
-import './Game.module.css';
+import styles from './Game.module.css';
 
 export default function GameGrid(props) {
   const [score, setScore] = useState(0);
@@ -14,7 +14,7 @@ export default function GameGrid(props) {
   categories.map((category) =>
     categoryHeaderElements.push(
       <Grid item key={category} xs={2}>
-        <button className="gridHeader" disabled>
+        <button className={styles.gridHeader} disabled>
           {category}
         </button>
       </Grid>
@@ -47,7 +47,7 @@ export default function GameGrid(props) {
 
   return remaining > 0 ? (
     <div>
-      <Grid container id="statusBar">
+      <Grid container className={styles.statusBar}>
         <Grid item xs={6}>
           Score: {score}
         </Grid>
@@ -57,8 +57,8 @@ export default function GameGrid(props) {
           </Button>
         </Grid>
       </Grid>
-      <Grid container xs={12} id="gameGrid">
-        <Grid container className="gridRow">
+      <Grid container xs={12} className={styles.gameGrid}>
+        <Grid container className={styles.gridRow}>
           {categoryHeaderElements}
         </Grid>
         <Grid
@@ -66,7 +66,7 @@ export default function GameGrid(props) {
           xs={2}
           direction="column"
           id="category1"
-          className="gridColumn"
+          className={styles.gridColumn}
         >
           <Grid item xs={2}>
             <button>200</button>
@@ -89,7 +89,7 @@ export default function GameGrid(props) {
           xs={2}
           direction="column"
           id="category2"
-          className="gridColumn"
+          className={styles.gridColumn}
         >
           <Grid item xs={2}>
             <button>200</button>
@@ -112,7 +112,7 @@ export default function GameGrid(props) {
           xs={2}
           direction="column"
           id="category3"
-          className="gridColumn"
+          className={styles.gridColumn}
         >
           <Grid item xs={2}>
             <button>200</button>
@@ -135,7 +135,7 @@ export default function GameGrid(props) {
           xs={2}
           direction="column"
           id="category4"
-          className="gridColumn"
+          className={styles.gridColumn}
         >
           <Grid item xs={2}>
             <button>200</button>
@@ -158,7 +158,7 @@ export default function GameGrid(props) {
           xs={2}
           direction="column"
           id="category5"
-          className="gridColumn"
+          className={styles.gridColumn}
         >
           <Grid item xs={2}>
             <button>200</button>
@@ -181,7 +181,7 @@ export default function GameGrid(props) {
           xs={2}
           direction="column"
           id="category6"
-          className="gridColumn"
+          className={styles.gridColumn}
         >
           <Grid item xs={2}>
             <button>200</button>

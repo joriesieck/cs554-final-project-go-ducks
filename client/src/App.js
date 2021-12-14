@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import CreateUser from './components/CreateUser/CreateUser';
 import LogIn from './components/LogIn/LogIn';
 import AuthContainer from './AuthContainer';
-import '../src/components/LogIn/LogIn.module.css';
 
 function App() {
   return (

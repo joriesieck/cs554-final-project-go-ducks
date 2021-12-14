@@ -6,10 +6,11 @@ import {
 } from '../../firebase/firebaseSetup';
 import { signInWithEmailAndPassword, signInWithPopup } from '@firebase/auth';
 import { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { Alert, Button, TextField } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkString } from '../../utils/inputChecks';
+import Image from 'next/image';
 
 import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
@@ -118,9 +119,9 @@ export default function LogIn() {
   if (loggedIn) return <Redirect to="/home" />;
 
   return (
-    <div id="login-user">
+    <div className={styles.loginUser}>
       <h1>Log In</h1>
-      <form onSubmit={logUserIn} id="login-user-form">
+      <form onSubmit={logUserIn} className={styles.loginUserForm}>
         <TextField id="email" required type="email" label="Email" />
         <TextField id="password" required type="password" label="Password" />
         <Button type="submit" variant="contained">
@@ -128,13 +129,13 @@ export default function LogIn() {
         </Button>
       </form>
 
-      <div className="provider-logos">
+      <div className={styles.providerLogos}>
         <Button
           variant="contained"
-          className="provider-logo"
+          className={styles.providerLogo}
           onClick={googleProviderSignIn}
         >
-          <img
+          <Image
             src={googleLogo}
             alt="sign in with google"
             height={50}
@@ -148,16 +149,16 @@ export default function LogIn() {
 			</Button> */}
         <Button
           variant="contained"
-          className="provider-logo"
+          className={styles.providerLogo}
           onClick={gitProviderSignIn}
         >
-          <img src={gitLogo} alt="sign in with github" height={50} width={50} />
+          <Image src={gitLogo} alt="sign in with github" height={50} width={50} />
           Sign in with GitHub
         </Button>
       </div>
 
       {errors && (
-        <Alert severity="error" className="create-user-errors">
+        <Alert severity="error" className={styles.loginErrors}>
           <ul>
             {errors.map((error) => {
               error = error.replace('Error: ', '');
@@ -169,7 +170,7 @@ export default function LogIn() {
 
       <p>Test user: email: testing@test.com, password: test12</p>
       <p>
-        Not a user yet? <a href="/create-user">Create Account</a>
+        Not a user yet? <Link to="/create-user">Create Account</Link>
       </p>
     </div>
   );
