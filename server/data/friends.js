@@ -215,6 +215,9 @@ async function removePending(username, pendingName){
     if (!userUpdate.matchedCount && !userUpdate.modifiedCount){
         throw `Unable to remove User ${pendingName} from pending of User ${username}`;
     }
+    // update user redis cache
+    user.pending_friends = user.pending_friends.filter(e => !e.pendingId.equals(pending._id));
+    await client.hsetAsync('idCache', user._id.toString(), JSON.stringify(user));
 
     const pendingUpdate = await userCollection.updateOne(
         {_id: pending._id},
@@ -223,6 +226,9 @@ async function removePending(username, pendingName){
     if (!pendingUpdate.matchedCount && !pendingUpdate.modifiedCount){
         throw `Unable to remove User ${username} from pending of User ${pendingName}`;
     }
+    // update pending cache
+    pending.pending_friends = pending.pending_friends.filter(e => !e.pendingId.equals(user._id));
+    await client.hsetAsync('idCache', pending._id.toString(), JSON.stringify(pending));
 
     let res = await userData.getUserById(user._id.toString());
 
@@ -251,6 +257,9 @@ async function removeFriend(username, friendName){
     if (!userUpdate.matchedCount && !userUpdate.modifiedCount){
         throw `Unable to remove User ${friendName} from friends of User ${username}`;
     }
+    // update user cache
+    user.friends = user.friends.filter(e => !e.equals(friend._id));
+    await client.hsetAsync('idCache', user._id.toString(), JSON.stringify(user));
 
     const friendUpdate = await userCollection.updateOne(
         { _id: friend._id},
@@ -259,6 +268,10 @@ async function removeFriend(username, friendName){
     if (!friendUpdate.matchedCount && !friendUpdate.modifiedCount){
         throw `Unable to remove User ${username} from friends of User ${friendName}`;
     }
+    // update friend cache
+    friend.friends = friend.friends.filter(e => !e.equals(user._id));
+    await client.hsetAsync('idCache', friend._id.toString(), JSON.stringify(friend));
+
     let res = await userData.getUserById(user._id.toString());
     // return requester
     return res;
