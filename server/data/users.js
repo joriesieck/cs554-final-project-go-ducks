@@ -114,12 +114,14 @@ const exportedMethods = {
     await removeFriendAll(username);
     return await userCollection.deleteOne({ username: username });
   },
-  async saveGameInfo(username, categoryIds) {
+  async saveGameInfo(username, categories) {
     checkString(username, 'Username', false);
-    checkArray(categoryIds, 'CategoryIds');
-    if (categoryIds.length<=0) throw 'Please pass in at least one category.';
-    for (let catId of categoryIds) {
-      checkNum(catId, 'CategoryId');
+    checkArray(categories, 'Categories');
+    if (categories.length<=0) throw 'Please pass in at least one category.';
+    for (let {categoryId, score} of categories) {
+      checkNum(categoryId, 'CategoryId');
+      if (!score) score = 0;
+      checkNum(score, 'Score');
     }
     const userCollection = await users();
     const user = await userCollection.findOne({username});
@@ -128,16 +130,16 @@ const exportedMethods = {
     if (!user.recent_categories) user.recent_categories = [];
 
     // loop over categories
-    for (let categoryId of categoryIds) {
+    for (let {categoryId, score} of categories) {
       // if we've seen this before, remove the old category to preserve shifting order
-      if (user.recent_categories.includes(categoryId)) user.recent_categories.filter((catId) => catId!==categoryId);
-      user.recent_categories.push(categoryId);
+      user.recent_categories = user.recent_categories.filter((cat) => cat.categoryId!==categoryId);
+      user.recent_categories.push({categoryId, score: score || 0});
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length>12) user.recent_categories.shift()
     
     const result = await userCollection.updateOne({ username }, { $set: { recent_categories:user.recent_categories } });
-    if (!result.modifiedCount) throw `Error updating user ${username}`;
+    if (!result.acknowledged) throw `Error updating user ${username}`;
     const updatedUser = await userCollection.findOne({username});
     return updatedUser;
   },

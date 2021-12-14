@@ -352,14 +352,16 @@ router.patch('/add-highscore', async (req, res) => {
 // save game info
 router.patch('/save-game-info', async (req, res) => {
   // get the variables from req.body
-  let { username, categoryIds } = req.body;
+  let { username, categories } = req.body;
   // check inputs
   try {
     checkString(username, 'Username', false);
-    checkArray(categoryIds, 'CategoryIds');
-    if (categoryIds.length<=0) throw 'Please pass in at least one category.';
-    for (let catId of categoryIds) {
-      checkNum(catId, 'CategoryId');
+    checkArray(categories, 'Categories');
+    if (categories.length<=0) throw 'Please pass in at least one category.';
+    for (let {categoryId, score} of categories) {
+      checkNum(categoryId, 'CategoryId');
+      if (!score) score = 0;
+      checkNum(score, 'Score');
     }
   } catch (e) {
     res.status(400).json({error:e});
@@ -369,7 +371,7 @@ router.patch('/save-game-info', async (req, res) => {
   // add the category
   let user;
   try {
-    user = await userData.saveGameInfo(username, categoryIds);
+    user = await userData.saveGameInfo(username, categories);
   } catch (e) {
     res.status(400).json({error:e});
     return;
