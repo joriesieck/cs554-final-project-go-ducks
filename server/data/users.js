@@ -37,23 +37,35 @@ async function removeFriendAll(friendName) {
 const exportedMethods = {
   async getUserById(id) {
     checkObjId(id, 'User ID');
-    const parsedId = ObjectId(id);
-    const userCollection = await users();
-    const user = await userCollection.findOne({ _id: parsedId });
-    if (!user) throw `User with ID ${id} not found`;
-    return user;
+    const cachedUser = await client.hgetAsync('idCache', id);
+    if (cachedUser) {
+      console.log('returned from cache');
+      return JSON.parse(cachedUser);
+    } else {
+      const parsedId = ObjectId(id);
+      const userCollection = await users();
+      const user = await userCollection.findOne({ _id: parsedId });
+      if (!user) throw `User with ID ${id} not found`;
+      await client.hmsetAsync('idCache', id, JSON.stringify(user));
+      return user;
+    }
   },
   async getUserByName(username) {
     checkString(username, 'Username', false);
-    const cachedUser = await client.hgetAsync('usernameCache', username);
-    if (cachedUser) {
-      console.log('returned from cache');
+    const cachedUserID = await client.hgetAsync('usernameCache', username); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
       return JSON.parse(cachedUser);
     } else {
       const userCollection = await users();
       const user = await userCollection.findOne({ username: username });
       if (!user) throw `User with username ${username} not found`;
-      await client.hmsetAsync('usernameCache', username, JSON.stringify(user));
+      await client.hmsetAsync('usernameCache', username, user._id.toString());
+      await client.hmsetAsync(
+        'idCache',
+        user._id.toString(),
+        JSON.stringify(user)
+      );
       return user;
     }
   },
