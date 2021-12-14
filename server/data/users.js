@@ -10,17 +10,18 @@ const users = mongoCollections.users;
 
 async function removeFriendAll(friendName){
   checkString(friendName, "Friend Name", false);
+  let friend = await exportedMethods.getUserByName(friendName);
   const userCollection = await users();
   const updateFriends = await userCollection.updateMany(
-      { friends: friendName },
-      { $pull: { friends: friendName }}
+      { friends: friend._id },
+      { $pull: { friends: friend._id }}
   );
   if (!updateFriends.matchedCount && !updateFriends.modifiedCount){
       throw `Unable to remove User ${friendName} from friends of users`;
   }
   const updatePending = await userCollection.updateMany(
-      { 'pending_friends.pendingName': friendName},
-      { $pull: { pending_friends: {pendingName: friendName}}}
+      { 'pending_friends.pendingId': friend._id },
+      { $pull: { pending_friends: {pendingId: friend._id}}}
   );
   if (!updatePending.matchedCount && !updatePending.modifiedCount){
       throw `Unable to remove User ${friendName} from friends of users`;
