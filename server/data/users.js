@@ -160,6 +160,9 @@ const exportedMethods = {
     const userByUsername = await userCollection.findOne({ username: username });
     if (!userByUsername) throw `User with username ${username} doesn't exist`;
     await removeFriendAll(username);
+    await client.hdelAsync('idCache', userByUsername._id.toString());
+    await client.hdelAsync('usernameCache', userByUsername.username.toString());
+    await client.hdelAsync('emailCache', userByUsername.email.toString());
     return await userCollection.deleteOne({ username: username });
   },
 };
