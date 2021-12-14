@@ -71,7 +71,7 @@ async function getAllPending(username) {
 }
 
 // add friend by name -> add to pending array, requesting user is passed as uname
-// pending array will fn as obj array in form [ {pendingName: uname, status: 'sent'}, {pendingName: uname, status: 'received'}] differentiates
+// pending array will fn as obj array in form [ {pendingId: uname, status: 'sent'}, {pendingId: uname, status: 'received'}] differentiates
 // whether request needs approval from given user 
 // could also refactor this as instead of single pending array, one sent array and one received array
 async function addFriend(requesterName, requesteeName){
@@ -81,7 +81,7 @@ async function addFriend(requesterName, requesteeName){
 
     // check if both exist
     let requester = await userData.getUserByName(requesterName);
-    let requestee = await userData.getUserByName(requesterName);
+    let requestee = await userData.getUserByName(requesteeName);
 
     // check if already in friends, throwing for now
     const inFriends = requester.friends.some((e) => e.equals(requestee._id));
@@ -106,7 +106,7 @@ async function addFriend(requesterName, requesteeName){
 
     // update pending arrays with relevant info, storing id of friend rather than name
     const requesterUpdate = await userCollection.updateOne(
-        { _id: requesterName._id },
+        { _id: requester._id },
         { $addToSet: { pending_friends: { pendingId: requestee._id, status: 'sent'}}}
     )
     if (!requesterUpdate.matchedCount && !requesterUpdate.modifiedCount){
@@ -122,7 +122,7 @@ async function addFriend(requesterName, requesteeName){
     }
 
     // return updated requester
-    const res = await userData.getUserById(requester._id);
+    const res = await userData.getUserById(requester._id.toString());
     return res;
 }
 
@@ -168,7 +168,7 @@ async function acceptFriend(username, pendingName){
         throw `Unable to add User ${username} to friends of User ${pendingName}`;
     }
 
-    let res = await userData.getUserById(user._id);
+    let res = await userData.getUserById(user._id.toString());
     return res;
 }
 
@@ -205,7 +205,7 @@ async function removePending(username, pendingName){
         throw `Unable to remove User ${username} from pending of User ${pendingName}`;
     }
 
-    let res = await userData.getUserById(user._id);
+    let res = await userData.getUserById(user._id.toString());
 
     return res;
 }
@@ -240,7 +240,7 @@ async function removeFriend(username, friendName){
     if (!friendUpdate.matchedCount && !friendUpdate.modifiedCount){
         throw `Unable to remove User ${username} from friends of User ${friendName}`;
     }
-    let res = await userData.getUserById(user._id);
+    let res = await userData.getUserById(user._id.toString());
     // return requester
     return res;
 }

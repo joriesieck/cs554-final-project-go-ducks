@@ -92,11 +92,11 @@ const main = async () => {
 		console.log(e);
 	}
 	// for testing
-	try {
-		await users.removeUser('user5')
-	} catch(e) {
-		console.log(e);
-	}
+	// try {
+	// 	await users.removeUser('user5')
+	// } catch(e) {
+	// 	console.log(e);
+	// }
 	// removals, can get rid of
 	// try {
 	// 	let res = await friends.removeFriend('user4', 'user6');
