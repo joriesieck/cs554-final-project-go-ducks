@@ -5,10 +5,6 @@ import {
   CircularProgress,
   Checkbox,
   Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Modal,
   TextField,
   FormControlLabel
@@ -49,12 +45,8 @@ import {
   gitProvider,
   googleProvider,
 } from '../../firebase/firebaseSetup';
-import Image from 'next/image';
-import googleLogo from '/public/imgs/google-logo.png';
-import gitLogo from '/public/imgs/github-logo.png';
 import styles from './Profile.module.css';
 
-{/*TODO fix aria landmarks */}
 export default function Profile () {
 	const [editUser, setEditUser] = useState(false);
 	const [editEmail, setEditEmail] = useState(false);
@@ -81,7 +73,6 @@ export default function Profile () {
 	const [openRejectModal, setOpenRejectModal] = useState(false);
 	const [openAcceptModal, setOpenAcceptModal] = useState(false);
 	const [toggleFriends, setToggleFriends] = useState({friendId:'', friendUser:''});
-	const [friendData, setFriendData] = useState(null);
 
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
@@ -643,13 +634,17 @@ export default function Profile () {
 
 			{/* google */}
 			{provider==='google.com' && <div className={styles.profileProvider}>
-				<Image src={googleLogo} alt='google logo' height={50} width={50} />
+				{/* <div id='google-logo'>
+					<Image src={googleLogo} alt='google logo' height={50} width={50} />
+				</div> */}
 				<p>Edit your sign-in information on <a href='https://www.google.com/' target='_blank' rel='noreferrer'>Google <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
 			</div>}
 
 			{/* github */}
 			{provider==='github.com' && <div className={styles.profileProvider}>
-				<Image src={gitLogo} alt='github logo' height={50} width={50} />
+				{/* <div id='github-logo'>
+					<Image src={gitLogo} alt='github logo' height={50} width={50} />
+				</div> */}
 				<p>Edit your sign-in information on <a href='https://github.com/' target='_blank' rel='noreferrer'>GitHub <OpenInNewIcon style={{width:'15px', height:'15px'}} /></a></p>
 			</div>}
 
@@ -670,7 +665,7 @@ export default function Profile () {
 				</form>}
 				<Button id="edit-leaderboard" onClick={toggleEdit}>{editLeaderboard ? <CloseIcon aria-label='discard edits' onClick={(e) => {toggleEdit(e,'edit-leaderboard')}} /> : 'Change'}</Button>
 			</Grid>
-			{userData.high_scores.length>0 && <Grid container xs={12}>
+			{userData.high_scores.length>0 && <Grid container>
 				{userData.high_scores.map((score, i) => (<>
 					<Grid item className={styles.gridRow} xs={1}><SportsScoreIcon /></Grid>
 					<Grid item className={styles.gridRow} xs={11}>{score}</Grid>
@@ -681,7 +676,7 @@ export default function Profile () {
 			
 			<div className={styles.profileList}>
 			<h2>Friends</h2>
-			{userData.friends.length>0 && <Grid container xs={12}>
+			{userData.friends.length>0 && <Grid container>
 				{userData.friends.map(({_id, username}, i) => (<>
 					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
 					<Grid item xs={8.5} className={styles.gridRow}>{username}</Grid>
@@ -701,7 +696,7 @@ export default function Profile () {
 					<Grid item xs={3}>Status</Grid>
 					<Grid item xs={3}></Grid>
 					<Grid item xs={12}><hr className={styles.gridDivider} /></Grid>
-				{userData.pending_friends.map(({_id, username, pending_status}, i) => (<Grid container id={`${_id}-row`} xs={12}>
+				{userData.pending_friends.map(({_id, username, pending_status}, i) => (<Grid container id={`${_id}-row`}>
 						<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
 						<Grid item xs={5} className={styles.gridRow}>{username}</Grid>
 						<Grid item xs={3} className={styles.gridRow}>{pending_status}</Grid>

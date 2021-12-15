@@ -16,9 +16,13 @@
 .providerLogo {
 	margin-top: 10px !important;
 }
-.providerLogo img {
+/* .providerLogo img {
 	margin-right: 5px;
-}
+} */
+
+/* .nextImg span span img::after {
+	content: "transparent layer over logo"
+} */
 
 .providerLogos {
 	display: flex;

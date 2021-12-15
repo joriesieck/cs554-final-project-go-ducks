@@ -5,7 +5,7 @@ import {
   googleProvider,
 } from '../../firebase/firebaseSetup';
 import { signInWithEmailAndPassword, signInWithPopup } from '@firebase/auth';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Button, TextField, FormControlLabel, Checkbox } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
 import { checkString, checkBool } from '../../utils/inputChecks';
@@ -25,6 +25,22 @@ export default function LogIn() {
 	const [email, setEmail] = useState(null);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
+
+	useEffect(() => {
+		// add alt text to next images
+		const githubImg = document.getElementById('github-logo');
+		const googleImg = document.getElementById('google-logo');
+		try {
+			githubImg.firstChild.firstChild.firstChild.alt = 'transparent layer over logo';
+		} catch (e) {
+			console.log(`Error adding alt text to nextjs transparent layer over github logo: ${e}`);
+		}
+		try {
+			googleImg.firstChild.firstChild.firstChild.alt = 'transparent layer over logo';
+		} catch (e) {
+			console.log(`Error adding alt text to nextjs transparent layer over google logo: ${e}`);
+		}
+	}, []);
 
 	// if user is already logged in, redirect to home
 	if (user) return <Redirect to="/home" />;
@@ -149,7 +165,7 @@ export default function LogIn() {
 		}
 
 		// trigger page reload to get rid of weird iframe
-		window.location.reload();
+		// window.location.reload();
 
 		// store email in redux
 		dispatch({
@@ -233,24 +249,27 @@ export default function LogIn() {
 			</form>
 			
 			<div className={styles.providerLogos}>
-			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn}>
-				{/* TODO fix tota11y error */}
-				{/* <img src={googleLogo} alt='sign in with google'> */}
+			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn} id='google-logo'>
 				<Image
 					src={googleLogo}
 					alt="sign in with google"
-					// height={50}
-					// width={50}
+					height={50}
+					width={50}
+					className={styles.nextImg}
 				 />
-				{/* </img> */}
 				Sign in with Google
 			</Button>
 			{/* <Button variant="contained" className='provider-logo' onClick={fbProviderSignIn}>
 				<img src={fbLogo} alt="sign in with facebook" height={50} width={50} />
 				Sign in with Facebook
 			</Button> */}
-			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn}>
-				<Image src={gitLogo} alt="sign in with github" height={50} width={50} />
+			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn} id='github-logo'>
+				<Image
+					src={gitLogo}
+					alt="sign in with github"
+					height={50}
+					width={50}
+				/>
 				Sign in with GitHub
 			</Button>
 			</div>
