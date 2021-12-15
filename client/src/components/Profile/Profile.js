@@ -105,23 +105,8 @@ export default function Profile () {
 				data = await getUserByEmail(user);
 				const friends = await getAllFriends(data.username);
 				const pendingFriends = await getAllPendingFriends(data.username);
-				{/* TODO put back after this is fixed */}
-				// data.friends = friends;
-				// data.pending_friends = pendingFriends;
-				data.friends = [
-					{_id: "61b7edbbf5f69356c716b4ec",
-						username:'jorie'},
-					{_id: "61b7ed0faa5411ee4b635f68",
-						username: 'user5'}
-				]
-				data.pending_friends = [
-					{_id: '61b7ec199937fcd0d97a2811',
-					pending_status: 'sent',
-					username: 'user6'},
-					{_id: '61b7ec199937fcd0d97a2812',
-					pending_status: 'received',
-					username: 'user7'}
-				]
+				data.friends = friends;
+				data.pending_friends = pendingFriends;
 				console.log(friends, pendingFriends);
 				setUserData(data);
 			} catch (e) {
@@ -693,7 +678,7 @@ export default function Profile () {
 			</Grid>}
 			{userData.high_scores.length<=0 && <p>No high scores to show.</p>}
 			</div>
-					{/*TODO align buttons */}
+			
 			<div className={styles.profileList}>
 			<h2>Friends</h2>
 			{userData.friends.length>0 && <Grid container xs={12}>
