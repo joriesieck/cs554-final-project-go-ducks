@@ -1,6 +1,6 @@
 import { Tabs, Tab, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link, Redirect, useLocation } from 'react-router-dom';
 import { signOut } from '@firebase/auth';
 import { auth } from '../../firebase/firebaseSetup';
 import { useDispatch } from 'react-redux';
@@ -8,6 +8,10 @@ import { useDispatch } from 'react-redux';
 import styles from './Nav.module.css';
 
 export default function NavBar() {
+  // get the pathname from react-router-dom since that's what we're linking through
+  const { pathname } = useLocation();
+
+  // set the default to be whatever is in the window
   const [value, setValue] = useState(
     window.location.href
       .match(/\/[a-zA-Z]+\/?$/)[0]
@@ -15,7 +19,9 @@ export default function NavBar() {
       .toLowerCase()
   );
 
-  // TODO fix buttons
+  useEffect(() => {
+    setValue(pathname.split('/')[1]);
+  }, [pathname]);
 
   const [logout, setLogout] = useState(false);
   const dispatch = useDispatch();

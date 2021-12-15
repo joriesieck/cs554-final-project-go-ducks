@@ -28,6 +28,11 @@ const leaderboardData = [
 		_id: '61b4a7930b1fa59502af8372'
 	},
 	{
+		username: 'testing',
+		highScore: 85,
+		_id: '61b4f098bb1c6a95871c0b2d'
+	},
+	{
 		username: 'jorie',
 		highScore: 80,
 		_id: '61b7ed0faa5411ee4b635f68'
@@ -38,7 +43,6 @@ const leaderboardData = [
 
 export default function Leaderboard () {
 	// TODO hook in back end
-	// TODO add friend
 	const user = useSelector((state) => state.user);	// highlight user
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
