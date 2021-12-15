@@ -12,8 +12,9 @@ export default function _app({ Component, pageProps }) {
         <Router>
           <Provider store={store}>
             <PersistGate persistor={persistor}>
-              <App />
-              {Component ? <Component {...pageProps} /> : <div></div>}
+              <App>
+                <Component {...pageProps} />
+              </App>
             </PersistGate>
           </Provider>
         </Router>
