@@ -11,7 +11,7 @@ function App() {
         <Route exact path="/" component={LogIn} />
         <Route exact path="/create-user" component={CreateUser} />
         <Route
-          path={['/home', '/profile', '/game']}
+          path={['/home', '/profile', '/game', '/leaderboard']}
           component={AuthContainer}
         />
       </Router>
