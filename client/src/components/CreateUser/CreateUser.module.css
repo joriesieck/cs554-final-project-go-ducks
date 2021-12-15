@@ -1,33 +1,33 @@
 .createUser {
-	margin-left: auto;
-	margin-right: auto;
-	max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 500px;
 }
 
 .createUserForm {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 300px;
 }
 
 .createUserErrors {
-	margin-top: 20px;
+  margin-top: 20px;
 }
 
 .createUserErrors ul {
-	list-style-type: none;
-	padding: 0px;
+  list-style-type: none;
+  padding: 0px;
 }
 
 .providerLogo {
-	margin-top: 10px !important;
+  margin-top: 10px !important;
 }
 .providerLogo img {
-	margin-right: 5px;
+  margin-right: 5px;
 }
 
 .providerLogos {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }

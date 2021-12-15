@@ -37,19 +37,15 @@
   }
 }
 
-
 /*Landing Page */
-.landingButtonGroup
-{
+.landingButtonGroup {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.landingButton
-{
+.landingButton {
   width: 30%;
   height: 75px;
   margin: 5px;
 }
-

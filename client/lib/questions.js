@@ -1,7 +1,7 @@
-const axios = require("axios");
+const axios = require('axios');
 
-import React, { useState } from "react";
-const baseUrl = "http://jservice.io/api";
+import React, { useState } from 'react';
+const baseUrl = 'http://jservice.io/api';
 
 export async function getQuestionPage(count) {
   try {

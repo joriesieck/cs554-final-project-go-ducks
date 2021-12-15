@@ -11,11 +11,11 @@ function App() {
   window.addEventListener('beforeunload', (e) => {
     // on close, log user out
     dispatch({
-      type:'CLEAR_TOKEN'
+      type: 'CLEAR_TOKEN',
     });
 
     dispatch({
-      type:'LOG_OUT'
+      type: 'LOG_OUT',
     });
   });
 

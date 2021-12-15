@@ -9,7 +9,7 @@ const serviceAccount = require('./cs554-go-ducks-firebase-adminsdk-vfm00-b40f1c3
 // following firebase documentation and https://dev.to/dingran/next-js-firebase-authentication-and-middleware-for-api-routes-29m1
 
 admin.initializeApp({
-	credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
 });
 
 app.use(cors());
@@ -21,11 +21,13 @@ app.use(async (req, res, next) => {
   try {
     const result = await admin.auth().verifyIdToken(req.headers.authtoken);
   } catch (e) {
-    res.status(403).json({error: 'You must be logged in to access this route.'});
+    res
+      .status(403)
+      .json({ error: 'You must be logged in to access this route.' });
     return;
   }
   next();
-})
+});
 
 configRoutes(app);
 

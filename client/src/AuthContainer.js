@@ -5,12 +5,12 @@ import NavBar from './components/Nav/Nav';
 import GameSetup from './components/Game/GameSetup';
 
 export default function AuthContainer() {
-	return (
-		<>
-			<NavBar />
-			<Route exact path='/home' component={Home} />
-			<Route exact path='/profile' component={Profile} />
-			<Route exact path='/game' component={GameSetup} />
-		</>
-	)
+  return (
+    <>
+      <NavBar />
+      <Route exact path="/home" component={Home} />
+      <Route exact path="/profile" component={Profile} />
+      <Route exact path="/game" component={GameSetup} />
+    </>
+  );
 }

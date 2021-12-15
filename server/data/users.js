@@ -14,24 +14,24 @@ const client = redis.createClient();
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
-async function removeFriendAll(friendName){
-  checkString(friendName, "Friend Name", false);
+async function removeFriendAll(friendName) {
+  checkString(friendName, 'Friend Name', false);
   let friend = await exportedMethods.getUserByName(friendName);
   // if no friends, skip pull from friends; if no pending, skip pull from pending
   const userCollection = await users();
-  if (friend.friends.length > 0){
+  if (friend.friends.length > 0) {
     const updateFriends = await userCollection.updateMany(
-        { friends: friend._id },
-        { $pull: { friends: friend._id }}
+      { friends: friend._id },
+      { $pull: { friends: friend._id } }
     );
     if (!updateFriends.matchedCount && !updateFriends.modifiedCount) {
       throw `Unable to remove User ${friendName} from friends of users`;
     }
   }
-  if (friend.pending_friends.length > 0){
+  if (friend.pending_friends.length > 0) {
     const updatePending = await userCollection.updateMany(
-        { 'pending_friends.pendingId': friend._id },
-        { $pull: { pending_friends: {pendingId: friend._id}}}
+      { 'pending_friends.pendingId': friend._id },
+      { $pull: { pending_friends: { pendingId: friend._id } } }
     );
     if (!updatePending.matchedCount && !updatePending.modifiedCount) {
       throw `Unable to remove User ${friendName} from friends of users`;
@@ -47,8 +47,11 @@ const exportedMethods = {
     if (cachedUser) {
       let parsedUser = JSON.parse(cachedUser);
       parsedUser._id = ObjectId(parsedUser._id);
-      parsedUser.friends = parsedUser.friends.map(e => ObjectId(e));
-      parsedUser.pending_friends = parsedUser.pending_friends.map(e => ({pendingId: ObjectId(e.pendingId), status: e.status}));
+      parsedUser.friends = parsedUser.friends.map((e) => ObjectId(e));
+      parsedUser.pending_friends = parsedUser.pending_friends.map((e) => ({
+        pendingId: ObjectId(e.pendingId),
+        status: e.status,
+      }));
       return parsedUser;
     } else {
       const parsedId = ObjectId(id);
@@ -66,8 +69,11 @@ const exportedMethods = {
       const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
       let parsedUser = JSON.parse(cachedUser);
       parsedUser._id = ObjectId(parsedUser._id);
-      parsedUser.friends = parsedUser.friends.map(e => ObjectId(e));
-      parsedUser.pending_friends = parsedUser.pending_friends.map(e => ({pendingId: ObjectId(e.pendingId), status: e.status}));
+      parsedUser.friends = parsedUser.friends.map((e) => ObjectId(e));
+      parsedUser.pending_friends = parsedUser.pending_friends.map((e) => ({
+        pendingId: ObjectId(e.pendingId),
+        status: e.status,
+      }));
       return parsedUser;
     } else {
       const userCollection = await users();
@@ -89,8 +95,11 @@ const exportedMethods = {
       const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
       let parsedUser = JSON.parse(cachedUser);
       parsedUser._id = ObjectId(parsedUser._id);
-      parsedUser.friends = parsedUser.friends.map(e => ObjectId(e));
-      parsedUser.pending_friends = parsedUser.pending_friends.map(e => ({pendingId: ObjectId(e.pendingId), status: e.status}));
+      parsedUser.friends = parsedUser.friends.map((e) => ObjectId(e));
+      parsedUser.pending_friends = parsedUser.pending_friends.map((e) => ({
+        pendingId: ObjectId(e.pendingId),
+        status: e.status,
+      }));
       return parsedUser;
     } else {
       const userCollection = await users();
