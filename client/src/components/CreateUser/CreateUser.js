@@ -27,8 +27,8 @@ export default function CreateUser() {
 	const [email, setEmail] = useState(null);
 	const [username, setUsername] = useState(null);
 	const [emailExists, setEmailExists] = useState(false);
+	const [storeAuthToken, setStoreAuthToken] = useState(null);
 	const user = useSelector((state) => state.user.user);
-	const authToken = useSelector((state) => state.auth.authToken);
 	const dispatch = useDispatch();
 
 	// if user is already logged in, redirect to home
@@ -84,6 +84,20 @@ export default function CreateUser() {
 			return;
 		}
 
+		let result;
+		let authToken;
+		// if we create them in firebase and then there are errors/they otherwise don't proceed with account creation, they will be able to just create an account later
+		// TODO make sure that is true ^
+		try {
+			result = await createUserWithEmailAndPassword(auth, email, password);
+			if (!result.user.uid) throw Error('Something went wrong creating your account, please try again.');
+			authToken = result.user.accessToken;
+		} catch (e) {
+			console.log(e);
+			setErrors([e.toString()]);
+			return;
+		}
+
 		// make sure username not already in db
 		try {
 			const result = await getUserByName(username, authToken);
@@ -105,7 +119,7 @@ export default function CreateUser() {
 
 		// add user to db
 		try {
-			const result = await addUser(username, email, optedForLeaderboard);
+			const result = await addUser(username, email, optedForLeaderboard, authToken);
 			console.log(result);
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
@@ -116,23 +130,11 @@ export default function CreateUser() {
 			return;
 		}
 
-		let result;
-		try {
-			result = await createUserWithEmailAndPassword(auth, email, password);
-			if (!result.user.uid) throw Error('Something went wrong creating your account, please try again.');
-		} catch (e) {
-			console.log(e);
-			setErrors([e.toString()]);
-			// delete db record
-			try {
-				await removeUser(username);
-			} catch (e) {
-				// just console it
-				console.log(e);
-			}
-			return;
-		}
-
+		// store authToken
+		dispatch({
+			type: 'UPDATE_TOKEN',
+			payload: authToken
+		});
 		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
@@ -154,9 +156,11 @@ export default function CreateUser() {
 
 	const providerSignIn = async (provider) => {
 		let result;
+		let authToken;
 		try {
 			// try pop up - some browsers block
 			result = await signInWithPopup(auth, provider);
+			authToken = result.user.accessToken;
 		} catch (e) {
 			// print a message asking to allow popups
 			setErrors(['Please allow pop-ups and try again to sign in with a provider.']);
@@ -191,6 +195,8 @@ export default function CreateUser() {
 			}
 		}
 
+		// store auth token
+		setStoreAuthToken(authToken);
 		// store email
 		setEmail(result.user.email);
 		// prompt for username
@@ -221,7 +227,7 @@ export default function CreateUser() {
 
 		// make sure username not already in db
 		try {
-			const result = await getUserByName(username, authToken);
+			const result = await getUserByName(username, storeAuthToken);
 			if (result && result._id) {
 				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
 				return;
@@ -240,7 +246,7 @@ export default function CreateUser() {
 		
 		// add user to database
 		try {
-			const result = await addUser(username, email, optedForLeaderboard);
+			const result = await addUser(username, email, optedForLeaderboard, storeAuthToken);
 			console.log(result);
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
@@ -252,6 +258,10 @@ export default function CreateUser() {
 		}
 
 		dispatch({
+			type: 'UPDATE_TOKEN',
+			payload: storeAuthToken
+		});
+		dispatch({
 			type: 'LOG_IN',
 			payload: email
 		});
@@ -261,6 +271,10 @@ export default function CreateUser() {
 	}
 
 	const preserveOldAccount = () => {
+		dispatch({
+			type: 'UPDATE_TOKEN',
+			payload: storeAuthToken
+		});
 		dispatch({
 			type: 'LOG_IN',
 			payload: email
@@ -273,7 +287,7 @@ export default function CreateUser() {
 	const dontPreserveOldAccount = async () => {
 		// delete old record in database
 		try {
-			await removeUser(username);
+			await removeUser(username, storeAuthToken);
 		} catch (e) {
 			setErrors([`Sorry, something went wrong deleting your old account: ${e.toString()}. Please try again later.`]);
 			return;

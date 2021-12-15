@@ -17,12 +17,13 @@ import googleLogo from '../../imgs/google-logo.png';
 import fbLogo from '../../imgs/facebook-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
 import styles from './LogIn.module.css';
-// TODO auth ?
+
 export default function LogIn() {
 	const [errors, setErrors] = useState(null);
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [displaySignUp, setDisplaySignUp] = useState(false);
 	const [email, setEmail] = useState(null);
+	const [storeAuthToken, setStoreAuthToken] = useState(null);
 	const user = useSelector((state) => state.user.user);
 	const dispatch = useDispatch();
 
@@ -74,9 +75,10 @@ export default function LogIn() {
 
 		// make sure we have a record for this person in the db - otherwise just give them the chance to sign up
 		try {
-			result = await getUserByEmail(email);
+			result = await getUserByEmail(email, authToken);
 			if (!result._id) {
 				setEmail(email);
+				setStoreAuthToken(authToken);
 				setDisplaySignUp(true);
 				return;
 			}
@@ -87,11 +89,12 @@ export default function LogIn() {
 			}
 			if (e.response.data.error.includes('not found') || e.status!==404) {
 				setEmail(email);
+				setStoreAuthToken(authToken);
 				setDisplaySignUp(true);
 				return;
 			}
 		}
-		// TODO setAuthToken like setEmail
+		
 		// store auth token in redux
 		dispatch({
 			type: 'UPDATE_TOKEN',
@@ -127,7 +130,7 @@ export default function LogIn() {
 			// try pop up - some browsers block
 			result = await signInWithPopup(auth, provider);
 			console.log(result);
-			authToken = result.user.authToken;
+			authToken = result.user.accessToken;
 		} catch (e) {
 			console.log(e);
 			// print a message asking to allow popups
@@ -141,9 +144,10 @@ export default function LogIn() {
 		// make sure we have a record for this person in the db - otherwise just give them the chance to sign up
 		let dbResult;
 		try {
-			dbResult = await getUserByEmail(result.user.email);
+			dbResult = await getUserByEmail(result.user.email, authToken);
 			if (!dbResult._id) {
 				setEmail(result.user.email);
+				setStoreAuthToken(authToken);
 				setDisplaySignUp(true);
 				return;
 			}
@@ -154,11 +158,17 @@ export default function LogIn() {
 			}
 			if (e.response.data.error.includes('not found') || e.status!==404) {
 				setEmail(result.user.email);
+				setStoreAuthToken(authToken);
 				setDisplaySignUp(true);
 				return;
 			}
 		}
 
+		// store auth token
+		dispatch({
+			type: 'UPDATE_TOKEN',
+			payload: authToken
+		})
 		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
@@ -190,7 +200,7 @@ export default function LogIn() {
 
 		// make sure username not already in db
 		try {
-			const result = await getUserByName(username);
+			const result = await getUserByName(username, storeAuthToken);
 			if (result && result._id) {
 				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
 				return;
@@ -209,8 +219,7 @@ export default function LogIn() {
 		
 		// add user to database
 		try {
-			const result = await addUser(username, email, optedForLeaderboard);
-			console.log(result);
+			const result = await addUser(username, email, optedForLeaderboard, storeAuthToken);
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
 				setErrors(([e.toString()]));
@@ -220,6 +229,10 @@ export default function LogIn() {
 			return;
 		}
 
+		dispatch({
+			type: 'UPDATE_TOKEN',
+			payload: storeAuthToken
+		});
 		dispatch({
 			type: 'LOG_IN',
 			payload: email
