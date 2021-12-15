@@ -18,7 +18,7 @@ export default function Home() {
 				<Button component={Link} variant="contained" className="landingButton">Practice Questions By Category</Button>
 				<Button component={Link} to="/profile" variant="contained" className="landingButton">View Profile</Button>
 				<Button component={Link} variant="contained" className="landingButton">Manage Friends</Button>
-				<Button component={Link} variant="contained" className="landingButton">Leaderboard</Button>
+				<Button component={Link} to="/leaderboard" variant="contained" className="landingButton">Leaderboard</Button>
 			</div>
 			
 		</>

@@ -1,5 +1,5 @@
 import { Tabs, Tab, Button } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import { signOut } from '@firebase/auth';
 import { auth } from '../../firebase/firebaseSetup';
@@ -14,6 +14,9 @@ export default function NavBar() {
       .substr(1)
       .toLowerCase()
   );
+
+  // TODO fix buttons
+
   const [logout, setLogout] = useState(false);
   const dispatch = useDispatch();
 
@@ -61,6 +64,16 @@ export default function NavBar() {
             id='profile-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='profile-tab'
+          />
+          <Tab
+            value="leaderboard"
+            label="Leaderboard"
+            aria-label="Leaderboard"
+            component={Link}
+            to="/leaderboard"
+            id='leaderboard-tab'
+            aria-controls='navigation-tabs'
+            aria-labelledby='leaderboard-tab'
           />
         </Tabs>
       </div>
