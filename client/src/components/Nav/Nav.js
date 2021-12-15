@@ -62,15 +62,25 @@ export default function NavBar() {
             aria-labelledby='home-tab'
           />
           <Tab
-            value="profile"
-            label="Profile"
-            aria-label="Profile"
+            value="game"
+            label="Game"
+            aria-label="Game"
             component={Link}
-            to="/profile"
-            id='profile-tab'
+            to="/game"
+            id='game-tab'
             aria-controls='navigation-tabs'
-            aria-labelledby='profile-tab'
+            aria-labelledby='game-tab'
           />
+          {/* <Tab
+            value="practice"
+            label="Practice"
+            aria-label="Practice"
+            component={Link}
+            to="/practice"
+            id='practice-tab'
+            aria-controls='navigation-tabs'
+            aria-labelledby='practice-tab'
+          /> */}
           <Tab
             value="leaderboard"
             label="Leaderboard"
@@ -80,6 +90,16 @@ export default function NavBar() {
             id='leaderboard-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='leaderboard-tab'
+          />
+          <Tab
+            value="profile"
+            label="Profile"
+            aria-label="Profile"
+            component={Link}
+            to="/profile"
+            id='profile-tab'
+            aria-controls='navigation-tabs'
+            aria-labelledby='profile-tab'
           />
         </Tabs>
       </div>
