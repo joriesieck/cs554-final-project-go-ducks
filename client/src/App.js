@@ -7,7 +7,7 @@ import AuthContainer from './AuthContainer';
 function App() {
   return (
     <>
-      <Head><title>Jeopary Trainer</title></Head>
+      <Head><title>Jeopardy Trainer</title></Head>
       <Router>
         <Route exact path="/" component={LogIn} />
         <Route exact path="/create-user" component={CreateUser} />
