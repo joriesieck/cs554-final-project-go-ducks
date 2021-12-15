@@ -364,7 +364,7 @@ router.patch('/save-game-info', async (req, res) => {
       checkNum(score, 'Score');
     }
   } catch (e) {
-    res.status(400).json({error:e});
+    res.status(400).json({error:`Error in saving game info: ${e}`});
     return;
   }
 
@@ -373,7 +373,7 @@ router.patch('/save-game-info', async (req, res) => {
   try {
     user = await userData.saveGameInfo(username, categories);
   } catch (e) {
-    res.status(400).json({error:e});
+    res.status(400).json({error:`Error in saving game info: ${e}`});
     return;
   }
 
