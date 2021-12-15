@@ -1,5 +1,9 @@
 import Profile from '../../components/Profile/Profile';
-
+import AuthContainer from '../../AuthContainer';
 export default function profile() {
-  return <Profile />;
+  return (
+    <AuthContainer>
+      <Profile />
+    </AuthContainer>
+  );
 }
