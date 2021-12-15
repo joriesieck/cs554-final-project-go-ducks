@@ -53,6 +53,31 @@ router.get('/username/:username', async (req, res) => {
   // send back to front end
   res.json(user);
 });
+// get user by id
+router.get('/id/:id', async (req, res) => {
+  // get the username from req.params
+  let { id } = req.params;
+  // make sure it's a string, nonempty, etc
+  try {
+    checkObjId(id, 'User ID');
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  // get the user
+  let user;
+  try {
+    user = await userData.getUserById(id);
+    if (!user.username) throw 'No user found.';
+  } catch (e) {
+    res.status(404).json({ error: e.message || e.toString() });
+    return;
+  }
+
+  // send back to front end
+  res.json(user);
+});
 router.get('/email/:email', async (req, res) => {
   // get the email from req.params
   let { email } = req.params;
@@ -199,6 +224,54 @@ router.delete('/:username', async (req, res) => {
   }
   // return success
   res.status(200).json({ message: `${username} successfully deleted` });
+});
+
+// get friends of user
+router.get('/friends/:username', async (req, res) => {
+  // get username from req.params
+  let { username } = req.params;
+  // make sure it's a string, nonempty, etc
+  try {
+    username = checkString(username, 'Username', false);
+  } catch (e) {
+    res.status(400).json({ error: e});
+    return;
+  }
+
+  // get friends
+  let friends;
+  try {
+    friends = await friendData.getAllFriends(username);
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  res.status(200).json(friends);
+});
+
+// get pending friends of user
+router.get('/pending-friends/:username', async (req, res) => {
+  // get username from req.params
+  let { username } = req.params;
+  // make sure it's a string, nonempty, etc
+  try {
+    username = checkString(username, 'Username', false);
+  } catch (e) {
+    res.status(400).json({ error: e});
+    return;
+  }
+
+  // get friends
+  let pendingFriends;
+  try {
+    pendingFriends = await friendData.getAllPending(username);
+  } catch (e) {
+    res.status(400).json({ error: e });
+    return;
+  }
+
+  res.status(200).json(pendingFriends);
 });
 
 // add friend

@@ -1,4 +1,4 @@
-#profile {
+.profile {
 	margin-left: auto;
 	margin-right: auto;
 	max-width: 500px;
@@ -8,26 +8,26 @@
 	height: 90vh;
 }
 
-.profile-list {
+.profileList {
 	border: 1px solid gray;
 	border-radius: 10px;
 	padding: 10px;
 }
 
-.profile-editable {
+.profileEditable {
 	display: flex;
 	justify-content: space-between;
 	min-height: 75px;
 	align-items: center;
 }
 
-.profile-editable form {
+.profileEditable form {
 	display: flex;
 	justify-content: space-between;
 	width: 100%;
 }
 
-.profile-reauth-modal {
+.profileReauthModal {
 	max-width: 300px;
 	height: 300px;
 	margin-left: auto;
@@ -35,11 +35,11 @@
 	margin-top: 100px;
 }
 
-.profile-reauth-modal-errors {
+.profileReauthModalErrors {
 	height: 450px;
 }
 
-.profile-reauth-box {
+.profileReauthBox {
 	background-color: white;
 	display: flex;
 	flex-direction: column;
@@ -51,33 +51,42 @@
 	border-radius: 5%;
 }
 
-.profile-reauth-box h1 {
+.profileReauthBox h1 {
 	margin: 0;
 	text-align: center;
 }
 
-#profile-reauth-close {
+.profileReauthClose {
 	cursor: pointer;
 }
 
-#reauth-user-form {
+.reauthUserForm {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	height: 175px;
 }
 
-.change-password {
+.changePassword {
 	width: 100%;
 }
 
-.profile-provider {
+.profileProvider {
 	display: flex;
 }
 
-.profile-loading {
+.profileLoading {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	height: 90vh;
+}
+
+.profileErrors {
+	margin-top: 20px;
+}
+
+.profileErrors ul {
+	list-style-type: none;
+	padding: 0px;
 }
