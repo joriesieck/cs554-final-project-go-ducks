@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const data = require('../data');
-const userData = data.users; // change to data.users when db funcs are done
+const userData = data.users;
 const friendData = data.friends;
 const {
   checkString,
@@ -9,8 +9,14 @@ const {
   checkObjId,
   checkNum,
   checkEmail,
+  checkArray
 } = require('../inputChecks');
+const bluebird = require('bluebird');
+const redis = require('redis');
+const client = redis.createClient();
 
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
 // get user
 router.get('/username/:username', async (req, res) => {
   // get the username from req.params
@@ -26,8 +32,20 @@ router.get('/username/:username', async (req, res) => {
   // get the user
   let user;
   try {
-    user = await userData.getUserByName(username);
-    if (!user.username) throw 'No user found.';
+    const cachedUserID = await client.hgetAsync('usernameCache', username); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
+      user = JSON.parse(cachedUser);
+    } else {
+      user = await userData.getUserByName(username);
+      await client.hmsetAsync('usernameCache', username, user._id.toString());
+      await client.hmsetAsync(
+        'idCache',
+        user._id.toString(),
+        JSON.stringify(user)
+      );
+      if (!user.username) throw 'No user found.';
+    }
   } catch (e) {
     res.status(404).json({ error: e.message || e.toString() });
     return;
@@ -75,8 +93,20 @@ router.get('/email/:email', async (req, res) => {
   // get the user
   let user;
   try {
-    user = await userData.getUserByEmail(email);
-    if (!user.username) throw 'No user found.';
+    const cachedUserID = await client.hgetAsync('emailCache', email); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
+      user = JSON.parse(cachedUser);
+    } else {
+      user = await userData.getUserByEmail(email);
+      await client.hmsetAsync('emailCache', email, user._id.toString());
+      await client.hmsetAsync(
+        'idCache',
+        user._id.toString(),
+        JSON.stringify(user)
+      );
+      if (!user.username) throw 'No user found.';
+    }
   } catch (e) {
     res.status(404).json({ error: e.message || e.toString() });
     return;
@@ -141,7 +171,22 @@ router.patch('/edit-user', async (req, res) => {
     res.status(400).json({ error: 'Minimum of one field must be updated' });
   } else {
     try {
-      updatedUser = await userData.updateUser(originalEmail, updatedFields);
+      const updatedUser = await userData.updateUser(
+        originalEmail,
+        updatedFields
+      );
+      await client.hdelAsync('emailCache', originalEmail); //delete old user info from cache
+      await client.hmsetAsync(
+        //add new user info to cache
+        'emailCache',
+        updatedUser.email,
+        updatedUser._id.toString()
+      );
+      await client.hmsetAsync(
+        'idCache',
+        updatedUser._id.toString(),
+        JSON.stringify(updatedUser)
+      );
       res.status(201).json(updatedUser);
     } catch (e) {
       res.status(400).json({ error: `Could not update user. Error: ${e}` });
@@ -161,7 +206,19 @@ router.delete('/:username', async (req, res) => {
   }
   // delete the user
   try {
+    let user;
+    const cachedUserID = await client.hgetAsync('usernameCache', username); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
+      user = JSON.parse(cachedUser);
+    } else {
+      user = await userData.getUserByName(username);
+    }
     await userData.removeUser(username);
+    //Remvoe user from wherever it may be in the cache
+    await client.hdelAsync('idCache', user._id.toString());
+    await client.hdelAsync('usernameCache', user.username.toString());
+    await client.hdelAsync('emailCache', user.email.toString());
   } catch (e) {
     res.status(400).json({ error: `Could not delete user. Error: ${e}` });
     return;
@@ -342,6 +399,37 @@ router.patch('/add-highscore', async (req, res) => {
     if (!user.username) throw 'Error adding score.';
   } catch (e) {
     res.status(400).json({ error: e });
+    return;
+  }
+
+  res.status(200).json(user);
+});
+
+// save game info
+router.patch('/save-game-info', async (req, res) => {
+  // get the variables from req.body
+  let { username, categories } = req.body;
+  // check inputs
+  try {
+    checkString(username, 'Username', false);
+    checkArray(categories, 'Categories');
+    if (categories.length<=0) throw 'Please pass in at least one category.';
+    for (let {categoryId, score} of categories) {
+      checkNum(categoryId, 'CategoryId');
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
+  } catch (e) {
+    res.status(400).json({error:`Error in saving game info: ${e}`});
+    return;
+  }
+
+  // add the category
+  let user;
+  try {
+    user = await userData.saveGameInfo(username, categories);
+  } catch (e) {
+    res.status(400).json({error:`Error in saving game info: ${e}`});
     return;
   }
 

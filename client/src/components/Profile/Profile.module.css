@@ -2,16 +2,19 @@
 	margin-left: auto;
 	margin-right: auto;
 	max-width: 500px;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	height: 90vh;
 }
 
 .profileList {
 	border: 1px solid gray;
 	border-radius: 10px;
 	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.profileList h2 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-size: 18px;
 }
 
 .profileEditable {
@@ -19,6 +22,10 @@
 	justify-content: space-between;
 	min-height: 75px;
 	align-items: center;
+}
+
+.profileLeaderboard {
+	min-height: 0;
 }
 
 .profileEditable form {
@@ -67,7 +74,7 @@
 	height: 175px;
 }
 
-.changePassword {
+.changePassword, .deleteAccount {
 	width: 100%;
 }
 
@@ -89,4 +96,17 @@
 .profileErrors ul {
 	list-style-type: none;
 	padding: 0px;
+}
+
+.personIcon {
+	fill: gray !important;
+}
+
+.gridDivider {
+	border-top: 1px solid gray;
+	border-bottom: none;
+}
+
+.gridRow {
+	align-self: center;
 }

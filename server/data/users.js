@@ -5,33 +5,29 @@ const {
   checkObjId,
   checkBool,
   checkEmail,
+  checkNum,
+  checkArray
 } = require('../inputChecks');
 const users = mongoCollections.users;
-const bluebird = require('bluebird');
-const redis = require('redis');
-const client = redis.createClient();
 
-bluebird.promisifyAll(redis.RedisClient.prototype);
-bluebird.promisifyAll(redis.Multi.prototype);
-
-async function removeFriendAll(friendName){
-  checkString(friendName, "Friend Name", false);
+async function removeFriendAll(friendName) {
+  checkString(friendName, 'Friend Name', false);
   let friend = await exportedMethods.getUserByName(friendName);
   // if no friends, skip pull from friends; if no pending, skip pull from pending
   const userCollection = await users();
-  if (friend.friends.length > 0){
+  if (friend.friends.length > 0) {
     const updateFriends = await userCollection.updateMany(
-        { friends: friend._id },
-        { $pull: { friends: friend._id }}
+      { friends: friend._id },
+      { $pull: { friends: friend._id } }
     );
     if (!updateFriends.matchedCount && !updateFriends.modifiedCount) {
       throw `Unable to remove User ${friendName} from friends of users`;
     }
   }
-  if (friend.pending_friends.length > 0){
+  if (friend.pending_friends.length > 0) {
     const updatePending = await userCollection.updateMany(
-        { 'pending_friends.pendingId': friend._id },
-        { $pull: { pending_friends: {pendingId: friend._id}}}
+      { 'pending_friends.pendingId': friend._id },
+      { $pull: { pending_friends: { pendingId: friend._id } } }
     );
     if (!updatePending.matchedCount && !updatePending.modifiedCount) {
       throw `Unable to remove User ${friendName} from friends of users`;
@@ -43,68 +39,25 @@ async function removeFriendAll(friendName){
 const exportedMethods = {
   async getUserById(id) {
     checkObjId(id, 'User ID');
-    const cachedUser = await client.hgetAsync('idCache', id);
-    if (cachedUser) {
-      let parsedUser = JSON.parse(cachedUser);
-      parsedUser._id = ObjectId(parsedUser._id);
-      parsedUser.friends = parsedUser.friends.map(e => ObjectId(e));
-      parsedUser.pending_friends = parsedUser.pending_friends.map(e => ({pendingId: ObjectId(e.pendingId), status: e.status}));
-      return parsedUser;
-    } else {
-      const parsedId = ObjectId(id);
-      const userCollection = await users();
-      const user = await userCollection.findOne({ _id: parsedId });
-      if (!user) throw `User with ID ${id} not found`;
-      await client.hmsetAsync('idCache', id, JSON.stringify(user));
-      return user;
-    }
+    const parsedId = ObjectId(id);
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: parsedId });
+    if (!user) throw `User with ID ${id} not found`;
+    return user;
   },
   async getUserByName(username) {
     checkString(username, 'Username', false);
-    const cachedUserID = await client.hgetAsync('usernameCache', username); //returns an ID
-    if (cachedUserID) {
-      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
-      let parsedUser = JSON.parse(cachedUser);
-      parsedUser._id = ObjectId(parsedUser._id);
-      parsedUser.friends = parsedUser.friends.map(e => ObjectId(e));
-      parsedUser.pending_friends = parsedUser.pending_friends.map(e => ({pendingId: ObjectId(e.pendingId), status: e.status}));
-      return parsedUser;
-    } else {
-      const userCollection = await users();
-      const user = await userCollection.findOne({ username: username });
-      if (!user) throw `User with username ${username} not found`;
-      await client.hmsetAsync('usernameCache', username, user._id.toString());
-      await client.hmsetAsync(
-        'idCache',
-        user._id.toString(),
-        JSON.stringify(user)
-      );
-      return user;
-    }
+    const userCollection = await users();
+    const user = await userCollection.findOne({ username: username });
+    if (!user) throw `User with username ${username} not found`;
+    return user;
   },
   async getUserByEmail(email) {
     checkEmail(email, 'Email');
-    const cachedUserID = await client.hgetAsync('emailCache', email); //returns an ID
-    if (cachedUserID) {
-      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
-      let parsedUser = JSON.parse(cachedUser);
-      parsedUser._id = ObjectId(parsedUser._id);
-      parsedUser.friends = parsedUser.friends.map(e => ObjectId(e));
-      parsedUser.pending_friends = parsedUser.pending_friends.map(e => ({pendingId: ObjectId(e.pendingId), status: e.status}));
-      return parsedUser;
-    } else {
-      const userCollection = await users();
-      const user = await userCollection.findOne({ email: email });
-      if (!user) throw `User with email ${email} not found`;
-      await client.hmsetAsync('emailCache', email, user._id.toString());
-      await client.hmsetAsync(
-        'idCache',
-        user._id.toString(),
-        JSON.stringify(user)
-      );
-
-      return user;
-    }
+    const userCollection = await users();
+    const user = await userCollection.findOne({ email: email });
+    if (!user) throw `User with email ${email} not found`;
+    return user;
   },
   async doesUserExist(username, email) {
     checkString(username, 'Username', false);
@@ -128,6 +81,7 @@ const exportedMethods = {
       friends: [],
       pending_friends: [],
       optedForLeaderboard: optedForLeaderboard,
+      recent_categories: []
     });
     return insertInfo;
   },
@@ -155,21 +109,7 @@ const exportedMethods = {
       { email: originalEmail },
       { $set: updatedFields }
     );
-    await client.hdelAsync('emailCache', originalEmail); //If the user is stored in the cache, we need to make sure we dont get the old version from cache
     const updatedUser = await this.getUserByEmail(email ?? originalEmail);
-
-    //updates or sets usernameCache with the current username value
-    await client.hmsetAsync(
-      'usernameCache',
-      updatedUser.username,
-      updatedUser._id.toString()
-    );
-    // if the user was cached, the cache with update with new values, otherwise it will just be added to the cache
-    await client.hmsetAsync(
-      'idCache',
-      updatedUser._id.toString(),
-      JSON.stringify(updatedUser)
-    );
     return updatedUser;
   },
   async removeUser(username) {
@@ -177,11 +117,54 @@ const exportedMethods = {
     const userCollection = await users();
     const userByUsername = await userCollection.findOne({ username: username });
     if (!userByUsername) throw `User with username ${username} doesn't exist`;
-    await removeFriendAll(username);
-    await client.hdelAsync('idCache', userByUsername._id.toString());
-    await client.hdelAsync('usernameCache', userByUsername.username.toString());
-    await client.hdelAsync('emailCache', userByUsername.email.toString());
+    //await removeFriendAll(username);
+
     return await userCollection.deleteOne({ username: username });
   },
+  async saveGameInfo(username, categories) {
+    checkString(username, 'Username', false);
+    checkArray(categories, 'Categories');
+    if (categories.length<=0) throw 'Please pass in at least one category.';
+    for (let {categoryId, score} of categories) {
+      checkNum(categoryId, 'CategoryId');
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
+    const userCollection = await users();
+    const user = await userCollection.findOne({username});
+    
+    // create the field if this is an old user that doesn't have it
+    if (!user.recent_categories) user.recent_categories = [];
+
+    // loop over categories
+    for (let {categoryId, score} of categories) {
+      // if we've seen this before, remove the old category to preserve shifting order
+      user.recent_categories = user.recent_categories.filter((cat) => cat.categoryId!==categoryId);
+      user.recent_categories.push({categoryId, score: score || 0});
+    }
+    // only keep at most 12 categories (2 games' worth)
+    while (user.recent_categories.length>12) user.recent_categories.shift()
+    
+    const result = await userCollection.updateOne({ username }, { $set: { recent_categories:user.recent_categories } });
+    if (!result.acknowledged) throw `Error updating user ${username}`;
+    const updatedUser = await userCollection.findOne({username});
+    return updatedUser;
+  },
+  async addHighScore(username,highScore) {
+    checkString(username, 'Username', false);
+    checkNum(highScore, 'HighScore');
+    const userCollection = await users();
+    const user = await userCollection.findOne({username});
+
+    // make sure this is really a high score
+    if (user.high_scores.length>0 && Math.max(user.high_scores)>=highScore) throw 'This score is not higher than all previous scores.';
+
+    user.high_scores.push(highScore);
+    const result = await userCollection.updateOne({ username }, { $set: { high_scores:user.high_scores } });
+    if (!result.modifiedCount) throw `Error updating user ${username}`;
+    const updatedUser = await userCollection.findOne({username});
+    return updatedUser;
+  }
 };
+
 module.exports = exportedMethods;
