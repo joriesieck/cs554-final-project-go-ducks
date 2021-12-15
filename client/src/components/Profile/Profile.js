@@ -699,7 +699,6 @@ export default function Profile () {
 			</List>}
 			{userData.high_scores.length<=0 && <p>No high scores to show.</p>}
 			</div>
-					{/*TODO align buttons */}
 			<div className={styles.profileList}>
 			<h2>Friends</h2>
 			{userData.friends.length>0 && <Grid container xs={12}>

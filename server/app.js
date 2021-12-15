@@ -20,7 +20,6 @@ app.use(async (req, res, next) => {
   console.log(req.headers);
   try {
     const result = await admin.auth().verifyIdToken(req.headers.authtoken);
-    console.log(result);
   } catch (e) {
     res.status(403).json({error: 'You must be logged in to access this route.'});
     return;

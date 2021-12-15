@@ -12,6 +12,7 @@ import {
   createUserWithEmailAndPassword,
   fetchSignInMethodsForEmail,
   signInWithPopup,
+  deleteUser
 } from '@firebase/auth';
 import { Link, Redirect } from 'react-router-dom';
 import Image from 'next/image';
@@ -19,7 +20,7 @@ import Image from 'next/image';
 import styles from './CreateUser.module.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-// TODO auth ?
+
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
@@ -86,8 +87,6 @@ export default function CreateUser() {
 
 		let result;
 		let authToken;
-		// if we create them in firebase and then there are errors/they otherwise don't proceed with account creation, they will be able to just create an account later
-		// TODO make sure that is true ^
 		try {
 			result = await createUserWithEmailAndPassword(auth, email, password);
 			if (!result.user.uid) throw Error('Something went wrong creating your account, please try again.');
@@ -102,6 +101,7 @@ export default function CreateUser() {
 		try {
 			const result = await getUserByName(username, authToken);
 			if (result && result._id) {
+				await deleteUser(auth.currentUser);
 				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
 				return;
 			}
@@ -229,6 +229,7 @@ export default function CreateUser() {
 		try {
 			const result = await getUserByName(username, storeAuthToken);
 			if (result && result._id) {
+				await deleteUser(auth.currentUser);
 				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
 				return;
 			}
@@ -348,7 +349,7 @@ export default function CreateUser() {
 				</ul>
 			</Alert>}
 
-			<p>Already have an account? <a href="/">Log in</a> instead.</p>
+			<p>Already have an account? <Link to="/">Log in</Link> instead.</p>
 		</div>
 	)
 }
