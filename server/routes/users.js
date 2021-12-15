@@ -291,9 +291,14 @@ router.patch('/add-friend', async (req, res) => {
   // add the friend
   let user;
   try {
-    user = await friendData.addFriend(username, friendToAdd);
+    let [ userAdding , toAdd ] = await friendData.addFriend(username, friendToAdd);
+    // update relevant users in cache
+    await client.hsetAsync('idCache', userAdding._id.toString(), JSON.stringify(userAdding));
+    await client.hsetAsync('idCache', toAdd._id.toString(), JSON.stringify(toAdd));
+    user = userAdding;
     if (!user.username) throw 'Error adding friend.';
   } catch (e) {
+    console.log(e);
     res.status(400).json({ error: e });
     return;
   }
@@ -317,7 +322,11 @@ router.patch('/remove-friend', async (req, res) => {
   // remove the friend
   let user;
   try {
-    user = await friendData.removeFriend(username, friendToRemove);
+    let [ userRemoving, toRemove] = await friendData.removeFriend(username, friendToRemove);
+    // update relevant users in cache
+    await client.hsetAsync('idCache', userRemoving._id.toString(), JSON.stringify(userRemoving));
+    await client.hsetAsync('idCache', toRemove._id.toString(), JSON.stringify(toRemove));
+    user = userRemoving;
     if (!user.username) throw 'Error removing friend.';
   } catch (e) {
     res.status(400).json({ error: e });
@@ -343,7 +352,11 @@ router.patch('/accept-friend', async (req, res) => {
   // accept the friend
   let user;
   try {
-    user = await friendData.acceptFriend(username, friendToAccept);
+    let [userAccepting, toAccept] = await friendData.acceptFriend(username, friendToAccept);
+    // update relevant cached users
+    await client.hsetAsync('idCache', userAccepting._id.toString(), JSON.stringify(userAccepting));
+    await client.hsetAsync('idCache', toAccept._id.toString(), JSON.stringify(toAccept));
+    user = userAccepting;
     if (!user.username) throw 'Error accepting friend.';
   } catch (e) {
     res.status(400).json({ error: e });
@@ -369,7 +382,11 @@ router.patch('/remove-pending-friend', async (req, res) => {
   // remove the pending friend
   let user;
   try {
-    user = await friendData.removePending(username, pendingToRemove);
+    let [userRemoving, toRemove] = await friendData.removePending(username, pendingToRemove);
+    // update relevant users in cache
+    await client.hsetAsync('idCache', userRemoving._id.toString(), JSON.stringify(userRemoving));
+    await client.hsetAsync('idCache', toRemove._id.toString(), JSON.stringify(toRemove));
+    user = userRemoving;
     if (!user.username) throw 'Error removing pending friend.';
   } catch (e) {
     res.status(400).json({ error: e });

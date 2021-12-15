@@ -117,7 +117,7 @@ const exportedMethods = {
     const userCollection = await users();
     const userByUsername = await userCollection.findOne({ username: username });
     if (!userByUsername) throw `User with username ${username} doesn't exist`;
-    //await removeFriendAll(username);
+    await removeFriendAll(username);
 
     return await userCollection.deleteOne({ username: username });
   },
