@@ -127,27 +127,13 @@ export default function Profile() {
     fetchUserData();
   }, [user]);
 
-  // const fetchFriends = async () => {
-  // 	// let data;
-  // 	for (let friendId of userData.friends) {
-  // 		let data;
-  // 		try {
-  // 			data = await
-  // 		}
-  // 	}
-  // }
-
-  // // get their friends
-  // useEffect(() => {
-
-  // }, [user]);
-
   // if user is not logged in, redirect to login
   if (!user) return <Redirect to="/" />;
 
   const toggleEdit = (e, id) => {
     e.preventDefault();
-    console.log(e.target);
+	setProviderError(null);
+
     if (!id) id = e.target.id;
 
     if (id === 'edit-username') {
@@ -165,7 +151,9 @@ export default function Profile() {
   };
 
   const editProfile = async (e) => {
-    e.preventDefault();
+	e.preventDefault();
+
+	setProviderError(null);
 
     // get the field we're editing
     const fieldToEdit = e.target.id;
@@ -442,10 +430,6 @@ export default function Profile() {
     setOpenModal(false);
     setDeleting(false);
   };
-
-  // const handleConfirmClose = () => {
-  // 	setOpenConfirmModal(false);
-  // }
 
   const triggerConfirmModal = (
     e,
@@ -783,7 +767,7 @@ export default function Profile() {
                 error={usernameError !== ''}
                 helperText={usernameError.replace('Error: ', '')}
               />
-              <Button type="submit">
+              <Button type="submit" className={styles.submitCheck}>
                 <CheckIcon />
               </Button>
             </form>
@@ -825,7 +809,7 @@ export default function Profile() {
                     error={emailError !== ''}
                     helperText={emailError.replace('Error: ', '')}
                   />
-                  <Button type="submit">
+                  <Button type="submit" className={styles.submitCheck}>
                     <CheckIcon />
                   </Button>
                 </form>
@@ -852,7 +836,7 @@ export default function Profile() {
                     error={passError !== ''}
                     helperText={passError.replace('Error: ', '')}
                   />
-                  <Button type="submit">
+                  <Button type="submit" className={styles.submitCheck}>
                     <CheckIcon />
                   </Button>
                 </form>
@@ -941,7 +925,7 @@ export default function Profile() {
                 } the leaderboard`}
                 control={<Checkbox />}
               />
-              <Button type="submit">
+              <Button type="submit" className={styles.submitCheck}>
                 <CheckIcon />
               </Button>
             </form>

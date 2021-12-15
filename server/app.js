@@ -17,7 +17,6 @@ app.use(express.json());
 
 // authentication middleware
 app.use(async (req, res, next) => {
-  console.log(req.headers);
   try {
     const result = await admin.auth().verifyIdToken(req.headers.authtoken);
   } catch (e) {
