@@ -214,6 +214,21 @@ router.delete('/:username', async (req, res) => {
     } else {
       user = await userData.getUserByName(username);
     }
+    // remove user from friend and pending arrays, must remove in redis as well
+    const [ friendList, pendingList ] = await userData.removeFriendAll(username);
+    // unsure how to deal with the loop of asyncs
+    for (let friend of friendList){
+      let fstr = await client.hgetAsync('idCache', friend.toString());
+      let f = JSON.parse(fstr);
+      f.friends = f.friends.filter(e => e !== user._id.toString());
+      await client.hsetAsync('idCache', friend.toString(), JSON.stringify(f));
+    }
+    for (let pending of pendingList){
+      let pstr = await client.hgetAsync('idCache', pending.pendingId.toString());
+      let p = JSON.parse(pstr);
+      p.pending_friends = p.pending_friends.filter(e => e.pendingId !== user._id.toString());
+      await client.hsetAsync('idCache', pending.pendingId.toString(), JSON.stringify(p));
+    }
     await userData.removeUser(username);
     //Remvoe user from wherever it may be in the cache
     await client.hdelAsync('idCache', user._id.toString());

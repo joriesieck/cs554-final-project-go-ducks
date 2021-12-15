@@ -10,32 +10,6 @@ const {
 } = require('../inputChecks');
 const users = mongoCollections.users;
 
-async function removeFriendAll(friendName) {
-  checkString(friendName, 'Friend Name', false);
-  let friend = await exportedMethods.getUserByName(friendName);
-  // if no friends, skip pull from friends; if no pending, skip pull from pending
-  const userCollection = await users();
-  if (friend.friends.length > 0) {
-    const updateFriends = await userCollection.updateMany(
-      { friends: friend._id },
-      { $pull: { friends: friend._id } }
-    );
-    if (!updateFriends.matchedCount && !updateFriends.modifiedCount) {
-      throw `Unable to remove User ${friendName} from friends of users`;
-    }
-  }
-  if (friend.pending_friends.length > 0) {
-    const updatePending = await userCollection.updateMany(
-      { 'pending_friends.pendingId': friend._id },
-      { $pull: { pending_friends: { pendingId: friend._id } } }
-    );
-    if (!updatePending.matchedCount && !updatePending.modifiedCount) {
-      throw `Unable to remove User ${friendName} from friends of users`;
-    }
-  }
-  return true;
-}
-
 const exportedMethods = {
   async getUserById(id) {
     checkObjId(id, 'User ID');
@@ -117,9 +91,34 @@ const exportedMethods = {
     const userCollection = await users();
     const userByUsername = await userCollection.findOne({ username: username });
     if (!userByUsername) throw `User with username ${username} doesn't exist`;
-    await removeFriendAll(username);
+    //await removeFriendAll(username);
 
     return await userCollection.deleteOne({ username: username });
+  },
+  async removeFriendAll(friendName) {
+    checkString(friendName, 'Friend Name', false);
+    let friend = await exportedMethods.getUserByName(friendName);
+    // if no friends, skip pull from friends; if no pending, skip pull from pending
+    const userCollection = await users();
+    if (friend.friends.length > 0) {
+      const updateFriends = await userCollection.updateMany(
+        { friends: friend._id },
+        { $pull: { friends: friend._id } }
+      );
+      if (!updateFriends.matchedCount && !updateFriends.modifiedCount) {
+        throw `Unable to remove User ${friendName} from friends of users`;
+      }
+    }
+    if (friend.pending_friends.length > 0) {
+      const updatePending = await userCollection.updateMany(
+        { 'pending_friends.pendingId': friend._id },
+        { $pull: { pending_friends: { pendingId: friend._id } } }
+      );
+      if (!updatePending.matchedCount && !updatePending.modifiedCount) {
+        throw `Unable to remove User ${friendName} from friends of users`;
+      }
+    }
+    return [friend.friends, friend.pending_friends];
   },
   async saveGameInfo(username, categories) {
     checkString(username, 'Username', false);
