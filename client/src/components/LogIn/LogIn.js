@@ -13,9 +13,9 @@ import { getUserByName, getUserByEmail, addUser } from "../../utils/backendCalls
 import { Link, Redirect } from 'react-router-dom';
 import Image from 'next/image';
 
-import googleLogo from '../../imgs/google-logo.png';
-import fbLogo from '../../imgs/facebook-logo.png';
-import gitLogo from '../../imgs/github-logo.png';
+import googleLogo from '/public/imgs/google-logo.png';
+import fbLogo from '/public/imgs/facebook-logo.png';
+import gitLogo from '/public/imgs/github-logo.png';
 import styles from './LogIn.module.css';
 
 export default function LogIn() {
@@ -235,12 +235,14 @@ export default function LogIn() {
 			<div className={styles.providerLogos}>
 			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn}>
 				{/* TODO fix tota11y error */}
+				{/* <img src={googleLogo} alt='sign in with google'> */}
 				<Image
 					src={googleLogo}
 					alt="sign in with google"
-					height={50}
-					width={50}
-				/>
+					// height={50}
+					// width={50}
+				 />
+				{/* </img> */}
 				Sign in with Google
 			</Button>
 			{/* <Button variant="contained" className='provider-logo' onClick={fbProviderSignIn}>

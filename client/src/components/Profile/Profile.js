@@ -50,8 +50,8 @@ import {
   googleProvider,
 } from '../../firebase/firebaseSetup';
 import Image from 'next/image';
-import googleLogo from '../../imgs/google-logo.png';
-import gitLogo from '../../imgs/github-logo.png';
+import googleLogo from '/public/imgs/google-logo.png';
+import gitLogo from '/public/imgs/github-logo.png';
 import styles from './Profile.module.css';
 
 {/*TODO fix aria landmarks */}
