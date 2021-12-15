@@ -19,7 +19,7 @@ import Image from 'next/image';
 import styles from './CreateUser.module.css';
 import googleLogo from '../../imgs/google-logo.png';
 import gitLogo from '../../imgs/github-logo.png';
-
+// TODO auth ?
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
 	const [created, setCreated] = useState(false);
@@ -28,6 +28,7 @@ export default function CreateUser() {
 	const [username, setUsername] = useState(null);
 	const [emailExists, setEmailExists] = useState(false);
 	const user = useSelector((state) => state.user.user);
+	const authToken = useSelector((state) => state.auth.authToken);
 	const dispatch = useDispatch();
 
 	// if user is already logged in, redirect to home
@@ -85,7 +86,7 @@ export default function CreateUser() {
 
 		// make sure username not already in db
 		try {
-			const result = await getUserByName(username);
+			const result = await getUserByName(username, authToken);
 			if (result && result._id) {
 				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
 				return;
@@ -171,7 +172,7 @@ export default function CreateUser() {
 		// check if email already exists in db
 		let user
 		try {
-			user = await getUserByEmail(result.user.email);
+			user = await getUserByEmail(result.user.email, authToken);
 			if (user && user._id) {
 				// store email
 				setEmail(result.user.email);
@@ -220,7 +221,7 @@ export default function CreateUser() {
 
 		// make sure username not already in db
 		try {
-			const result = await getUserByName(username);
+			const result = await getUserByName(username, authToken);
 			if (result && result._id) {
 				setErrors(['Sorry, that username is in use by someone else. Please pick a new one.']);
 				return;

@@ -21,6 +21,9 @@ export default function NavBar() {
     try {
       signOut(auth);
       dispatch({
+        type: 'CLEAR_TOKEN'
+      });
+      dispatch({
         type: 'LOG_OUT',
       });
       setLogout(true);
