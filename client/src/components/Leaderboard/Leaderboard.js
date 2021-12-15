@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Button,Grid } from "@mui/material";
+import { Button,FormControlLabel,Grid, Switch } from "@mui/material";
 import SportsScore from "@mui/icons-material/SportsScore";
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
@@ -46,6 +46,8 @@ export default function Leaderboard () {
 	const user = useSelector((state) => state.user);	// highlight user
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
+	const [friendsOnly, setFriendsOnly] = useState(false);
+
 	useEffect(() => {
 		async function fetchData() {
 			let data;
@@ -64,41 +66,36 @@ export default function Leaderboard () {
 		fetchData();
 	}, []);
 
-	const triggerAddFriend = async (e, username) => {
-		e.preventDefault();
-		try {
-			checkString(username, 'Username', true, false);
-			const result = await addFriend(userData.username, username);
-			userData.friends = result.friends;
-		} catch (e) {
-			if (!e.response || !e.response.data || !e.response.data.error) {
-				setError((e.toString()));
-				return;
-			}
-			setError(e.response.data.error);
-			return;
-		}
-	}
-
 	return (
 		<div className={styles.leaderboard}>
 			<h1>Leaderboard</h1>
-			{(leaderboardData.length>0 && userData) && <Grid container xs={12} className={styles.gridContainer}>
+			{(leaderboardData.length>0 && userData) && 
+			<>
+			<Grid container className={styles.gridRow}>
+				<Grid item xs={7}>{friendsOnly ? 'Showing only friends' : 'Showing all players'}</Grid>
+				<Grid item xs={5}><FormControlLabel control={<Switch
+					onChange={() => {setFriendsOnly(!friendsOnly)}}
+					inputProps={{'aria-label': 'controlled'}}
+				/>} label='Show only friends' /></Grid>
+			</Grid>
+			<Grid container xs={12} className={styles.gridContainer}>
 				{leaderboardData.map(({username, highScore, _id}, i) => {
+					const friends = userData.friends.includes(_id);
+					const isSelf = username===userData.username;
+					if (friendsOnly && (!friends && !isSelf)) return;
 					let place;
 					if (i===0) place = 'firstPlace';
 					else if (i===1) place = 'secondPlace';
 					else if (i===2) place = 'thirdPlace';
-					const friends = userData.friends.includes(_id);
-					return (<Grid container xs={12} className={`${styles.gridRow}${username===userData.username ? ` ${styles.currentUser}` : ''}`}>
+					return (<Grid container xs={12} className={`${styles.gridRow}${isSelf ? ` ${styles.currentUser}` : ''}`}>
 						<Grid item xs={1} className={styles[place]}>{i<=2 ? <EmojiEventsIcon /> : <LeaderboardIcon />}</Grid>
 						<Grid item xs={1}>{i+1}</Grid>
 						<Grid item xs={5}>{username}</Grid>
 						<Grid item xs={4}>{highScore}</Grid>
 						{friends && <Grid item xs={1}><GroupIcon /></Grid>}
-						{/* <Grid item xs={2} className={styles.friendIcons}>{friends ? <GroupIcon /> : <Button onClick={(e) => {triggerAddFriend(e, username)}}><PersonAddIcon onClick={(e) => {triggerAddFriend(e, username)}} /></Button>}</Grid> */}
 					</Grid>)})}
-			</Grid>}
+			</Grid>
+			</>}
 			
 			{leaderboardData.length<=0 && <p>Looks like there aren't any users on the leaderboard yet. <Link to='/game'>Play a game</Link> to kick it off!</p>}
 

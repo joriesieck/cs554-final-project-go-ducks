@@ -50,6 +50,7 @@ export default function NavBar() {
           onChange={(e) => {
             setValue(e.target.innerText.toLowerCase());
           }}
+          inputProps={{'aria-label': 'navigation tabs'}}
         >
           <Tab
             value="home"
@@ -60,6 +61,7 @@ export default function NavBar() {
             id='home-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='home-tab'
+            inputProps={{'aria-label': 'home', 'aria-controls': 'navigation-tabs'}}
           />
           <Tab
             value="game"
@@ -70,6 +72,7 @@ export default function NavBar() {
             id='game-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='game-tab'
+            inputProps={{'aria-label': 'game', 'aria-controls': 'navigation-tabs'}}
           />
           {/* <Tab
             value="practice"
@@ -80,6 +83,7 @@ export default function NavBar() {
             id='practice-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='practice-tab'
+            inputProps={{'aria-label': 'practice', 'aria-controls': 'navigation-tabs'}}
           /> */}
           <Tab
             value="leaderboard"
@@ -90,6 +94,7 @@ export default function NavBar() {
             id='leaderboard-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='leaderboard-tab'
+            inputProps={{'aria-label': 'leaderboard', 'aria-controls': 'navigation-tabs'}}
           />
           <Tab
             value="profile"
@@ -100,6 +105,7 @@ export default function NavBar() {
             id='profile-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='profile-tab'
+            inputProps={{'aria-label': 'profile', 'aria-controls': 'navigation-tabs'}}
           />
         </Tabs>
       </div>
