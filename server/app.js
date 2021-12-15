@@ -6,6 +6,12 @@ const configRoutes = require('./routes');
 app.use(cors());
 app.use(express.json());
 
+// authentication middleware
+app.use(async (req, res, next) => {
+  console.log(req.body);
+  next();
+})
+
 configRoutes(app);
 
 app.listen(3001, () => {

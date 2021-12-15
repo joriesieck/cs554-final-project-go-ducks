@@ -6,7 +6,7 @@ export default function Home() {
 	//TODO conditional leaderboard button if player has opted in?
 
 
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
 	// if user is not logged in, redirect to login
 	if (!user) return <Redirect to="/" />;
 	return (

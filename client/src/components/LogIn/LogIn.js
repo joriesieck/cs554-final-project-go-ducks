@@ -23,7 +23,7 @@ export default function LogIn() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [displaySignUp, setDisplaySignUp] = useState(false);
 	const [email, setEmail] = useState(null);
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
 	const dispatch = useDispatch();
 
 	// if user is already logged in, redirect to home
@@ -58,8 +58,11 @@ export default function LogIn() {
 		}
 
 		let result;
+		let authToken;
 		try {
 			result = await signInWithEmailAndPassword(auth, email, password);
+			console.log(result);
+			authToken = result.user.accessToken;
 			if (!result.user.uid) throw Error('couldnt log in');
 		} catch (e) {
 			setErrors(['Invalid login credentials.']);
@@ -88,7 +91,12 @@ export default function LogIn() {
 				return;
 			}
 		}
-
+		// TODO setAuthToken like setEmail
+		// store auth token in redux
+		dispatch({
+			type: 'UPDATE_TOKEN',
+			payload: authToken
+		})
 		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
@@ -114,9 +122,12 @@ export default function LogIn() {
 
 	const providerSignIn = async (provider) => {
 		let result;
+		let authToken;
 		try {
 			// try pop up - some browsers block
 			result = await signInWithPopup(auth, provider);
+			console.log(result);
+			authToken = result.user.authToken;
 		} catch (e) {
 			console.log(e);
 			// print a message asking to allow popups

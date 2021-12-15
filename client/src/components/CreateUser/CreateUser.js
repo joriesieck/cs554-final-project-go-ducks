@@ -27,7 +27,7 @@ export default function CreateUser() {
 	const [email, setEmail] = useState(null);
 	const [username, setUsername] = useState(null);
 	const [emailExists, setEmailExists] = useState(false);
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
 	const dispatch = useDispatch();
 
 	// if user is already logged in, redirect to home

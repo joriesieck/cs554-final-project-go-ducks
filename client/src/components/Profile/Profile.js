@@ -83,7 +83,8 @@ export default function Profile () {
 	const [toggleFriends, setToggleFriends] = useState({friendId:'', friendUser:''});
 	const [friendData, setFriendData] = useState(null);
 
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
+	const authToken = useSelector((state) => state.auth.authToken);
 	const dispatch = useDispatch();
 
 	// check if the user logged in with a provider
@@ -237,7 +238,8 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					optedForLeaderboard: !userData.optedForLeaderboard
+					optedForLeaderboard: !userData.optedForLeaderboard,
+					authToken
 				});
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {

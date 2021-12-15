@@ -26,12 +26,13 @@ async function removeUser (username) {
 	return data;
 }
 
-async function editUserInfo ({originalEmail, username, newEmail, optedForLeaderboard}) {
+async function editUserInfo ({originalEmail, username, newEmail, optedForLeaderboard, authToken}) {
 	const {data} = await axios.patch(`${siteUrl}/users/edit-user`, {
 		originalEmail,
 		username,
 		newEmail,
-		optedForLeaderboard
+		optedForLeaderboard,
+		authToken
 	});
 	return data;
 }
