@@ -3,6 +3,7 @@ const router = express.Router();
 const data = require('../data');
 const userData = data.users;
 const friendData = data.friends;
+const leaderboardData = data.leaderboard;
 const {
   checkString,
   checkBool,
@@ -441,6 +442,15 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
+  // add to database
+  let dbResult;
+  try {
+    dbResult = await leaderboardData.addToLeaderboard(username, highScore);
+  } catch (e) {
+    res.status(400).json({error: `Error adding ${username} to the database leaderboard: ${e}`});
+    return;
+  }
+
   res.status(200).json(user);
 });
 
@@ -478,7 +488,28 @@ router.patch('/save-game-info', async (req, res) => {
 // get leaderboard
 router.get('/leaderboard', async (req, res) => {
   // get the number of people on the leaderboard
-  const leaderboardCount = await client.zcardAsync('leaderboard');
+  let leaderboardCount = await client.zcardAsync('leaderboard');
+  // get the number of people in the database leaderboard
+  const dbLeaderboard = await leaderboardData.getLeaderboard();
+  const dbLeaderboardCount = dbLeaderboard.leaderboard.length;
+  // if they're different, add new people to the redis leaderboard
+  if (dbLeaderboardCount>leaderboardCount) {
+    for (let entry of dbLeaderboard.leaderboard) {
+      if (typeof entry==='object') {
+        try {
+          const result = await client.zadd('leaderboard', entry.score, entry.username);
+          if (!result) {
+            res.status(400).json({error: `Error adding ${entry.username} to the leaderboard`});
+            return;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        leaderboardCount++;
+      }
+    }
+  }
+
   // get the leaderboard - outputs ['FIRSTPLACE', 'SCORE', 'SECONDPLACE', 'SCORE', ...]
   const redisLeaderboard = await client.zrevrangeAsync('leaderboard', 0, leaderboardCount-1, 'WITHSCORES');
   
