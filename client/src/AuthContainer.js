@@ -3,6 +3,7 @@ import Home from './components/Home/Home';
 import Profile from './components/Profile/Profile';
 import NavBar from './components/Nav/Nav';
 import GameSetup from './components/Game/GameSetup';
+import Leaderboard from './components/Leaderboard/Leaderboard';
 
 export default function AuthContainer() {
 	return (
@@ -11,6 +12,7 @@ export default function AuthContainer() {
 			<Route exact path='/home' component={Home} />
 			<Route exact path='/profile' component={Profile} />
 			<Route exact path='/game' component={GameSetup} />
+			<Route exact path='/leaderboard' component={Leaderboard} />
 		</>
 	)
 }

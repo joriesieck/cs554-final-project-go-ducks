@@ -5,7 +5,7 @@ import {
   googleProvider,
 } from '../../firebase/firebaseSetup';
 import { signInWithEmailAndPassword, signInWithPopup } from '@firebase/auth';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Button, TextField, FormControlLabel, Checkbox } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
 import { checkString, checkBool } from '../../utils/inputChecks';
@@ -13,9 +13,9 @@ import { getUserByName, getUserByEmail, addUser } from "../../utils/backendCalls
 import { Link, Redirect } from 'react-router-dom';
 import Image from 'next/image';
 
-import googleLogo from '../../imgs/google-logo.png';
-import fbLogo from '../../imgs/facebook-logo.png';
-import gitLogo from '../../imgs/github-logo.png';
+import googleLogo from '/public/imgs/google-logo.png';
+import fbLogo from '/public/imgs/facebook-logo.png';
+import gitLogo from '/public/imgs/github-logo.png';
 import styles from './LogIn.module.css';
 
 export default function LogIn() {
@@ -25,6 +25,22 @@ export default function LogIn() {
 	const [email, setEmail] = useState(null);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
+
+	useEffect(() => {
+		// add alt text to next images
+		const githubImg = document.getElementById('github-logo');
+		const googleImg = document.getElementById('google-logo');
+		try {
+			githubImg.firstChild.firstChild.firstChild.alt = 'transparent layer over logo';
+		} catch (e) {
+			console.log(`Error adding alt text to nextjs transparent layer over github logo: ${e}`);
+		}
+		try {
+			googleImg.firstChild.firstChild.firstChild.alt = 'transparent layer over logo';
+		} catch (e) {
+			console.log(`Error adding alt text to nextjs transparent layer over google logo: ${e}`);
+		}
+	}, []);
 
 	// if user is already logged in, redirect to home
 	if (user) return <Redirect to="/home" />;
@@ -148,11 +164,15 @@ export default function LogIn() {
 			}
 		}
 
+		// trigger page reload to get rid of weird iframe
+		// window.location.reload();
+
 		// store email in redux
 		dispatch({
 			type: 'LOG_IN',
 			payload: result.user.email
 		});
+		
 	}
 
 	const signUserUp = async (e) => {
@@ -229,16 +249,27 @@ export default function LogIn() {
 			</form>
 			
 			<div className={styles.providerLogos}>
-			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn}>
-				<Image src={googleLogo} alt="sign in with google" height={50} width={50} />
+			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn} id='google-logo'>
+				<Image
+					src={googleLogo}
+					alt="sign in with google"
+					height={50}
+					width={50}
+					className={styles.nextImg}
+				 />
 				Sign in with Google
 			</Button>
 			{/* <Button variant="contained" className='provider-logo' onClick={fbProviderSignIn}>
 				<img src={fbLogo} alt="sign in with facebook" height={50} width={50} />
 				Sign in with Facebook
 			</Button> */}
-			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn}>
-				<Image src={gitLogo} alt="sign in with github" height={50} width={50} />
+			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn} id='github-logo'>
+				<Image
+					src={gitLogo}
+					alt="sign in with github"
+					height={50}
+					width={50}
+				/>
 				Sign in with GitHub
 			</Button>
 			</div>
@@ -269,3 +300,4 @@ export default function LogIn() {
 
 // google logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freepngimg.com%2Fthumb%2Fgoogle%2F66903-google-pay-gboard-platform-logo-cloud.png&f=1&nofb=1
 // fb logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freepngimg.com%2Fthumb%2Ffacebook%2F65310-icons-media-fb-computer-facebook-social.png&f=1&nofb=1
+// github logo: https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpngimg.com%2Fuploads%2Fgithub%2Fgithub_PNG45.png&f=1&nofb=1

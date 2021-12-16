@@ -70,6 +70,14 @@ async function getAllPendingFriends (username) {
 	return data;
 }
 
+async function addFriend (username, friendToAdd) {
+	const {data} = await axios.patch(`${siteUrl}/users/add-friend`, {
+		username,
+		friendToAdd
+	});
+	return data;
+}
+
 export {
 	getUserByName,
 	getUserByEmail,
@@ -80,5 +88,6 @@ export {
 	removePendingFriend,
 	acceptPendingFriend,
 	getAllFriends,
-	getAllPendingFriends
+	getAllPendingFriends,
+	addFriend
 }

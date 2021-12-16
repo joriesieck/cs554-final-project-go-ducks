@@ -83,9 +83,9 @@ export default function GameSetup()
                 {
                     categoryChoice !== "" && gameType !== "" ? 
                     (categoryChoice === 'custom' ? <CategoryForm /> : 
-                    <ul>Categories
+                    <><span>Categories</span><ul>
                         {categories.map((category) => <li key={category}>{category}</li>)}
-                    </ul>) : <></>
+                    </ul></>) : <></>
                 }
 
                 {categoryChoice !== '' && gameType !== '' && categories.length === 6 || categoryChoice === 'custom' ? <Button type="submit" onClick={handleFormSubmit}>Start Game</Button> : <></>}
