@@ -3,9 +3,9 @@ import Home from './components/Home/Home';
 import Profile from './components/Profile/Profile';
 import NavBar from './components/Nav/Nav';
 import GameSetup from './components/Game/GameSetup';
+import Leaderboard from './components/Leaderboard/Leaderboard';
 import Practice from './components/Practice/Practice';
 import Friends from './components/Friends/Friends';
-import Leaderboard from './components/Friends/Leaderboard';
 
 export default function AuthContainer() {
 	return (
