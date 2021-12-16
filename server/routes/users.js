@@ -1,16 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const data = require('../data');
-const userData = data.users; // change to data.users when db funcs are done
+const userData = data.users;
 const friendData = data.friends;
+const leaderboardData = data.leaderboard;
 const {
   checkString,
   checkBool,
   checkObjId,
   checkNum,
   checkEmail,
+  checkArray
 } = require('../inputChecks');
+const bluebird = require('bluebird');
+const redis = require('redis');
+const client = redis.createClient();
 
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
 // get user
 router.get('/username/:username', async (req, res) => {
   // get the username from req.params
@@ -26,8 +33,20 @@ router.get('/username/:username', async (req, res) => {
   // get the user
   let user;
   try {
-    user = await userData.getUserByName(username);
-    if (!user.username) throw 'No user found.';
+    const cachedUserID = await client.hgetAsync('usernameCache', username); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
+      user = JSON.parse(cachedUser);
+    } else {
+      user = await userData.getUserByName(username);
+      await client.hmsetAsync('usernameCache', username, user._id.toString());
+      await client.hmsetAsync(
+        'idCache',
+        user._id.toString(),
+        JSON.stringify(user)
+      );
+      if (!user.username) throw 'No user found.';
+    }
   } catch (e) {
     res.status(404).json({ error: e.message || e.toString() });
     return;
@@ -75,8 +94,20 @@ router.get('/email/:email', async (req, res) => {
   // get the user
   let user;
   try {
-    user = await userData.getUserByEmail(email);
-    if (!user.username) throw 'No user found.';
+    const cachedUserID = await client.hgetAsync('emailCache', email); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
+      user = JSON.parse(cachedUser);
+    } else {
+      user = await userData.getUserByEmail(email);
+      await client.hmsetAsync('emailCache', email, user._id.toString());
+      await client.hmsetAsync(
+        'idCache',
+        user._id.toString(),
+        JSON.stringify(user)
+      );
+      if (!user.username) throw 'No user found.';
+    }
   } catch (e) {
     res.status(404).json({ error: e.message || e.toString() });
     return;
@@ -141,7 +172,22 @@ router.patch('/edit-user', async (req, res) => {
     res.status(400).json({ error: 'Minimum of one field must be updated' });
   } else {
     try {
-      updatedUser = await userData.updateUser(originalEmail, updatedFields);
+      const updatedUser = await userData.updateUser(
+        originalEmail,
+        updatedFields
+      );
+      await client.hdelAsync('emailCache', originalEmail); //delete old user info from cache
+      await client.hmsetAsync(
+        //add new user info to cache
+        'emailCache',
+        updatedUser.email,
+        updatedUser._id.toString()
+      );
+      await client.hmsetAsync(
+        'idCache',
+        updatedUser._id.toString(),
+        JSON.stringify(updatedUser)
+      );
       res.status(201).json(updatedUser);
     } catch (e) {
       res.status(400).json({ error: `Could not update user. Error: ${e}` });
@@ -161,7 +207,34 @@ router.delete('/:username', async (req, res) => {
   }
   // delete the user
   try {
+    let user;
+    const cachedUserID = await client.hgetAsync('usernameCache', username); //returns an ID
+    if (cachedUserID) {
+      const cachedUser = await client.hgetAsync('idCache', cachedUserID); //returns all information
+      user = JSON.parse(cachedUser);
+    } else {
+      user = await userData.getUserByName(username);
+    }
+    // remove user from friend and pending arrays, must remove in redis as well
+    const [ friendList, pendingList ] = await userData.removeFriendAll(username);
+    // unsure how to deal with the loop of asyncs
+    for (let friend of friendList){
+      let fstr = await client.hgetAsync('idCache', friend.toString());
+      let f = JSON.parse(fstr);
+      f.friends = f.friends.filter(e => e !== user._id.toString());
+      await client.hsetAsync('idCache', friend.toString(), JSON.stringify(f));
+    }
+    for (let pending of pendingList){
+      let pstr = await client.hgetAsync('idCache', pending.pendingId.toString());
+      let p = JSON.parse(pstr);
+      p.pending_friends = p.pending_friends.filter(e => e.pendingId !== user._id.toString());
+      await client.hsetAsync('idCache', pending.pendingId.toString(), JSON.stringify(p));
+    }
     await userData.removeUser(username);
+    //Remvoe user from wherever it may be in the cache
+    await client.hdelAsync('idCache', user._id.toString());
+    await client.hdelAsync('usernameCache', user.username.toString());
+    await client.hdelAsync('emailCache', user.email.toString());
   } catch (e) {
     res.status(400).json({ error: `Could not delete user. Error: ${e}` });
     return;
@@ -234,7 +307,11 @@ router.patch('/add-friend', async (req, res) => {
   // add the friend
   let user;
   try {
-    user = await friendData.addFriend(username, friendToAdd);
+    let [ userAdding , toAdd ] = await friendData.addFriend(username, friendToAdd);
+    // update relevant users in cache
+    await client.hsetAsync('idCache', userAdding._id.toString(), JSON.stringify(userAdding));
+    await client.hsetAsync('idCache', toAdd._id.toString(), JSON.stringify(toAdd));
+    user = userAdding;
     if (!user.username) throw 'Error adding friend.';
   } catch (e) {
     console.log(e);
@@ -261,7 +338,11 @@ router.patch('/remove-friend', async (req, res) => {
   // remove the friend
   let user;
   try {
-    user = await friendData.removeFriend(username, friendToRemove);
+    let [ userRemoving, toRemove] = await friendData.removeFriend(username, friendToRemove);
+    // update relevant users in cache
+    await client.hsetAsync('idCache', userRemoving._id.toString(), JSON.stringify(userRemoving));
+    await client.hsetAsync('idCache', toRemove._id.toString(), JSON.stringify(toRemove));
+    user = userRemoving;
     if (!user.username) throw 'Error removing friend.';
   } catch (e) {
     res.status(400).json({ error: e });
@@ -287,7 +368,11 @@ router.patch('/accept-friend', async (req, res) => {
   // accept the friend
   let user;
   try {
-    user = await friendData.acceptFriend(username, friendToAccept);
+    let [userAccepting, toAccept] = await friendData.acceptFriend(username, friendToAccept);
+    // update relevant cached users
+    await client.hsetAsync('idCache', userAccepting._id.toString(), JSON.stringify(userAccepting));
+    await client.hsetAsync('idCache', toAccept._id.toString(), JSON.stringify(toAccept));
+    user = userAccepting;
     if (!user.username) throw 'Error accepting friend.';
   } catch (e) {
     res.status(400).json({ error: e });
@@ -313,10 +398,13 @@ router.patch('/remove-pending-friend', async (req, res) => {
   // remove the pending friend
   let user;
   try {
-    user = await friendData.removePending(username, pendingToRemove);
+    let [userRemoving, toRemove] = await friendData.removePending(username, pendingToRemove);
+    // update relevant users in cache
+    await client.hsetAsync('idCache', userRemoving._id.toString(), JSON.stringify(userRemoving));
+    await client.hsetAsync('idCache', toRemove._id.toString(), JSON.stringify(toRemove));
+    user = userRemoving;
     if (!user.username) throw 'Error removing pending friend.';
   } catch (e) {
-    console.log(e);
     res.status(400).json({ error: e });
     return;
   }
@@ -337,7 +425,7 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
-  // add the score
+  // add the score - throws if not the new highest score
   let user;
   try {
     user = await userData.addHighScore(username, highScore);
@@ -347,7 +435,102 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
+  // add to leaderboard
+  const result = await client.zadd('leaderboard', highScore, username);
+  if (!result) {
+    res.status(400).json({error: `Error adding ${username} to the leaderboard`});
+    return;
+  }
+
+  // add to database
+  let dbResult;
+  try {
+    dbResult = await leaderboardData.addToLeaderboard(username, highScore);
+  } catch (e) {
+    res.status(400).json({error: `Error adding ${username} to the database leaderboard: ${e}`});
+    return;
+  }
+
   res.status(200).json(user);
 });
+
+// save game info
+router.patch('/save-game-info', async (req, res) => {
+  // get the variables from req.body
+  let { username, categories } = req.body;
+  // check inputs
+  try {
+    checkString(username, 'Username', false);
+    checkArray(categories, 'Categories');
+    if (categories.length<=0) throw 'Please pass in at least one category.';
+    for (let {categoryId, score} of categories) {
+      checkNum(categoryId, 'CategoryId');
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
+  } catch (e) {
+    res.status(400).json({error:`Error in saving game info: ${e}`});
+    return;
+  }
+
+  // add the category
+  let user;
+  try {
+    user = await userData.saveGameInfo(username, categories);
+  } catch (e) {
+    res.status(400).json({error:`Error in saving game info: ${e}`});
+    return;
+  }
+
+  res.status(200).json(user);
+});
+
+// get leaderboard
+router.get('/leaderboard', async (req, res) => {
+  // get the number of people on the leaderboard
+  let leaderboardCount = await client.zcardAsync('leaderboard');
+  // get the number of people in the database leaderboard
+  const dbLeaderboard = await leaderboardData.getLeaderboard();
+  const dbLeaderboardCount = dbLeaderboard.leaderboard.length;
+  // if they're different, add new people to the redis leaderboard
+  if (dbLeaderboardCount>leaderboardCount) {
+    for (let entry of dbLeaderboard.leaderboard) {
+      if (typeof entry==='object') {
+        try {
+          const result = await client.zadd('leaderboard', entry.score, entry.username);
+          if (!result) {
+            res.status(400).json({error: `Error adding ${entry.username} to the leaderboard`});
+            return;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        leaderboardCount++;
+      }
+    }
+  }
+
+  // get the leaderboard - outputs ['FIRSTPLACE', 'SCORE', 'SECONDPLACE', 'SCORE', ...]
+  const redisLeaderboard = await client.zrevrangeAsync('leaderboard', 0, leaderboardCount-1, 'WITHSCORES');
+  
+  // make it usable
+  const leaderboard = [];
+  for (let i=0;i<redisLeaderboard.length;i+=2) {
+    const username = redisLeaderboard[i];
+    const score = redisLeaderboard[i+1];
+    try {
+      const user = await userData.getUserByName(username);
+      leaderboard.push({
+        username,
+        score,
+        _id: user._id
+      });
+    } catch (e) {
+      // just skip this one
+    }
+  }
+  
+  res.status(200).json({leaderboard});
+})
 
 module.exports = router;

@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import {Button} from '@mui/material';
+import {Link} from 'react-router-dom';
 
 export default function GameFinished(props) {
   let score = props.score;

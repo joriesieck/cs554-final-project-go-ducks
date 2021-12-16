@@ -139,15 +139,38 @@ async function getAllPendingFriends(username, authToken) {
   return data;
 }
 
+async function addFriend (username, friendToAdd, authToken) {
+	const {data} = await axios.patch(`${siteUrl}/users/add-friend`, {
+		username,
+		friendToAdd
+	}, {
+    headers: {
+      authToken
+    }
+  });
+	return data;
+}
+
+async function getLeaderboard (authToken) {
+	const {data} = await axios.get(`${siteUrl}/users/leaderboard`, {
+    headers: {
+      authToken
+    }
+  });
+	return data;
+}
+
 export {
-  getUserByName,
-  getUserByEmail,
-  addUser,
-  removeUser,
-  editUserInfo,
-  removeFriend,
-  removePendingFriend,
-  acceptPendingFriend,
-  getAllFriends,
-  getAllPendingFriends,
-};
+	getUserByName,
+	getUserByEmail,
+	addUser,
+	removeUser,
+	editUserInfo,
+	removeFriend,
+	removePendingFriend,
+	acceptPendingFriend,
+	getAllFriends,
+	getAllPendingFriends,
+	addFriend,
+	getLeaderboard
+}

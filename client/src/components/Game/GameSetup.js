@@ -49,80 +49,41 @@ export default function GameSetup() {
     return ['r', 'a', 'n', 'd', 'o', 'm'];
   };
 
-  const CategoryForm = (props) => {
-    return (
-      <div>
-        <TextField></TextField>
-        <Button></Button>
-      </div>
+    return(
+        <div id="gamePlay">
+            {inSetup ?
+            <FormControl id="gameSetupForm" component="fieldset">
+                <FormLabel>What kind of game are you looking to play?</FormLabel>
+                <ToggleButtonGroup exclusive value={gameType} onChange={handleGameTypeChange}>
+                    <ToggleButton value="solo">Solo</ToggleButton>
+                    <ToggleButton value="friends">With Friends</ToggleButton>
+                </ToggleButtonGroup>
+                <br/>
+                {
+                    gameType !== "" ? 
+                    <>
+                        <FormLabel>What kind of categories would you like to play with?</FormLabel>
+                        <ToggleButtonGroup exclusive value={categoryChoice} onChange={handleCategoryChoiceChange}>
+                            <ToggleButton value="random">Random</ToggleButton>
+                            <ToggleButton value="custom">Custom</ToggleButton>
+                        </ToggleButtonGroup>
+                    </> : <></>
+                }
+                {
+                    categoryChoice !== "" && gameType !== "" ? 
+                    (categoryChoice === 'custom' ? <CategoryForm /> : 
+                    <><span>Categories</span><ul>
+                        {categories.map((category) => <li key={category}>{category}</li>)}
+                    </ul></>) : <></>
+                }
+
+                {categoryChoice !== '' && gameType !== '' && categories.length === 6 || categoryChoice === 'custom' ? <Button type="submit" onClick={handleFormSubmit}>Start Game</Button> : <></>}
+            </FormControl>
+            : <div></div>
+            }
+            {inGame ?
+            <GameGrid id="grid" categories={categories}></GameGrid> : <div></div>
+            }
+        </div>    
     );
   };
-
-  return (
-    <div id="gamePlay">
-      {inSetup ? (
-        <FormControl id="gameSetupForm" component="fieldset">
-          <FormLabel>What kind of game are you looking to play?</FormLabel>
-          <ToggleButtonGroup
-            exclusive
-            value={gameType}
-            onChange={handleGameTypeChange}
-          >
-            <ToggleButton value="solo">Solo</ToggleButton>
-            <ToggleButton value="friends">With Friends</ToggleButton>
-          </ToggleButtonGroup>
-          <br />
-          {gameType !== '' ? (
-            <>
-              <FormLabel>
-                What kind of categories would you like to play with?
-              </FormLabel>
-              <ToggleButtonGroup
-                exclusive
-                value={categoryChoice}
-                onChange={handleCategoryChoiceChange}
-              >
-                <ToggleButton value="random">Random</ToggleButton>
-                <ToggleButton value="custom">Custom</ToggleButton>
-              </ToggleButtonGroup>
-            </>
-          ) : (
-            <></>
-          )}
-          {categoryChoice !== '' && gameType !== '' ? (
-            categoryChoice === 'custom' ? (
-              <CategoryForm />
-            ) : (
-              <ul>
-                Categories
-                {categories.map((category) => (
-                  <li key={category}>{category}</li>
-                ))}
-              </ul>
-            )
-          ) : (
-            <></>
-          )}
-
-          {(categoryChoice !== '' &&
-            gameType !== '' &&
-            categories.length === 6) ||
-          categoryChoice === 'custom' ? (
-            <Button type="submit" onClick={handleFormSubmit}>
-              Start Game
-            </Button>
-          ) : (
-            <></>
-          )}
-        </FormControl>
-      ) : (
-        <div></div>
-      )}
-      {inGame ? (
-        <GameGrid id="grid" categories={categories}></GameGrid>
-      ) : (
-        <div></div>
-      )}
-    </div>
-  );
-}

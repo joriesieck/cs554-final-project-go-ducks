@@ -43,6 +43,10 @@ const inputChecks = {
       throw `${varName}: ${email} is an invalid email`;
     }
   },
+  checkArray(array, varName) {
+    if (!array || arguments.length<2) throw `Please provide a value for ${varName}`;
+    if (!Array.isArray(array)) throw `${varName} must be an array.`;
+  }
 };
 
 module.exports = inputChecks;

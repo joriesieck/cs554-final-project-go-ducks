@@ -5,10 +5,6 @@ import {
   CircularProgress,
   Checkbox,
   Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Modal,
   TextField,
   FormControlLabel,
@@ -49,9 +45,6 @@ import {
   gitProvider,
   googleProvider,
 } from '../../firebase/firebaseSetup';
-import Image from 'next/image';
-import googleLogo from '../../imgs/google-logo.png';
-import gitLogo from '../../imgs/github-logo.png';
 import styles from './Profile.module.css';
 
 export default function Profile() {
@@ -582,6 +575,7 @@ export default function Profile() {
               <CloseIcon
                 className={styles.profileReauthClose}
                 onClick={handleClose}
+                aria-label='close modal'
               />
             </Grid>
           </Grid>
@@ -634,6 +628,7 @@ export default function Profile() {
                 onClick={() => {
                   setOpenRemoveModal(false);
                 }}
+                aria-label='close modal'
               />
             </Grid>
           </Grid>
@@ -677,6 +672,7 @@ export default function Profile() {
                 onClick={() => {
                   setOpenRejectModal(false);
                 }}
+                aria-label='close modal'
               />
             </Grid>
           </Grid>
@@ -723,6 +719,7 @@ export default function Profile() {
                 onClick={() => {
                   setOpenAcceptModal(false);
                 }}
+                aria-label='close modal'
               />
             </Grid>
           </Grid>
@@ -768,7 +765,7 @@ export default function Profile() {
                 helperText={usernameError.replace('Error: ', '')}
               />
               <Button type="submit" className={styles.submitCheck}>
-                <CheckIcon />
+                <CheckIcon aria-label='save changes' />
               </Button>
             </form>
           )}
@@ -778,6 +775,7 @@ export default function Profile() {
                 onClick={(e) => {
                   toggleEdit(e, 'edit-username');
                 }}
+                aria-label='discard edits'
               />
             ) : (
               'Edit'
@@ -810,7 +808,7 @@ export default function Profile() {
                     helperText={emailError.replace('Error: ', '')}
                   />
                   <Button type="submit" className={styles.submitCheck}>
-                    <CheckIcon />
+                    <CheckIcon aria-label='save changes' />
                   </Button>
                 </form>
               )}
@@ -820,6 +818,7 @@ export default function Profile() {
                     onClick={(e) => {
                       toggleEdit(e, 'edit-email');
                     }}
+                    aria-label='discard edits'
                   />
                 ) : (
                   'Edit'
@@ -837,7 +836,7 @@ export default function Profile() {
                     helperText={passError.replace('Error: ', '')}
                   />
                   <Button type="submit" className={styles.submitCheck}>
-                    <CheckIcon />
+                    <CheckIcon aria-label='save changes' />
                   </Button>
                 </form>
               )}
@@ -853,6 +852,7 @@ export default function Profile() {
                     onClick={(e) => {
                       toggleEdit(e, 'edit-password');
                     }}
+                    aria-label='discard edits'
                   />
                 ) : (
                   'Change Password'
@@ -865,7 +865,6 @@ export default function Profile() {
         {/* google */}
         {provider === 'google.com' && (
           <div className={styles.profileProvider}>
-            <Image src={googleLogo} alt="google logo" height={50} width={50} />
             <p>
               Edit your sign-in information on{' '}
               <a
@@ -883,7 +882,6 @@ export default function Profile() {
         {/* github */}
         {provider === 'github.com' && (
           <div className={styles.profileProvider}>
-            <Image src={gitLogo} alt="github logo" height={50} width={50} />
             <p>
               Edit your sign-in information on{' '}
               <a href="https://github.com/" target="_blank" rel="noreferrer">
@@ -926,7 +924,7 @@ export default function Profile() {
                 control={<Checkbox />}
               />
               <Button type="submit" className={styles.submitCheck}>
-                <CheckIcon />
+                <CheckIcon aria-label='save changes' />
               </Button>
             </form>
           )}
@@ -936,6 +934,7 @@ export default function Profile() {
                 onClick={(e) => {
                   toggleEdit(e, 'edit-leaderboard');
                 }}
+                aria-label='discard edits'
               />
             ) : (
               'Change'
