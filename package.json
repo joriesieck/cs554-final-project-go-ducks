@@ -2,7 +2,6 @@
 	"name": "jeopardy-trainer",
 	"version": "1.0.0",
 	"description": "CS554 final project",
-	"main": "index.js",
 	"scripts": {
 		"client-install": "cd client && npm install",
 		"server-install": "cd server && npm install",
