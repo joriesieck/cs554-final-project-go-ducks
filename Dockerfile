@@ -4,18 +4,30 @@ FROM node:16
 # set working directory as root, since we want to run both client and server
 WORKDIR .
 
+# # install redis
+# RUN wget https://download.redis.io/releases/redis-6.2.6.tar.gz
+# RUN tar xzf redis-6.2.6.tar.gz
+# WORKDIR ./redis-6.2.6
+# RUN make
+
+# # WORKDIR ..
+
+# RUN ./src/redis-cli PING
+
 # install local dependencies
 COPY package*.json ./
 RUN npm install
 # for client
-WORKDIR ./client
-RUN npm install
+# WORKDIR ./client
+# COPY package*.json ./
+# RUN npm install
 # for server
-WORKDIR ../server
-RUN npm install
+# WORKDIR ../server
+# COPY package*.json ./
+# RUN npm install
 
 # reset workdir
-WORKDIR ..
+# WORKDIR ..
 
 # bundle source code
 COPY . .
