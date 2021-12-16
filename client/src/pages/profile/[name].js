@@ -10,7 +10,7 @@ export default function profileByName({ data }) {
 
 export async function getStaticProps({ params }) {
 	const data = await getProfileByUserName(params.name);
-
+    
 	return {
 		props: { data },
 		revalidate: 2000
