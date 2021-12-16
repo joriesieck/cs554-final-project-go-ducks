@@ -30,6 +30,31 @@ export default function Practice()
 {
     const [questionsCompleted, setQuestionsCompleted] = useState(0);
     const [mode, setMode] = useState('setup');
+    const [practiceType, setPracticeType] = useState('');
+    const [categoryChoice, setCategoryChoice] = useState('');
+    const [category, setCategory] = useState('');
+
+    useEffect(() =>
+    {
+        if (categoryChoice === 'random') 
+        {
+            let cats = setRandomCategories();
+            setCategories(cats)
+        }
+    }, [categoryChoice])
+
+    const handleCategoryChoiceChange = (e, catChoice) =>
+    {
+        setCategoryChoice(catChoice);
+        if (catChoice === 'custom') setCategory([]);
+        console.log(catChoice)
+    }
+
+    const handleFormSubmit = (e) =>
+    {
+        setInSetup(false);
+        setInGame(true);
+    }
     //select categories we want to do practice on
     //select a number of questions to have for practice or "free play"
     //toggle buttons, selection
