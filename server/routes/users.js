@@ -13,10 +13,7 @@ const {
 } = require('../inputChecks');
 const bluebird = require('bluebird');
 const redis = require('redis');
-const client = redis.createClient({
-  host: 'redis',
-  port: 6379
-});
+const client = redis.createClient(6379, "redis");
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);

@@ -1,15 +1,19 @@
 version: '3'
 services:
-  redis-server:
-    container_name: redis
-    image: 'redis'
+  redis:
+    container_name: redis-container
+    image: redis:latest
+    restart: always
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
     ports:
-      - "6379:6379"
+      - 6379:6379
+    volumes:
+      - /home/jorie/f21-classes/cs554/cs554-final-project-go-ducks/redis.conf:/tmp/redis.conf
   node-app:
     depends_on:
       - redis
     build: .
     ports:
-      - "4001:8081"
+      - 3001:3001
     links:
       - redis
