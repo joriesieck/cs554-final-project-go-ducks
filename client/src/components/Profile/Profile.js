@@ -16,7 +16,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import CheckIcon from '@mui/icons-material/Check';
 import { useSelector, useDispatch } from "react-redux";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
 import { 
