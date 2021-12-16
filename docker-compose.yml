@@ -1,15 +1,22 @@
-version: '3'
-services:
-  node-app:
-    build: .
-    ports:
-      - "3000:3000"
-      - "8001:8001"
-    environment:
-      NODE_ENV: development
-      REDIS_HOST: redis://db:6379
-    links:
-      - "db"
-  db:
-    image: docker.io/redis:latest
+redis:
+  image: redis
+  container_name: redis-cache
+  expose:
+    - 6379
+
+node_app:
+  build: ./
+  volumes:
+    - ./:/var/www/node_app
+  ports:
+    - 3000:3000
+    - 3001:3001
+  links:
+    - redis
+  environment:
+    - REDIS_URL=redis://redis-cache
+    - NODE_ENV=development
+    - PORT=3000
+  command:
+    sh -c 'npm i && npm start'
     
