@@ -2,11 +2,20 @@
 FROM node:16
 
 # set working directory as root, since we want to run both client and server
-WORKDIR /home/jorie/f21-classes/cs554/cs554-final-project-go-ducks
+WORKDIR .
 
 # install local dependencies
 COPY package*.json ./
-RUN npm run install-dependencies
+RUN npm install
+# for client
+WORKDIR ./client
+RUN npm install
+# for server
+WORKDIR ../server
+RUN npm install
+
+# reset workdir
+WORKDIR ..
 
 # bundle source code
 COPY . .
