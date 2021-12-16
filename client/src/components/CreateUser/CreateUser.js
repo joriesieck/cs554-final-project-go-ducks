@@ -1,5 +1,5 @@
 import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { checkString, checkBool } from "../../utils/inputChecks";
 import { addUser, getUserByEmail, getUserByName, removeUser } from "../../utils/backendCalls";
@@ -17,8 +17,8 @@ import { Link, Redirect } from 'react-router-dom';
 import Image from 'next/image';
 
 import styles from './CreateUser.module.css';
-import googleLogo from '../../imgs/google-logo.png';
-import gitLogo from '../../imgs/github-logo.png';
+import googleLogo from '/public/imgs/google-logo.png';
+import gitLogo from '/public/imgs/github-logo.png';
 
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
@@ -29,6 +29,22 @@ export default function CreateUser() {
 	const [emailExists, setEmailExists] = useState(false);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
+
+	useEffect(() => {
+		// add alt text to next images
+		const githubImg = document.getElementById('github-logo');
+		const googleImg = document.getElementById('google-logo');
+		try {
+			githubImg.firstChild.firstChild.firstChild.alt = 'transparent layer over logo';
+		} catch (e) {
+			console.log(`Error adding alt text to nextjs transparent layer over github logo: ${e}`);
+		}
+		try {
+			googleImg.firstChild.firstChild.firstChild.alt = 'transparent layer over logo';
+		} catch (e) {
+			console.log(`Error adding alt text to nextjs transparent layer over google logo: ${e}`);
+		}
+	}, []);
 
 	// if user is already logged in, redirect to home
 	if (user) return <Redirect to="/home" />;
@@ -295,7 +311,7 @@ export default function CreateUser() {
 			</form>}
 
 			{displayButton&& <div className={styles.providerLogos}>
-			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn}>
+			<Button variant="contained" className={styles.providerLogo} onClick={googleProviderSignIn} id='google-logo'>
 				<Image src={googleLogo} alt="sign in with google" height={50} width={50} />
 				Sign up with Google
 			</Button>
@@ -303,7 +319,7 @@ export default function CreateUser() {
 				<img src={fbLogo} alt="sign in with facebook" height={50} width={50} />
 				Sign in with Facebook
 			</Button> */}
-			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn}>
+			<Button variant="contained" className={styles.providerLogo} onClick={gitProviderSignIn} id='github-logo'>
 				<Image src={gitLogo} alt="sign in with github" height={50} width={50} />
 				Sign up with GitHub
 			</Button>
@@ -333,7 +349,7 @@ export default function CreateUser() {
 				</ul>
 			</Alert>}
 
-			<p>Already have an account? <a href="/">Log in</a> instead.</p>
+			<p>Already have an account? <Link to="/">Log in</Link> instead.</p>
 		</div>
 	)
 }

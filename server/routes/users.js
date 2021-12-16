@@ -3,6 +3,7 @@ const router = express.Router();
 const data = require('../data');
 const userData = data.users;
 const friendData = data.friends;
+const leaderboardData = data.leaderboard;
 const {
   checkString,
   checkBool,
@@ -424,13 +425,29 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
-  // add the score
+  // add the score - throws if not the new highest score
   let user;
   try {
     user = await userData.addHighScore(username, highScore);
     if (!user.username) throw 'Error adding score.';
   } catch (e) {
     res.status(400).json({ error: e });
+    return;
+  }
+
+  // add to leaderboard
+  const result = await client.zadd('leaderboard', highScore, username);
+  if (!result) {
+    res.status(400).json({error: `Error adding ${username} to the leaderboard`});
+    return;
+  }
+
+  // add to database
+  let dbResult;
+  try {
+    dbResult = await leaderboardData.addToLeaderboard(username, highScore);
+  } catch (e) {
+    res.status(400).json({error: `Error adding ${username} to the database leaderboard: ${e}`});
     return;
   }
 
@@ -467,5 +484,53 @@ router.patch('/save-game-info', async (req, res) => {
 
   res.status(200).json(user);
 });
+
+// get leaderboard
+router.get('/leaderboard', async (req, res) => {
+  // get the number of people on the leaderboard
+  let leaderboardCount = await client.zcardAsync('leaderboard');
+  // get the number of people in the database leaderboard
+  const dbLeaderboard = await leaderboardData.getLeaderboard();
+  const dbLeaderboardCount = dbLeaderboard.leaderboard.length;
+  // if they're different, add new people to the redis leaderboard
+  if (dbLeaderboardCount>leaderboardCount) {
+    for (let entry of dbLeaderboard.leaderboard) {
+      if (typeof entry==='object') {
+        try {
+          const result = await client.zadd('leaderboard', entry.score, entry.username);
+          if (!result) {
+            res.status(400).json({error: `Error adding ${entry.username} to the leaderboard`});
+            return;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        leaderboardCount++;
+      }
+    }
+  }
+
+  // get the leaderboard - outputs ['FIRSTPLACE', 'SCORE', 'SECONDPLACE', 'SCORE', ...]
+  const redisLeaderboard = await client.zrevrangeAsync('leaderboard', 0, leaderboardCount-1, 'WITHSCORES');
+  
+  // make it usable
+  const leaderboard = [];
+  for (let i=0;i<redisLeaderboard.length;i+=2) {
+    const username = redisLeaderboard[i];
+    const score = redisLeaderboard[i+1];
+    try {
+      const user = await userData.getUserByName(username);
+      leaderboard.push({
+        username,
+        score,
+        _id: user._id
+      });
+    } catch (e) {
+      // just skip this one
+    }
+  }
+  
+  res.status(200).json({leaderboard});
+})
 
 module.exports = router;
