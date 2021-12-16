@@ -12,7 +12,7 @@ function App() {
         <Route exact path="/" component={LogIn} />
         <Route exact path="/create-user" component={CreateUser} />
         <Route
-          path={['/home', '/profile', '/game', '/leaderboard']}
+          path={['/home', '/profile', '/game', '/practice', '/friends', '/leaderboard']}
           component={AuthContainer}
         />
       </Router>
