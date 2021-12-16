@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 import { getLeaderboard, getUserByEmail } from "../../utils/backendCalls";
 
 export default function Leaderboard () {
-	const user = useSelector((state) => state.user);	// highlight user
+	const user = useSelector((state) => state.user.user);	// highlight user
+	const authToken = useSelector((state) => state.auth.authToken);
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
 	const [friendsOnly, setFriendsOnly] = useState(false);
@@ -19,7 +20,7 @@ export default function Leaderboard () {
 		async function fetchData() {
 			let data;
 			try {
-				data = await getUserByEmail(user);
+				data = await getUserByEmail(user, authToken);
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setError((e.toString()));
@@ -37,7 +38,7 @@ export default function Leaderboard () {
 		async function fetchData() {
 			let data;
 			try {
-				data = await getLeaderboard();
+				data = await getLeaderboard(authToken);
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setError((e.toString()));

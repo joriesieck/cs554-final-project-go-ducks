@@ -76,7 +76,6 @@ export default function Profile() {
     friendId: '',
     friendUser: '',
   });
-  const [friendData, setFriendData] = useState(null);
 
   const user = useSelector((state) => state.user.user);
   const authToken = useSelector((state) => state.auth.authToken);
@@ -942,23 +941,25 @@ export default function Profile() {
           </Button>
         </Grid>
         {userData.high_scores.length > 0 && (
-          <List>
+          <Grid container>
             {userData.high_scores.map((score, i) => (
-              <ListItem disablePadding key={i}>
-                <ListItemIcon>
+              <Grid container>
+              <Grid item xs={1}>
                   <SportsScoreIcon />
-                </ListItemIcon>
-                <ListItemText primary={score} />
-              </ListItem>
+              </Grid>
+              <Grid item xs={11}>
+                {score}
+              </Grid>
+              </Grid>
             ))}
-          </List>
+          </Grid>
         )}
         {userData.high_scores.length <= 0 && <p>No high scores to show.</p>}
       </div>
       <div className={styles.profileList}>
         <h2>Friends</h2>
         {userData.friends.length > 0 && (
-          <Grid container xs={12}>
+          <Grid container>
             {userData.friends.map(({ _id, username }, i) => (
               <>
                 <Grid item xs={1} className={styles.gridRow}>
@@ -1003,7 +1004,7 @@ export default function Profile() {
               </Grid>
               {userData.pending_friends.map(
                 ({ _id, username, pending_status }, i) => (
-                  <Grid container id={`${_id}-row`} xs={12}>
+                  <Grid container id={`${_id}-row`}>
                     <Grid item xs={1} className={styles.gridRow}>
                       <PersonIcon className={styles.personIcon} />
                     </Grid>
@@ -1025,6 +1026,7 @@ export default function Profile() {
                             onClick={(e) => {
                               triggerConfirmModal(e, 'accept', _id, username);
                             }}
+                            aria-label='accept friend'
                           />
                         </Button>
                       )}
@@ -1053,6 +1055,7 @@ export default function Profile() {
                               pending_status
                             );
                           }}
+                          aria-label='reject friend'
                         />
                       </Button>
                     </Grid>

@@ -214,6 +214,7 @@ export default function CreateUser() {
         setEmail(result.user.email);
         setUsername(user.username);
         setEmailExists(true);
+        setStoreAuthToken(authToken);
         return;
       }
     } catch (e) {
