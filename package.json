@@ -1,0 +1,27 @@
+{
+	"name": "jeopardy-trainer",
+	"version": "1.0.0",
+	"description": "CS554 final project",
+	"main": "index.js",
+	"scripts": {
+		"client-install": "cd client && npm install",
+		"server-install": "cd server && npm install",
+		"install-dependencies": "concurrently \"npm run client-install\" \"npm run server-install\"",
+		"start-client": "cd client && npm run dev",
+		"start-server": "cd server && npm start",
+		"start": "concurrently \"npm run start-client\" \"npm run start-server\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/joriesieck/cs554-final-project-go-ducks.git"
+	},
+	"author": "Elias Frieling, Jorie Sieck, Jack Brummer, Ava Engstrom, Corinne Wisniewski",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/joriesieck/cs554-final-project-go-ducks/issues"
+	},
+	"homepage": "https://github.com/joriesieck/cs554-final-project-go-ducks#readme",
+	"dependencies": {
+		"concurrently": "^6.4.0"
+	}
+}
