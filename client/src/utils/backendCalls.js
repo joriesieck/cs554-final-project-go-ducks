@@ -78,6 +78,11 @@ async function addFriend (username, friendToAdd) {
 	return data;
 }
 
+async function getLeaderboard () {
+	const {data} = await axios.get(`${siteUrl}/users/leaderboard`);
+	return data;
+}
+
 export {
 	getUserByName,
 	getUserByEmail,
@@ -89,5 +94,6 @@ export {
 	acceptPendingFriend,
 	getAllFriends,
 	getAllPendingFriends,
-	addFriend
+	addFriend,
+	getLeaderboard
 }
