@@ -15,8 +15,6 @@ const exportedMethods = {
     const userCollection = await users();
 
     const allUsers = await userCollection.find({}).toArray();
-    console.log(allUsers);
-    console.log('get user is fired');
 
     if (!allUsers) throw 'There are no users';
     return allUsers;
@@ -33,6 +31,7 @@ const exportedMethods = {
     checkString(username, 'Username', false);
     const userCollection = await users();
     const user = await userCollection.findOne({ username: username });
+
     if (!user) throw `User with username ${username} not found`;
     return user;
   },
