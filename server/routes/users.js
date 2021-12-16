@@ -481,8 +481,23 @@ router.get('/leaderboard', async (req, res) => {
   const leaderboardCount = await client.zcardAsync('leaderboard');
   // get the leaderboard - outputs ['FIRSTPLACE', 'SCORE', 'SECONDPLACE', 'SCORE', ...]
   const redisLeaderboard = await client.zrevrangeAsync('leaderboard', 0, leaderboardCount-1, 'WITHSCORES');
+  
   // make it usable
-  const leaderboard = {}
+  const leaderboard = [];
+  for (let i=0;i<redisLeaderboard.length;i+=2) {
+    const username = redisLeaderboard[i];
+    const score = redisLeaderboard[i+1];
+    try {
+      const user = await userData.getUserByName(username);
+      leaderboard.push({
+        username,
+        score,
+        _id: user._id
+      });
+    } catch (e) {
+      // just skip this one
+    }
+  }
   
   res.status(200).json({leaderboard});
 })
