@@ -424,13 +424,20 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
-  // add the score
+  // add the score - throws if not the new highest score
   let user;
   try {
     user = await userData.addHighScore(username, highScore);
     if (!user.username) throw 'Error adding score.';
   } catch (e) {
     res.status(400).json({ error: e });
+    return;
+  }
+
+  // add to leaderboard
+  const result = await client.zadd('leaderboard', highScore, username);
+  if (!result) {
+    res.status(400).json({error: `Error adding ${username} to the leaderboard`});
     return;
   }
 
@@ -467,5 +474,17 @@ router.patch('/save-game-info', async (req, res) => {
 
   res.status(200).json(user);
 });
+
+// get leaderboard
+router.get('/leaderboard', async (req, res) => {
+  // get the number of people on the leaderboard
+  const leaderboardCount = await client.zcardAsync('leaderboard');
+  // get the leaderboard - outputs ['FIRSTPLACE', 'SCORE', 'SECONDPLACE', 'SCORE', ...]
+  const redisLeaderboard = await client.zrevrangeAsync('leaderboard', 0, leaderboardCount-1, 'WITHSCORES');
+  // make it usable
+  const leaderboard = {}
+  
+  res.status(200).json({leaderboard});
+})
 
 module.exports = router;
