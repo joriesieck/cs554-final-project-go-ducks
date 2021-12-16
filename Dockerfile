@@ -4,13 +4,13 @@ FROM node:16
 # set working directory as root, since we want to run both client and server
 WORKDIR .
 
-# # install redis
-# RUN wget https://download.redis.io/releases/redis-6.2.6.tar.gz
-# RUN tar xzf redis-6.2.6.tar.gz
-# WORKDIR ./redis-6.2.6
-# RUN make
+# install redis
+RUN wget https://download.redis.io/releases/redis-6.2.6.tar.gz
+RUN tar xzf redis-6.2.6.tar.gz
+WORKDIR ./redis-6.2.6
+RUN make
 
-# # WORKDIR ..
+WORKDIR ..
 
 # RUN ./src/redis-cli PING
 
