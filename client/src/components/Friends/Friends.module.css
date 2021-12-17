@@ -1,0 +1,25 @@
+
+.searchModal {
+	max-width: 300px;
+	max-height: 50vh;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 100px;
+}
+
+.searchBox {
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	padding: 20px;
+	border-radius: 5%;
+    /* overflow: scroll; // I want it to scroll but the scrollbar is ugly*/
+}
+
+.searchClose {
+	cursor: pointer;
+}

@@ -21,6 +21,7 @@ import {
 import { Box } from "@mui/system";
 import PersonIcon from '@mui/icons-material/Person';
 import CloseIcon from '@mui/icons-material/Close';
+import styles from './Friends.module.css';
 
 export default function Friends() {
     const [ userData, setUserData ] = useState(null);
@@ -30,6 +31,9 @@ export default function Friends() {
     const [ error, setError ] = useState(null);
     const [ searchError, setSearchError ] = useState(null);
     const [ openSearchModal, setOpenSearchModal ] = useState(false);
+    const [ openRemoveModal, setOpenRemoveModal ] = useState(false);
+    const [ openRejectModal, setOpenRejectModal ] = useState(false);
+    const [ openAcceptModal, setOpenAcceptModal ] = useState(false);
 
     const user = useSelector((state) => state.user);
 
@@ -101,12 +105,13 @@ export default function Friends() {
                 open={openSearchModal}
                 onClose={() => setOpenSearchModal(false)}
                 aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description">
-                <Box>
+                aria-describedby="modal-modal-description"
+                className={styles.searchModal}>
+                <Box className={styles.searchBox}>
                     <Grid container>
                         <Grid item xs={1}></Grid>
                         <Grid item xs={10}><h2>Search Results</h2></Grid>
-                        <Grid item xs={1}><CloseIcon aria-label="close modal" onClick={()=> {setOpenSearchModal(false)}} /></Grid>
+                        <Grid item xs={1}><CloseIcon aria-label="close modal" className={styles.searchClose} onClick={()=> {setOpenSearchModal(false)}} /></Grid>
                     </Grid>
                     {searchResults && searchResults.length >0 && 
                     <Grid container>
