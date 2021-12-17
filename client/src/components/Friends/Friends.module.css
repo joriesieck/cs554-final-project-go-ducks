@@ -20,6 +20,10 @@
     /* overflow: scroll; // I want it to scroll but the scrollbar is ugly*/
 }
 
+.searchHeader {
+    vertical-align: top;
+}
+
 .searchClose {
 	cursor: pointer;
 }

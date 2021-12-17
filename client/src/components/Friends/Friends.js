@@ -108,7 +108,7 @@ export default function Friends() {
                 aria-describedby="modal-modal-description"
                 className={styles.searchModal}>
                 <Box className={styles.searchBox}>
-                    <Grid container>
+                    <Grid container className={styles.searchHeader}>
                         <Grid item xs={1}></Grid>
                         <Grid item xs={10}><h2>Search Results</h2></Grid>
                         <Grid item xs={1}><CloseIcon aria-label="close modal" className={styles.searchClose} onClick={()=> {setOpenSearchModal(false)}} /></Grid>
@@ -117,8 +117,10 @@ export default function Friends() {
                     <Grid container>
                         {searchResults.map((user) => (<>
                         <Grid item xs={7}>{user.username}</Grid>
-                        <Grid item xs={5}>Add Friend</Grid></>))}
+                        <Grid item xs={5}>Add Friend</Grid></>))} {/*Add friend text should depend on if user has friend already*/}
                     </Grid>}
+                    {searchResults && searchResults.length <= 0 && 
+                    <p>Sorry we couldn't find any users with that name</p>}
                 </Box>
             </Modal>
             <h1>Friend Management</h1>
@@ -145,7 +147,7 @@ export default function Friends() {
                         {pendingFriends.map((pending) => (<>
                         {pending.pending_status === 'received' && <><Grid item xs={1}><PersonIcon /></Grid>
                         <Grid item xs={8.5}>{pending.username}</Grid>
-                        <Grid item xs={2.5}>Action</Grid></>}</>))}
+                        <Grid item xs={2.5}>Unsend</Grid></>}</>))}
                     </Grid>}
                     {pendingFriends && pendingFriends.length <= 0 && <p>No requests received.</p>}
                 </Grid>
@@ -156,7 +158,7 @@ export default function Friends() {
                         {pendingFriends.map((pending) => (<>
                         {pending.pending_status === 'sent' && <><Grid item xs={1}><PersonIcon /></Grid>
                         <Grid item xs={8.5}>{pending.username}</Grid>
-                        <Grid item xs={2.5}>Action</Grid></>}</>))}
+                        <Grid item xs={2.5}>Accept</Grid></>}</>))}
                     </Grid>}
                     {pendingFriends && pendingFriends.length <= 0 && <p>No requests sent.</p>}
                 </Grid>
