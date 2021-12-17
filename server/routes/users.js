@@ -19,6 +19,19 @@ const client = redis.createClient();
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 // get user
+
+router.get("/", async (req, res) => {
+  let allUsers;
+  try {
+    allUsers = await userData.getAllUsers();
+    if (!allUsers) throw "there are no users"
+  } catch (e) {
+    res.status(404).json({ error: e.message || e.toString() });
+    return;
+  }
+  res.json(allUsers);
+})
+
 router.get('/username/:username', async (req, res) => {
   // get the username from req.params
   let { username } = req.params;

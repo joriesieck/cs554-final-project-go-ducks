@@ -2,6 +2,11 @@ import axios from 'axios';
 
 const siteUrl = 'http://localhost:3001';
 
+async function getAllUsers() {
+	const { data } = await axios.get(`${siteUrl}/users`);
+	return data;
+}
+
 async function getUserByName (username) {
 	const {data} = await axios.get(`${siteUrl}/users/username/${username}`);
 	return data;
@@ -84,6 +89,7 @@ async function getLeaderboard () {
 }
 
 export {
+	getAllUsers,
 	getUserByName,
 	getUserByEmail,
 	addUser,

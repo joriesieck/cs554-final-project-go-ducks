@@ -11,7 +11,9 @@ import Head from 'next/head';
 export default function _app({ Component, pageProps }) {
   return (
     <div>
-      <Head><title>Jeopardy Trainer</title></Head>
+      <Head>
+        <title>Jeopardy Trainer</title>
+      </Head>
       {typeof window === 'undefined' ? null : (
         <Router>
           <Provider store={store}>
