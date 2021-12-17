@@ -129,6 +129,26 @@ router.get('/email/:email', async (req, res) => {
   // send back to front end
   res.json(user);
 });
+// search users
+router.post('/search', async(req, res) => {
+  let { searchTerm } = req.body;
+  // check input
+  try {
+    searchTerm = checkString(searchTerm, "Search Term", false);
+  } catch (e) {
+    res.status(400).json({error: e});
+    return;
+  }
+  // perform search
+  let users;
+  try {
+    users = await userData.searchUsersByName(searchTerm);
+  } catch (e){
+    res.status(400).json({error: `Could not perform search for ${searchTerm}. Error: ${e}`});
+    return;
+  }
+  res.status(200).json(users);
+});
 // create user
 router.post('/', async (req, res) => {
   // get variables from req body
