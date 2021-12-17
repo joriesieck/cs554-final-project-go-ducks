@@ -102,6 +102,16 @@ export default function NavBar() {
             aria-controls='navigation-tabs'
             aria-labelledby='profile-tab'
           />
+          <Tab
+            value="friends"
+            label="Friends"
+            aria-label="Friends"
+            component={Link}
+            to="/friends"
+            id='friends-tab'
+            aria-controls='navigation-tabs'
+            aria-labelledby='profile-tab'
+          />
         </Tabs>
       </div>
       <div className="logout-nav">
