@@ -42,6 +42,16 @@ const exportedMethods = {
     if (!user) throw `User with email ${email} not found`;
     return user;
   },
+  async searchUsersByName(searchString){
+    let search = checkString(searchString, 'Search String', false);
+
+    let userCollection = await users();
+    let results = await userCollection.find(
+        {username: { $regex: ".*" + search + ".*", $options: "i"}}
+    )
+    results = results.toArray()
+    return results;
+  },
   async doesUserExist(username, email) {
     checkString(username, 'Username', false);
     checkEmail(email, 'Email');
