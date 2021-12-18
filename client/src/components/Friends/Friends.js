@@ -39,6 +39,7 @@ export default function Friends() {
     const [ openRejectModal, setOpenRejectModal ] = useState(false);
     const [ openAcceptModal, setOpenAcceptModal ] = useState(false);
     const [ openUnsendModal, setOpenUnsendModal ] = useState(false);
+    const [ openAddModal, setOpenAddModal ] = useState(false);
     const [ toggleFriends, setToggleFriends ] = useState({friendId: '', friendUser: ''});
     
 
@@ -84,7 +85,6 @@ export default function Friends() {
         let results;
         try {
             results = await searchUsersByName(searchTerm);
-            console.log(results)
             setSearchResults(results);
             setOpenSearchModal(true);
         } catch (e) {
@@ -110,6 +110,8 @@ export default function Friends() {
             setOpenAcceptModal(true);
         } else if (action === 'unsend'){
             setOpenUnsendModal(true);
+        } else if (action === 'add'){
+            setOpenAddModal(true);
         }
     }
 
@@ -190,6 +192,30 @@ export default function Friends() {
 		setOpenAcceptModal(false);
 	}
 
+    const triggerAddFriend = async(e) => {
+        e.preventDefault;
+        let friendToAdd = toggleFriends.friendUser;
+        let result;
+        try {
+            friendToAdd = checkString(friendToAdd, "friendToAdd", true, false);
+            result = await addFriend(userData.username, friendToAdd);
+            // update front end
+            const pendingFriends = await getAllPendingFriends(result.username);
+            userData.pending_friends = pendingFriends;
+            setPendingFriends(pendingFriends);
+        } catch (e) {
+            if (!e.response || !e.response.data || !e.response.data.error) {
+				setProviderError((e.toString()));
+				setOpenAddModal(false);
+				return;
+			}
+			setProviderError(e.response.data.error);
+			setOpenAddModal(false);
+			return;
+		}
+		setOpenAddModal(false);
+    }
+
     return (
         <div>
             {/*something is going weird with this modal but I honestly don't understand what*/}
@@ -205,8 +231,9 @@ export default function Friends() {
                         <Grid item xs={10}><h2>Search Results</h2></Grid>
                         <Grid item xs={1}><CloseIcon aria-label="close modal" className={styles.friendsClose} onClick={()=> {setOpenSearchModal(false)}} /></Grid>
                     </Grid>
+                    <Box className={styles.innerBox}>
                     {searchResults && searchResults.length >0 && 
-                    <Grid container>
+                    <Grid container className={styles.searchBody}>
                         {searchResults.map((result) => {
                             let areFriends = friends && (friends.findIndex((elem) => elem._id.toString() === result._id) !== -1);
                             let pendInd = pendingFriends.findIndex((elem) => elem._id.toString() === result._id);
@@ -217,22 +244,42 @@ export default function Friends() {
                                 stat = stat.charAt(0).toUpperCase() + stat.slice(1);
                             }
                             return (<>
-                            <Grid item xs={7}>{result.username}</Grid>
+                            <Grid item xs={6}>{result.username}</Grid>
                             {friends && areFriends && 
-                                <Grid item xs={5}>Already Friends</Grid>
+                                <Grid item xs={6}>Already Friends</Grid>
                             }
                             {friends && arePending && 
-                                <Grid item xs={5}>{stat}!</Grid>
+                                <Grid item xs={6}>{stat}!</Grid>
                             }
                             {friends && !areFriends && !arePending &&
-                                <Grid item xs={5}>Send Request</Grid>
+                                <Grid item xs={6}><Button onClick={(e) =>triggerConfirmModal(e, 'add', result._id, result.username)}>Send Request</Button></Grid>
                             }
                         </>)})}
                     </Grid>}
+                    </Box>
                     {searchResults && searchResults.length <= 0 && 
                     <p>Sorry we couldn't find any users with that name</p>}
                 </Box>
             </Modal>
+            <Modal
+				open={openAddModal}
+				onClose={() => {setOpenAddModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.friendsModal}>
+				<Box className={styles.friendsBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.friendsClose} onClick={() => {setOpenAddModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Add {toggleFriends.friendUser} as a friend?</p>
+					
+					<Button variant='contained' onClick={triggerAddFriend}>Yes, add friend</Button>
+					<Button onClick={() => {setOpenAddModal(false)}}>Nevermind</Button>
+				</Box>
+			</Modal>
             <Modal
 				open={openRemoveModal}
 				onClose={() => {setOpenRemoveModal(false)}}
