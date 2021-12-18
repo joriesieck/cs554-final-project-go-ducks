@@ -31,7 +31,6 @@ const exportedMethods = {
     checkString(username, 'Username', false);
     const userCollection = await users();
     const user = await userCollection.findOne({ username: username });
-
     if (!user) throw `User with username ${username} not found`;
     return user;
   },
@@ -133,8 +132,9 @@ const exportedMethods = {
     checkString(username, 'Username', false);
     checkArray(categories, 'Categories');
     if (categories.length <= 0) throw 'Please pass in at least one category.';
-    for (let { categoryId, score } of categories) {
+    for (let { categoryId, categoryName, score } of categories) {
       checkNum(categoryId, 'CategoryId');
+      checkString(categoryName, 'categoryName', true);
       if (!score) score = 0;
       checkNum(score, 'Score');
     }
@@ -145,12 +145,12 @@ const exportedMethods = {
     if (!user.recent_categories) user.recent_categories = [];
 
     // loop over categories
-    for (let { categoryId, score } of categories) {
+    for (let { categoryId, categoryName, score } of categories) {
       // if we've seen this before, remove the old category to preserve shifting order
       user.recent_categories = user.recent_categories.filter(
         (cat) => cat.categoryId !== categoryId
       );
-      user.recent_categories.push({ categoryId, score: score || 0 });
+      user.recent_categories.push({ categoryId, categoryName, score: score || 0 });
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length > 12) user.recent_categories.shift();
@@ -163,11 +163,11 @@ const exportedMethods = {
     const updatedUser = await userCollection.findOne({ username });
     return updatedUser;
   },
-  async addHighScore(username, highScore) {
+  async addHighScore(user, highScore) {
+    const { username } = user;
     checkString(username, 'Username', false);
     checkNum(highScore, 'HighScore');
     const userCollection = await users();
-    const user = await userCollection.findOne({ username });
 
     // make sure this is really a high score
     if (user.high_scores.length > 0 && Math.max(user.high_scores) >= highScore)
@@ -181,6 +181,13 @@ const exportedMethods = {
     if (!result.modifiedCount) throw `Error updating user ${username}`;
     const updatedUser = await userCollection.findOne({ username });
     return updatedUser;
+  },
+  async getHighScore(user) {
+    console.log(user);
+    const highScore = Math.max(user.high_scores);
+    console.log(highScore);
+    checkNum(highScore, 'high score');
+    return highScore;
   },
 };
 

@@ -3,6 +3,10 @@ import GameGrid from './GameGrid';
 import {FormControl, 
     FormLabel, ToggleButtonGroup, ToggleButton, Button, TextField} from '@mui/material';
 
+import axios from "axios";
+
+const baseUrl = "http://jservice.io/api";
+
 export default function GameSetup()
 {
     const [gameType, setGameType] = useState("");
@@ -14,11 +18,15 @@ export default function GameSetup()
 
     useEffect(() =>
     {
-        if (categoryChoice === 'random') 
+        async function fun()
         {
-            let cats = setRandomCategories();
-            setCategories(cats)
+            if (categoryChoice === 'random' && inSetup) 
+            {
+                let cats = await setRandomCategories();
+                setCategories(cats);
+            }
         }
+        fun();
     }, [categoryChoice])
     
     //query all categories from the API
@@ -33,21 +41,39 @@ export default function GameSetup()
     {
         setCategoryChoice(catChoice);
         if (catChoice === 'custom') setCategories([]);
-        console.log(catChoice)
         //the callback for the toggles
         //set the category choice
         //make the next step appear
     }
 
-    const handleFormSubmit = (e) =>
+    const handleFormSubmit = async (e) =>
     {
         setInSetup(false);
+        categories.forEach(async ({id, title}) =>
+        {
+            let questionObjArr = [];
+            let values = [200, 400, 600, 800, 1000]
+            for (let i = 0; i < 5; i++)
+            {
+                let questionObj = {}
+                const { data } = await axios.get(`${baseUrl}/clues/?category=${id}&value=${values[i]}`);
+                if (!data) throw 'UNCAUGHT ERROR';
+                
+            }
+        })
         setInGame(true);
     }
 
-    const setRandomCategories = () =>
+    const setRandomCategories = async () =>
     {
-        return ['r','a','n','d','o','m'];
+        let returnVal = [];
+        while (returnVal.length < 6)
+        {
+            const { data } = await axios.get(`${baseUrl}/random`);
+            console.log(data[0].category.title.toUpperCase())
+            returnVal.push({id: data[0].category.id, title: data[0].category.title.toUpperCase()});
+        }
+        return returnVal;
     }
 
     const CategoryForm = (props) =>
@@ -84,7 +110,7 @@ export default function GameSetup()
                     categoryChoice !== "" && gameType !== "" ? 
                     (categoryChoice === 'custom' ? <CategoryForm /> : 
                     <><span>Categories</span><ul>
-                        {categories.map((category) => <li key={category}>{category}</li>)}
+                        {categories.map((category) => <li key={category.title}>{category.title}</li>)}
                     </ul></>) : <></>
                 }
 

@@ -5,6 +5,7 @@ const { checkString, checkNum } = require('../inputChecks');
 
 const exportedMethods = {
   async addToLeaderboard(username, score) {
+    console.log(score);
     checkString(username, 'Username', false);
     checkNum(score, 'Score');
     const user = getUserByName(username);
