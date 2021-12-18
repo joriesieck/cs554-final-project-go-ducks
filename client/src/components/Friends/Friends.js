@@ -355,7 +355,7 @@ export default function Friends() {
 			</Modal>
             <h1>Friend Management</h1>
             {/*put friend leaderboard here?*/}
-            < FriendLeaderboard />
+            {friends && < FriendLeaderboard friendList={friends}/>}
             <form onSubmit={searchUsers}>
                 <h2>Find Friends to Add</h2>
                 <TextField id="userSearch" label="Find users to add" />
