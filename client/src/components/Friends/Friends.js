@@ -357,7 +357,7 @@ export default function Friends() {
             {/*put friend leaderboard here?*/}
             < FriendLeaderboard />
             <form onSubmit={searchUsers}>
-                <h2>Search for Friends</h2>
+                <h2>Find Friends to Add</h2>
                 <TextField id="userSearch" label="Find users to add" />
                 <Button type="submit">Search</Button>
                 {searchError && <Alert severity="error" className={styles.searchError}>{searchError}</Alert>}
