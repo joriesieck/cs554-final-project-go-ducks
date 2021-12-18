@@ -183,9 +183,7 @@ const exportedMethods = {
     return updatedUser;
   },
   async getHighScore(user) {
-    console.log(user);
-    const highScore = Math.max(user.high_scores);
-    console.log(highScore);
+    const highScore = Math.max(...user.high_scores);
     checkNum(highScore, 'high score');
     return highScore;
   },
