@@ -31,7 +31,6 @@ const exportedMethods = {
     checkString(username, 'Username', false);
     const userCollection = await users();
     const user = await userCollection.findOne({ username: username });
-
     if (!user) throw `User with username ${username} not found`;
     return user;
   },
@@ -164,11 +163,11 @@ const exportedMethods = {
     const updatedUser = await userCollection.findOne({ username });
     return updatedUser;
   },
-  async addHighScore(username, highScore) {
+  async addHighScore(user, highScore) {
+    const { username } = user;
     checkString(username, 'Username', false);
     checkNum(highScore, 'HighScore');
     const userCollection = await users();
-    const user = await userCollection.findOne({ username });
 
     // make sure this is really a high score
     if (user.high_scores.length > 0 && Math.max(user.high_scores) >= highScore)
@@ -182,6 +181,13 @@ const exportedMethods = {
     if (!result.modifiedCount) throw `Error updating user ${username}`;
     const updatedUser = await userCollection.findOne({ username });
     return updatedUser;
+  },
+  async getHighScore(user) {
+    console.log(user);
+    const highScore = Math.max(user.high_scores);
+    console.log(highScore);
+    checkNum(highScore, 'high score');
+    return highScore;
   },
 };
 
