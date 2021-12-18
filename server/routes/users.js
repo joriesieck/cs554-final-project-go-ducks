@@ -542,6 +542,18 @@ router.get('/leaderboard', async (req, res) => {
   }
   
   res.status(200).json({leaderboard});
+});
+
+// get all categories any user has practiced
+router.get('/categories', async (req, res) => {
+  let result;
+  try {
+    result = await categoryData.getAllCategories();
+  } catch (e) {
+    res.status(400).json({error: `Error getting categories: ${e}`});
+    return;
+  }
+  res.status(200).json({categories:result});
 })
 
 module.exports = router;
