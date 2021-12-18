@@ -357,10 +357,12 @@ export default function Friends() {
             {/*put friend leaderboard here?*/}
             < FriendLeaderboard />
             <form onSubmit={searchUsers}>
+                <h2>Search for Friends</h2>
                 <TextField id="userSearch" label="Find users to add" />
                 <Button type="submit">Search</Button>
                 {searchError && <Alert severity="error" className={styles.searchError}>{searchError}</Alert>}
             </form>
+            <br/>
             <Grid container>
                 <Grid item xs={12} md={4}>
                     <h2>My Friends</h2>

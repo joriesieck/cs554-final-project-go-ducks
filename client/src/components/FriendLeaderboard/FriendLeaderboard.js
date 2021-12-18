@@ -12,7 +12,7 @@ export default function FriendLeaderboard () {
 	const user = useSelector((state) => state.user);	// highlight user
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
-	const [friendsLBData, setFriendsLBData] = useState([]);
+	const [leaderboardData, setLeaderboardData] = useState([]);
 
 	useEffect(() => {
 		async function fetchData() {
@@ -46,21 +46,23 @@ export default function FriendLeaderboard () {
 				return;
 			}
 			console.log(data);
-			let friendsLB = data.leaderboard.filter((elem) => (elem.username === userData.username || userData.friends.includes(elem._id)));
-			setFriendsLBData(friendsLB);
+			setLeaderboardData(data.leaderboard);
 		}
 		fetchData();
 	}, []);
 
+	let friendsLB = leaderboardData && leaderboardData.filter((elem) => (elem.username === userData.username || userData.friends.includes(elem._id)));
+	console.log(friendsLB)
 	return (
 		<div className={styles.leaderboard}>
-			<h3>Friends Leaderboard</h3>
-			{(friendsLBData.length>0 && userData) && 
+			<h2>Friends Leaderboard</h2>
+			{(leaderboardData && friendsLB.length>0 && userData) && 
 			<>
 			<Grid container xs={12} className={styles.gridContainer}>
-				{friendsLBData.map(({username, score }, i) => {
+				{friendsLB.map(({username, score }, i) => {
 					const isSelf = username===userData.username;
 					let place;
+					console.log(isSelf)
 					if (i===0) place = 'firstPlace';
 					else if (i===1) place = 'secondPlace';
 					else if (i===2) place = 'thirdPlace';
@@ -73,7 +75,7 @@ export default function FriendLeaderboard () {
 			</Grid>
 			</>}
 			
-			{friendsLBData.length<=0 && <p>Looks like you and your friends aren't on the leaderboard yet. <Link to='/game'>Play a game</Link> to kick it off!</p>}
+			{leaderboardData && friendsLB.length<=0 && <p>Looks like you and your friends aren't on the leaderboard yet. <Link to='/game'>Play a game</Link> to kick it off!</p>}
 
 			{error && <Alert severity="error">{error}</Alert>}
 		</div>
