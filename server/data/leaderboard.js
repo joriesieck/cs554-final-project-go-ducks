@@ -18,7 +18,7 @@ const exportedMethods = {
 		currentLeaderboard.leaderboard.push({username, score});
 		// update
 		const result = await leaderboardCollection.updateOne({tag: 'leaderboard'}, {$set: {leaderboard:currentLeaderboard.leaderboard}});
-		if (!result.modifiedCount) throw 'Error updating leaderboard';
+		if (!result.acknowledged) throw 'Error updating leaderboard';
 		return result;
 	},
 	async getLeaderboard () {

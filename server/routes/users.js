@@ -4,6 +4,7 @@ const data = require('../data');
 const userData = data.users;
 const friendData = data.friends;
 const leaderboardData = data.leaderboard;
+const categoryData = data.categories;
 const {
   checkString,
   checkBool,
@@ -425,27 +426,46 @@ router.patch('/remove-pending-friend', async (req, res) => {
   res.status(200).json(user);
 });
 
-// add high score
-router.patch('/add-highscore', async (req, res) => {
+// save game info
+router.patch('/save-game-info', async (req, res) => {
   // get the variables from req.body
-  let { username, highScore } = req.body;
-  // make sure it's a string, nonempty, etc
+  let { username, categories, highScore } = req.body;
+  // check inputs
   try {
-    username = checkString(username, 'Username', false);
+    checkString(username, 'Username', false);
+    checkArray(categories, 'Categories');
+    if (categories.length<=0) throw 'Please pass in at least one category.';
+    for (let {categoryId, categoryName, score} of categories) {
+      checkNum(categoryId, 'CategoryId');
+      checkString(categoryName, 'categoryName', true);
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
     checkNum(highScore, 'highScore');
   } catch (e) {
-    res.status(400).json({ error: e });
+    res.status(400).json({error:`Error in saving game info: ${e}`});
+    return;
+  }
+
+  // add the categories to the user
+  let user;
+  try {
+    user = await userData.saveGameInfo(username, categories);
+  } catch (e) {
+    res.status(400).json({error:`Error in saving game info: ${e}`});
     return;
   }
 
   // add the score - throws if not the new highest score
-  let user;
   try {
     user = await userData.addHighScore(username, highScore);
     if (!user.username) throw 'Error adding score.';
   } catch (e) {
-    res.status(400).json({ error: e });
-    return;
+    if (!e.includes('not higher')) {
+      res.status(400).json({ error: e });
+      return;
+    }
+    // otherwise it's fine, no op
   }
 
   // add to leaderboard
@@ -455,7 +475,7 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
-  // add to database
+  // add to database leaderboard
   let dbResult;
   try {
     dbResult = await leaderboardData.addToLeaderboard(username, highScore);
@@ -464,35 +484,13 @@ router.patch('/add-highscore', async (req, res) => {
     return;
   }
 
-  res.status(200).json(user);
-});
-
-// save game info
-router.patch('/save-game-info', async (req, res) => {
-  // get the variables from req.body
-  let { username, categories } = req.body;
-  // check inputs
-  try {
-    checkString(username, 'Username', false);
-    checkArray(categories, 'Categories');
-    if (categories.length<=0) throw 'Please pass in at least one category.';
-    for (let {categoryId, score} of categories) {
-      checkNum(categoryId, 'CategoryId');
-      if (!score) score = 0;
-      checkNum(score, 'Score');
+  // add the categories to the database
+  for (let {categoryId, categoryName} of categories) {
+    try {
+      await categoryData.addCategory(categoryId, categoryName);
+    } catch (e) {
+      // no op - just move on
     }
-  } catch (e) {
-    res.status(400).json({error:`Error in saving game info: ${e}`});
-    return;
-  }
-
-  // add the category
-  let user;
-  try {
-    user = await userData.saveGameInfo(username, categories);
-  } catch (e) {
-    res.status(400).json({error:`Error in saving game info: ${e}`});
-    return;
   }
 
   res.status(200).json(user);

@@ -133,8 +133,9 @@ const exportedMethods = {
     checkString(username, 'Username', false);
     checkArray(categories, 'Categories');
     if (categories.length <= 0) throw 'Please pass in at least one category.';
-    for (let { categoryId, score } of categories) {
+    for (let { categoryId, categoryName, score } of categories) {
       checkNum(categoryId, 'CategoryId');
+      checkString(categoryName, 'categoryName', true);
       if (!score) score = 0;
       checkNum(score, 'Score');
     }
@@ -145,12 +146,12 @@ const exportedMethods = {
     if (!user.recent_categories) user.recent_categories = [];
 
     // loop over categories
-    for (let { categoryId, score } of categories) {
+    for (let { categoryId, categoryName, score } of categories) {
       // if we've seen this before, remove the old category to preserve shifting order
       user.recent_categories = user.recent_categories.filter(
         (cat) => cat.categoryId !== categoryId
       );
-      user.recent_categories.push({ categoryId, score: score || 0 });
+      user.recent_categories.push({ categoryId, categoryName, score: score || 0 });
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length > 12) user.recent_categories.shift();
