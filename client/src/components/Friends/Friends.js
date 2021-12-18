@@ -207,9 +207,27 @@ export default function Friends() {
                     </Grid>
                     {searchResults && searchResults.length >0 && 
                     <Grid container>
-                        {searchResults.map((user) => (<>
-                        <Grid item xs={7}>{user.username}</Grid>
-                        <Grid item xs={5}>Add Friend</Grid></>))} {/*Add friend text should depend on if user has friend already*/}
+                        {searchResults.map((result) => {
+                            let areFriends = friends && (friends.findIndex((elem) => elem._id.toString() === result._id) !== -1);
+                            let pendInd = pendingFriends.findIndex((elem) => elem._id.toString() === result._id);
+                            let arePending = pendingFriends && pendInd !== -1;
+                            let stat;
+                            if (arePending){
+                                stat = pendingFriends[pendInd].pending_status;
+                                stat = stat.charAt(0).toUpperCase() + stat.slice(1);
+                            }
+                            return (<>
+                            <Grid item xs={7}>{result.username}</Grid>
+                            {friends && areFriends && 
+                                <Grid item xs={5}>Already Friends</Grid>
+                            }
+                            {friends && arePending && 
+                                <Grid item xs={5}>{stat}!</Grid>
+                            }
+                            {friends && !areFriends && !arePending &&
+                                <Grid item xs={5}>Send Request</Grid>
+                            }
+                        </>)})}
                     </Grid>}
                     {searchResults && searchResults.length <= 0 && 
                     <p>Sorry we couldn't find any users with that name</p>}
@@ -304,10 +322,11 @@ export default function Friends() {
                     <Grid container>
                         {friends.map((friend) => (<>
                         <Grid item xs={1}><PersonIcon /></Grid>
-                        <Grid item xs={8.5}>{friend.username}</Grid>
-                        <Grid item xs={2.5}>
+                        <Grid item xs={7.5}>{friend.username}</Grid>
+                        <Grid item xs={2}>
                             <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'remove', friend._id, friend.username)}}>Unfriend</Button>
-                        </Grid></>))}
+                        </Grid>
+                        <Grid item xs={1.5}></Grid></>))}
                     </Grid>}
                     {friends && friends.length <= 0 && <p>No friends to show.</p>}
                 </Grid>
@@ -317,14 +336,17 @@ export default function Friends() {
                     <Grid container>
                         {pendingFriends.map((pending) => (<>
                         {pending.pending_status === 'received' && <><Grid item xs={1}><PersonIcon /></Grid>
-                        <Grid item xs={8}>{pending.username}</Grid>
+                        <Grid item xs={7.5}>{pending.username}</Grid>
                         <Grid item xs={1.5}>
                             <Button onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}}><CheckIcon aria-label='accept friend' onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}} /></Button>
                         </Grid>
+                        <Grid item xs={1.5}>
                             <Button color="error" onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}}><CloseIcon aria-label='reject friend' onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}} /></Button>
+                        </Grid>
+                        <Grid item xs={.5}></Grid>
                         </>}</>))}
                     </Grid>}
-                    {pendingFriends && pendingFriends.length <= 0 && <p>No requests received.</p>}
+                    {pendingFriends && pendingFriends.findIndex((elem) => elem.pending_status === "received") === -1 && <p>No requests received.</p>}
                 </Grid>
                 <Grid item xs={12} md={4}>
                     <h2>Requests Sent</h2>
@@ -332,12 +354,13 @@ export default function Friends() {
                     <Grid container>
                         {pendingFriends.map((pending) => (<>
                         {pending.pending_status === 'sent' && <><Grid item xs={1}><PersonIcon /></Grid>
-                        <Grid item xs={8.5}>{pending.username}</Grid>
+                        <Grid item xs={7.5}>{pending.username}</Grid>
                         <Grid item xs={2.5}>
                             <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'unsend', pending._id, pending.username, pending.pending_status)}}>Unsend</Button>
-                        </Grid></>}</>))}
+                        </Grid>
+                        <Grid item xs={1}></Grid></>}</>))}
                     </Grid>}
-                    {pendingFriends && pendingFriends.length <= 0 && <p>No requests sent.</p>}
+                    {pendingFriends && pendingFriends.findIndex((elem) => elem.pending_status === "sent") === -1 && <p>No requests sent.</p>}
                 </Grid>
             </Grid>
         </div>
