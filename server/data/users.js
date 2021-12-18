@@ -44,10 +44,13 @@ const exportedMethods = {
   },
   async searchUsersByName(searchString){
     let search = checkString(searchString, 'Search String', false);
-
+    let validStr = search.replace(/[^a-z\d]/gi, "");
+    if (!validStr){
+      throw "Search string not valid";
+    }
     let userCollection = await users();
     let results = await userCollection.find(
-        {username: { $regex: ".*" + search + ".*", $options: "i"}}
+        {username: { $regex: ".*" + validStr + ".*", $options: "i"}}
     )
     results = results.toArray()
     return results;

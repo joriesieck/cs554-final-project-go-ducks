@@ -12,11 +12,13 @@ import {
     getAllFriends,
     getAllPendingFriends
 } from '../../utils/backendCalls';
+import FriendLeaderboard from '../FriendLeaderboard/FriendLeaderboard';
 import {
     Grid,
     Button,
     TextField,
-    Modal
+    Modal,
+    Alert
 } from '@mui/material';
 import { Box } from "@mui/system";
 import PersonIcon from '@mui/icons-material/Person';
@@ -32,7 +34,6 @@ export default function Friends() {
 
     const [ error, setError ] = useState(null);
     const [ searchError, setSearchError ] = useState(null);
-    const [ providerError, setProviderError ] = useState(null);
 
     const [ openSearchModal, setOpenSearchModal ] = useState(false);
     const [ openRemoveModal, setOpenRemoveModal ] = useState(false);
@@ -75,17 +76,13 @@ export default function Friends() {
         e.preventDefault();
         
         let searchTerm = e.target[0].value;
-        // input check
-        try {
-            searchTerm = checkString(searchTerm, 'Search Term', false);
-        } catch (e) {
-
-        }
         // perform search
         let results;
         try {
+            searchTerm = checkString(searchTerm, 'Search Term', true, false);
             results = await searchUsersByName(searchTerm);
             setSearchResults(results);
+            setSearchError(null);
             setOpenSearchModal(true);
         } catch (e) {
             if (!e.response || !e.response.data || !e.response.data.error){
@@ -128,11 +125,11 @@ export default function Friends() {
             userData.friends = friends;
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
-				setProviderError((e.toString()));
+				setError((e.toString()));
 			setOpenRemoveModal(false);
 			return;
 			}
-			setProviderError(e.response.data.error);
+			setError(e.response.data.error);
 			setOpenRemoveModal(false);
 			return;
 		}
@@ -151,12 +148,12 @@ export default function Friends() {
             userData.pending_friends = pendingFriends;
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
-				setProviderError((e.toString()));
+				setError((e.toString()));
 				setOpenRejectModal(false);
                 setOpenUnsendModal(false);
 				return;
 			}
-			setProviderError(e.response.data.error);
+			setError(e.response.data.error);
 			setOpenRejectModal(false);
             setOpenUnsendModal(false);
 			return;
@@ -181,11 +178,11 @@ export default function Friends() {
 			userData.friends = friends;
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
-				setProviderError((e.toString()));
+				setError((e.toString()));
 				setOpenAcceptModal(false);
 				return;
 			}
-			setProviderError(e.response.data.error);
+			setError(e.response.data.error);
 			setOpenAcceptModal(false);
 			return;
 		}
@@ -205,11 +202,11 @@ export default function Friends() {
             setPendingFriends(pendingFriends);
         } catch (e) {
             if (!e.response || !e.response.data || !e.response.data.error) {
-				setProviderError((e.toString()));
+				setError((e.toString()));
 				setOpenAddModal(false);
 				return;
 			}
-			setProviderError(e.response.data.error);
+			setError(e.response.data.error);
 			setOpenAddModal(false);
 			return;
 		}
@@ -218,7 +215,6 @@ export default function Friends() {
 
     return (
         <div>
-            {/*something is going weird with this modal but I honestly don't understand what*/}
             <Modal 
                 open={openSearchModal}
                 onClose={() => setOpenSearchModal(false)}
@@ -358,9 +354,12 @@ export default function Friends() {
 				</Box>
 			</Modal>
             <h1>Friend Management</h1>
+            {/*put friend leaderboard here?*/}
+            < FriendLeaderboard />
             <form onSubmit={searchUsers}>
                 <TextField id="userSearch" label="Find users to add" />
                 <Button type="submit">Search</Button>
+                {searchError && <Alert severity="error" className={styles.searchError}>{searchError}</Alert>}
             </form>
             <Grid container>
                 <Grid item xs={12} md={4}>
@@ -410,6 +409,9 @@ export default function Friends() {
                     {pendingFriends && pendingFriends.findIndex((elem) => elem.pending_status === "sent") === -1 && <p>No requests sent.</p>}
                 </Grid>
             </Grid>
+            {error && <Alert severity="error" className={styles.friendsError}>
+				{error}
+			</Alert>}
         </div>
     )
 
