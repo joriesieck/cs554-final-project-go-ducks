@@ -676,7 +676,7 @@ export default function Profile () {
 			
 			<div className={styles.profileList}>
 			<h2>Friends</h2>
-			{userData.friends.length>0 && <Grid container>
+			{userData.friends.length>0 && <Grid container className={styles.profileFriends}>
 				{userData.friends.map(({_id, username}, i) => (<>
 					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
 					<Grid item xs={8.5} className={styles.gridRow}>{username}</Grid>

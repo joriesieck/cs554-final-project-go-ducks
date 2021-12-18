@@ -1,10 +1,10 @@
-import { Tabs, Tab, Button } from '@mui/material';
+import { Tabs, Tab, Button, Menu, MenuItem } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Link, Redirect, useLocation } from 'react-router-dom';
 import { signOut } from '@firebase/auth';
 import { auth } from '../../firebase/firebaseSetup';
 import { useDispatch } from 'react-redux';
-
+import MenuIcon from '@mui/icons-material/Menu';
 import styles from './Nav.module.css';
 
 export default function NavBar() {
@@ -19,6 +19,9 @@ export default function NavBar() {
   //     .substr(1)
   //     .toLowerCase()
   // );
+
+  const [openMenu, setOpenMenu] = useState(false);
+  const [anchor, setAnchor] = useState(null);
 
   useEffect(() => {
     setValue(pathname.split('/')[1]);
@@ -41,7 +44,7 @@ export default function NavBar() {
 
   if (logout) return <Redirect to="/" />;
 
-  return (
+  return (<>
     <div className={styles.nav}>
       <div className="reg-nav">
         <Tabs
@@ -110,5 +113,37 @@ export default function NavBar() {
         </Button>
       </div>
     </div>
-  );
+    <div className={styles.responsiveNav}>
+          <MenuIcon
+            onClick={(e) => {
+              console.log(e);
+              setOpenMenu(true);
+              setAnchor(e.target);
+            }}
+            aria-controls='responsive-menu'
+            aria-haspopup='true'
+            aria-expanded={openMenu}
+            id='trigger-responsive-menu'
+            aria-label='open menu'
+            className={styles.responsiveNavIcon}
+          />
+          <Menu
+            id='responsive-menu'
+            open={openMenu}
+            onClose={() => {setOpenMenu(false)}}
+            MenuListProps={{
+              'aria-labelledby': 'trigger-responsive-menu'
+            }}
+            anchorEl={anchor}
+            className={styles.responsiveNav}
+          >
+            <MenuItem component={Link} to='/home' onClick={() => {setOpenMenu(false)}}>Home</MenuItem>
+            <MenuItem component={Link} to='/game' onClick={() => {setOpenMenu(false)}}>Game</MenuItem>
+            <MenuItem component={Link} to='/leaderboard' onClick={() => {setOpenMenu(false)}}>Leaderboard</MenuItem>
+            <MenuItem component={Link} to='/profile' onClick={() => {setOpenMenu(false)}}>Profile</MenuItem>
+            <MenuItem onClick={logUserOut}>Log Out</MenuItem>
+            {/* <MenuItem onClick={handleMenuClick}>Practice</MenuItem> */}
+          </Menu>
+    </div>
+  </>);
 }
