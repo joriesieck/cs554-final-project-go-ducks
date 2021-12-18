@@ -97,7 +97,7 @@ export default function Friends() {
 
     }
 
-    const triggerConfirmModal = (e, action, friendId, friendUser, pendingStatus) => {
+    const triggerConfirmModal = (e, action, friendId, friendUser) => {
         setToggleFriends({friendId, friendUser});
         if (action === 'remove'){
             setOpenRemoveModal(true);
@@ -234,23 +234,27 @@ export default function Friends() {
                             let areFriends = friends && (friends.findIndex((elem) => elem._id.toString() === result._id) !== -1);
                             let pendInd = pendingFriends.findIndex((elem) => elem._id.toString() === result._id);
                             let arePending = pendingFriends && pendInd !== -1;
+                            let isSelf = userData && userData.username === result.username;
                             let stat;
                             if (arePending){
                                 stat = pendingFriends[pendInd].pending_status;
                                 stat = stat.charAt(0).toUpperCase() + stat.slice(1);
                             }
-                            return (<>
-                            <Grid item xs={6}>{result.username}</Grid>
+                            return (<Grid item xs={12} className={styles.searchRow}><Grid container>
+                            <Grid item className={styles.searchUser} xs={6}>{result.username}</Grid>
+                            {friends && isSelf &&
+                                <Grid item container alignItems="center" justifyContent="center" xs={6}>Me</Grid>
+                            }
                             {friends && areFriends && 
-                                <Grid item xs={6}>Already Friends</Grid>
+                                <Grid item container alignItems="center" justifyContent="center" xs={6}>Already Friends</Grid>
                             }
                             {friends && arePending && 
-                                <Grid item xs={6}>{stat}!</Grid>
+                                <Grid item container alignItems="center" justifyContent="center" xs={6}>{stat}!</Grid>
                             }
-                            {friends && !areFriends && !arePending &&
-                                <Grid item xs={6}><Button onClick={(e) =>triggerConfirmModal(e, 'add', result._id, result.username)}>Send Request</Button></Grid>
+                            {friends && !areFriends && !arePending && !isSelf &&
+                                <Grid item container alignItems="center" justifyContent="center" xs={6}><Button onClick={(e) =>triggerConfirmModal(e, 'add', result._id, result.username)}>Send Request</Button></Grid>
                             }
-                        </>)})}
+                        </Grid></Grid>)})}
                     </Grid>}
                     </Box>
                     {searchResults && searchResults.length <= 0 && 
@@ -354,61 +358,83 @@ export default function Friends() {
 				</Box>
 			</Modal>
             <h1>Friend Management</h1>
-            {/*put friend leaderboard here?*/}
-            {friends && < FriendLeaderboard friendList={friends}/>}
-            <form onSubmit={searchUsers}>
-                <h2>Find Friends to Add</h2>
-                <TextField id="userSearch" label="Find users to add" />
-                <Button type="submit">Search</Button>
-                {searchError && <Alert severity="error" className={styles.searchError}>{searchError}</Alert>}
-            </form>
-            <br/>
             <Grid container>
-                <Grid item xs={12} md={4}>
-                    <h2>My Friends</h2>
-                    {friends && friends.length > 0 &&
+                <Grid item xs={12} lg={3}></Grid> {/*Empty*/}
+                <Grid item xs={12} md={6}> {/*Search, My friends, reqs received, reqs sent*/}
                     <Grid container>
-                        {friends.map((friend) => (<>
-                        <Grid item xs={1}><PersonIcon /></Grid>
-                        <Grid item xs={7.5}>{friend.username}</Grid>
-                        <Grid item xs={2}>
-                            <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'remove', friend._id, friend.username)}}>Unfriend</Button>
+                        <Grid item className={styles.spacer} xs={0} md={12}></Grid>
+                        <Grid item xs={12}>
+                            <Grid container> {/*Search and my friends*/}
+                                <Grid item xs={12} md={6}>
+                                    <form onSubmit={searchUsers}>
+                                        <h2>Find Friends to Add</h2>
+                                        <TextField id="userSearch" label="Find users to add" />
+                                        <Button type="submit">Search</Button>
+                                        {searchError && <Alert severity="error" className={styles.searchError}>{searchError}</Alert>}
+                                    </form>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <h2>My Friends</h2>
+                                    {friends && friends.length > 0 &&
+                                    <Grid container>
+                                        {friends.map((friend) => (<>
+                                        <Grid item xs={1}><PersonIcon /></Grid>
+                                        <Grid item xs={6.5}>{friend.username}</Grid>
+                                        <Grid item xs={3}>
+                                            <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'remove', friend._id, friend.username)}}>Unfriend</Button>
+                                        </Grid>
+                                        <Grid item xs={1.5}></Grid></>))}
+                                    </Grid>}
+                                    {friends && friends.length <= 0 && <p>No friends to show.</p>}
+                                </Grid>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={1.5}></Grid></>))}
-                    </Grid>}
-                    {friends && friends.length <= 0 && <p>No friends to show.</p>}
+                        <Grid item xs={12} className={styles.spacer}></Grid>
+                        <Grid item xs={12}>
+                            <Grid container> {/*Reqs rec'd, reqs sent*/}
+                                <Grid item xs={12} md={6}>
+                                    <h2>Requests Received</h2>
+                                    {pendingFriends && pendingFriends.length > 0 && 
+                                    <Grid container>
+                                        {pendingFriends.map((pending) => (<>
+                                        {pending.pending_status === 'received' && <><Grid item xs={1}><PersonIcon /></Grid>
+                                        <Grid item xs={6.5}>{pending.username}</Grid>
+                                        <Grid item xs={1.5}>
+                                            <Button onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}}><CheckIcon aria-label='accept friend' onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}} /></Button>
+                                        </Grid>
+                                        <Grid item xs={1.5}>
+                                            <Button color="error" onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}}><CloseIcon aria-label='reject friend' onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}} /></Button>
+                                        </Grid>
+                                        <Grid item xs={1.5}></Grid>
+                                        </>}</>))}
+                                    </Grid>}
+                                    {pendingFriends && pendingFriends.findIndex((elem) => elem.pending_status === "received") === -1 && <p>No requests received.</p>}
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <h2>Requests Sent</h2>
+                                    {pendingFriends && pendingFriends.length > 0 && 
+                                    <Grid container>
+                                        {pendingFriends.map((pending) => (<>
+                                        {pending.pending_status === 'sent' && <><Grid item xs={1}><PersonIcon /></Grid>
+                                        <Grid item xs={6.5}>{pending.username}</Grid>
+                                        <Grid item xs={3}>
+                                            <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'unsend', pending._id, pending.username)}}>Unsend</Button>
+                                        </Grid>
+                                        <Grid item xs={1.5}></Grid></>}</>))}
+                                    </Grid>}
+                                    {pendingFriends && pendingFriends.findIndex((elem) => elem.pending_status === "sent") === -1 && <p>No requests sent.</p>}
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item className={styles.spacer} xs={12}></Grid>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} md={4}>
-                    <h2>Requests Received</h2>
-                    {pendingFriends && pendingFriends.length > 0 && 
+                <Grid item xs={12} md={3}> {/*leaderboard*/}
                     <Grid container>
-                        {pendingFriends.map((pending) => (<>
-                        {pending.pending_status === 'received' && <><Grid item xs={1}><PersonIcon /></Grid>
-                        <Grid item xs={7.5}>{pending.username}</Grid>
-                        <Grid item xs={1.5}>
-                            <Button onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}}><CheckIcon aria-label='accept friend' onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}} /></Button>
+                        <Grid item xs={12}>
+                            {friends && < FriendLeaderboard friendList={friends}/>}
                         </Grid>
-                        <Grid item xs={1.5}>
-                            <Button color="error" onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}}><CloseIcon aria-label='reject friend' onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}} /></Button>
-                        </Grid>
-                        <Grid item xs={.5}></Grid>
-                        </>}</>))}
-                    </Grid>}
-                    {pendingFriends && pendingFriends.findIndex((elem) => elem.pending_status === "received") === -1 && <p>No requests received.</p>}
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <h2>Requests Sent</h2>
-                    {pendingFriends && pendingFriends.length > 0 && 
-                    <Grid container>
-                        {pendingFriends.map((pending) => (<>
-                        {pending.pending_status === 'sent' && <><Grid item xs={1}><PersonIcon /></Grid>
-                        <Grid item xs={7.5}>{pending.username}</Grid>
-                        <Grid item xs={2.5}>
-                            <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'unsend', pending._id, pending.username, pending.pending_status)}}>Unsend</Button>
-                        </Grid>
-                        <Grid item xs={1}></Grid></>}</>))}
-                    </Grid>}
-                    {pendingFriends && pendingFriends.findIndex((elem) => elem.pending_status === "sent") === -1 && <p>No requests sent.</p>}
+                    </Grid>
                 </Grid>
             </Grid>
             {error && <Alert severity="error" className={styles.friendsError}>
