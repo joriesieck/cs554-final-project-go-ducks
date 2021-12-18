@@ -183,8 +183,9 @@ router.patch('/edit-user', async (req, res) => {
   let { originalEmail, username, newEmail, optedForLeaderboard } = req.body;
   //originalEmail will be used to find the user we are updating
   let updatedFields = {};
+  let user;
   try {
-    const user = await userData.getUserByEmail(originalEmail);
+    user = await userData.getUserByEmail(originalEmail);
     if (username !== undefined && username !== user.username) {
       username = checkString(username, 'Username', false);
       updatedFields.username = username;
@@ -214,6 +215,16 @@ router.patch('/edit-user', async (req, res) => {
         updatedFields
       );
       await updateEmailCache(updatedUser, originalEmail); //delete old info from the cache
+      if (updatedUser.optedForLeaderboard && !user.optedForLeaderboard) {
+        //if the user wants to opt in to leaderboard
+        const highScore = await userData.getHighScore(updatedUser);
+        await client.zaddAsync('leaderboard', highScore, updatedUser.username);
+        await leaderboardData.addToLeaderboard(updatedUser.username, highScore);
+      }
+      if (!updatedUser.optedForLeaderboard && user.optedForLeaderboard) {
+        //opt out of leaderboard
+        await client.zremAsync('leaderboard', updatedUser.username);
+      }
       res.status(201).json(updatedUser);
     } catch (e) {
       res.status(400).json({ error: `Could not update user. Error: ${e}` });

@@ -181,6 +181,13 @@ const exportedMethods = {
     const updatedUser = await userCollection.findOne({ username });
     return updatedUser;
   },
+  async getHighScore(user) {
+    console.log(user);
+    const highScore = Math.max(user.high_scores);
+    console.log(highScore);
+    checkNum(highScore, 'high score');
+    return highScore;
+  },
 };
 
 module.exports = exportedMethods;
