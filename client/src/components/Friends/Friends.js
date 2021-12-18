@@ -32,6 +32,7 @@ export default function Friends() {
 
     const [ error, setError ] = useState(null);
     const [ searchError, setSearchError ] = useState(null);
+    const [ providerError, setProviderError ] = useState(null);
 
     const [ openSearchModal, setOpenSearchModal ] = useState(false);
     const [ openRemoveModal, setOpenRemoveModal ] = useState(false);
@@ -112,10 +113,82 @@ export default function Friends() {
         }
     }
 
-    const removeFriend = async (e) => {
-        e.preventDefault();
-        
-    }
+    const triggerRemoveFriend = async (e) => {
+		e.preventDefault();
+		let friendToRemove = toggleFriends.friendUser;
+		let result;
+		try {
+			friendToRemove = checkString(friendToRemove, 'friendToRemove', true, false);
+			result = await removeFriend(userData.username, friendToRemove);
+			// remove them on the front end too
+			const friends = await getAllFriends(result.username);
+			setFriends(friends);
+            userData.friends = friends;
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setProviderError((e.toString()));
+			setOpenRemoveModal(false);
+			return;
+			}
+			setProviderError(e.response.data.error);
+			setOpenRemoveModal(false);
+			return;
+		}
+		setOpenRemoveModal(false);
+	}
+    const triggerRemovePendingFriend = async (e) => {
+		e.preventDefault();
+		let pendingToRemove = toggleFriends.friendUser;
+		let result;
+		try {
+			pendingToRemove = checkString(pendingToRemove, 'pendingToRemove', true, false);
+			result = await removePendingFriend(userData.username, pendingToRemove);
+			// remove them on the front end too
+			const pendingFriends = await getAllPendingFriends(result.username);
+			setPendingFriends(pendingFriends);
+            userData.pending_friends = pendingFriends;
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setProviderError((e.toString()));
+				setOpenRejectModal(false);
+                setOpenUnsendModal(false);
+				return;
+			}
+			setProviderError(e.response.data.error);
+			setOpenRejectModal(false);
+            setOpenUnsendModal(false);
+			return;
+		}
+		setOpenRejectModal(false);
+        setOpenUnsendModal(false);
+	}
+
+    const triggerAddPendingFriend = async (e) => {
+		e.preventDefault();
+		let friendToAccept = toggleFriends.friendUser;
+		let result;
+		try {
+			friendToAccept = checkString(friendToAccept, 'friendToAccept', true, false);
+			result = await acceptPendingFriend(userData.username, friendToAccept);
+			// add them on the front end too
+			const friends = await getAllFriends(result.username);
+			const pendingFriends = await getAllPendingFriends(result.username);
+            setFriends(friends);
+			userData.pending_friends = pendingFriends;
+            setPendingFriends(pendingFriends);
+			userData.friends = friends;
+		} catch (e) {
+			if (!e.response || !e.response.data || !e.response.data.error) {
+				setProviderError((e.toString()));
+				setOpenAcceptModal(false);
+				return;
+			}
+			setProviderError(e.response.data.error);
+			setOpenAcceptModal(false);
+			return;
+		}
+		setOpenAcceptModal(false);
+	}
 
     return (
         <div>
@@ -157,7 +230,7 @@ export default function Friends() {
 
 					<p id="modal-modal-description">Are you sure you want to remove {toggleFriends.friendUser} as a friend?</p>
 					
-					<Button variant='contained'>Yes, unfriend</Button>
+					<Button variant='contained' onClick={triggerRemoveFriend}>Yes, unfriend</Button>
 					<Button onClick={() => {setOpenRemoveModal(false)}}>No, stay friends</Button>
 				</Box>
 			</Modal>
@@ -176,7 +249,7 @@ export default function Friends() {
 
 					<p id="modal-modal-description">Are you sure you want to add {toggleFriends.friendUser} as a friend?</p>
 					
-					<Button variant='contained'>Yes, add friend</Button>
+					<Button variant='contained' onClick={triggerAddPendingFriend}>Yes, add friend</Button>
 					<Button onClick={() => {setOpenAcceptModal(false)}}>No, do nothing</Button>
 				</Box>
 			</Modal>
@@ -196,7 +269,7 @@ export default function Friends() {
 
 					<p id="modal-modal-description">Are you sure you want to reject {toggleFriends.friendUser} as a friend?</p>
 					
-					<Button variant='contained'>Yes, reject</Button>
+					<Button variant='contained' onClick={triggerRemovePendingFriend}>Yes, reject</Button>
 					<Button onClick={() => {setOpenRejectModal(false)}}>No, do nothing</Button>
 				</Box>
 			</Modal>
@@ -215,7 +288,7 @@ export default function Friends() {
 
 					<p id="modal-modal-description">Are you sure you want to cancel your request to {toggleFriends.friendUser}?</p>
 					
-					<Button variant='contained'>Yes, cancel</Button>
+					<Button variant='contained' onClick={triggerRemovePendingFriend}>Yes, cancel</Button>
 					<Button onClick={() => {setOpenUnsendModal(false)}}>No, do nothing</Button>
 				</Box>
 			</Modal>
