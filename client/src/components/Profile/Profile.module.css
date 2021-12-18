@@ -110,3 +110,18 @@
 .gridRow {
 	align-self: center;
 }
+
+@media only screen and (max-width:549px) {
+	.profile {
+		font-size: large;
+	}
+	.profileEditable, .profileFriends {
+		flex-direction: column !important;
+		justify-content: space-around;
+	}
+	.profileEditable>*, .profileFriends>* {
+		width: 100%;
+		max-width: 100% !important;
+		text-align: center;
+	}
+}
