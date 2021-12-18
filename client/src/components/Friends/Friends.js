@@ -21,6 +21,7 @@ import {
 import { Box } from "@mui/system";
 import PersonIcon from '@mui/icons-material/Person';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
 import styles from './Friends.module.css';
 
 export default function Friends() {
@@ -28,12 +29,17 @@ export default function Friends() {
     const [ searchResults, setSearchResults ] = useState(null);
     const [ friends, setFriends ] = useState(null);
     const [ pendingFriends, setPendingFriends] = useState(null);
+
     const [ error, setError ] = useState(null);
     const [ searchError, setSearchError ] = useState(null);
+
     const [ openSearchModal, setOpenSearchModal ] = useState(false);
     const [ openRemoveModal, setOpenRemoveModal ] = useState(false);
     const [ openRejectModal, setOpenRejectModal ] = useState(false);
     const [ openAcceptModal, setOpenAcceptModal ] = useState(false);
+    const [ openUnsendModal, setOpenUnsendModal ] = useState(false);
+    const [ toggleFriends, setToggleFriends ] = useState({friendId: '', friendUser: ''});
+    
 
     const user = useSelector((state) => state.user);
 
@@ -93,6 +99,19 @@ export default function Friends() {
 
     }
 
+    const triggerConfirmModal = (e, action, friendId, friendUser, pendingStatus) => {
+        setToggleFriends({friendId, friendUser});
+        if (action === 'remove'){
+            setOpenRemoveModal(true);
+        } else if (action === 'reject'){
+            setOpenRejectModal(true);
+        } else if (action === 'accept'){
+            setOpenAcceptModal(true);
+        } else if (action === 'unsend'){
+            setOpenUnsendModal(true);
+        }
+    }
+
     const removeFriend = async (e) => {
         e.preventDefault();
         
@@ -111,7 +130,7 @@ export default function Friends() {
                     <Grid container className={styles.searchHeader}>
                         <Grid item xs={1}></Grid>
                         <Grid item xs={10}><h2>Search Results</h2></Grid>
-                        <Grid item xs={1}><CloseIcon aria-label="close modal" className={styles.searchClose} onClick={()=> {setOpenSearchModal(false)}} /></Grid>
+                        <Grid item xs={1}><CloseIcon aria-label="close modal" className={styles.friendsClose} onClick={()=> {setOpenSearchModal(false)}} /></Grid>
                     </Grid>
                     {searchResults && searchResults.length >0 && 
                     <Grid container>
@@ -123,6 +142,83 @@ export default function Friends() {
                     <p>Sorry we couldn't find any users with that name</p>}
                 </Box>
             </Modal>
+            <Modal
+				open={openRemoveModal}
+				onClose={() => {setOpenRemoveModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.friendsModal}>
+				<Box className={styles.friendsBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.friendsClose} onClick={() => {setOpenRemoveModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Are you sure you want to remove {toggleFriends.friendUser} as a friend?</p>
+					
+					<Button variant='contained'>Yes, unfriend</Button>
+					<Button onClick={() => {setOpenRemoveModal(false)}}>No, stay friends</Button>
+				</Box>
+			</Modal>
+            <Modal
+				open={openAcceptModal}
+				onClose={() => {setOpenAcceptModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.friendsModal}>
+				<Box className={styles.friendsBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.friendsClose} onClick={() => {setOpenAcceptModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Are you sure you want to add {toggleFriends.friendUser} as a friend?</p>
+					
+					<Button variant='contained'>Yes, add friend</Button>
+					<Button onClick={() => {setOpenAcceptModal(false)}}>No, do nothing</Button>
+				</Box>
+			</Modal>
+            <Modal
+				open={openRejectModal}
+				onClose={() => {setOpenRejectModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.friendsModal}
+			>
+				<Box className={styles.friendsBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.friendsClose} onClick={() => {setOpenRejectModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Are you sure you want to reject {toggleFriends.friendUser} as a friend?</p>
+					
+					<Button variant='contained'>Yes, reject</Button>
+					<Button onClick={() => {setOpenRejectModal(false)}}>No, do nothing</Button>
+				</Box>
+			</Modal>
+            <Modal
+				open={openUnsendModal}
+				onClose={() => {setOpenUnsendModal(false)}}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+				className={styles.friendsModal}>
+				<Box className={styles.friendsBox}>
+					<Grid container>
+						<Grid item xs={1}></Grid>
+						<Grid item xs={10}><h1 id="modal-modal-title">Confirm</h1></Grid>
+						<Grid item xs={1}><CloseIcon aria-label='close modal' className={styles.friendsClose} onClick={() => {setOpenUnsendModal(false)}} /></Grid>
+					</Grid>
+
+					<p id="modal-modal-description">Are you sure you want to cancel your request to {toggleFriends.friendUser}?</p>
+					
+					<Button variant='contained'>Yes, cancel</Button>
+					<Button onClick={() => {setOpenUnsendModal(false)}}>No, do nothing</Button>
+				</Box>
+			</Modal>
             <h1>Friend Management</h1>
             <form onSubmit={searchUsers}>
                 <TextField id="userSearch" label="Find users to add" />
@@ -136,7 +232,9 @@ export default function Friends() {
                         {friends.map((friend) => (<>
                         <Grid item xs={1}><PersonIcon /></Grid>
                         <Grid item xs={8.5}>{friend.username}</Grid>
-                        <Grid item xs={2.5}>Unfriend</Grid></>))}
+                        <Grid item xs={2.5}>
+                            <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'remove', friend._id, friend.username)}}>Unfriend</Button>
+                        </Grid></>))}
                     </Grid>}
                     {friends && friends.length <= 0 && <p>No friends to show.</p>}
                 </Grid>
@@ -146,8 +244,12 @@ export default function Friends() {
                     <Grid container>
                         {pendingFriends.map((pending) => (<>
                         {pending.pending_status === 'received' && <><Grid item xs={1}><PersonIcon /></Grid>
-                        <Grid item xs={8.5}>{pending.username}</Grid>
-                        <Grid item xs={2.5}>Unsend</Grid></>}</>))}
+                        <Grid item xs={8}>{pending.username}</Grid>
+                        <Grid item xs={1.5}>
+                            <Button onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}}><CheckIcon aria-label='accept friend' onClick={(e) => {triggerConfirmModal(e,'accept',pending._id, pending.username)}} /></Button>
+                        </Grid>
+                            <Button color="error" onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}}><CloseIcon aria-label='reject friend' onClick={(e) => {triggerConfirmModal(e,'reject',pending._id, pending.username)}} /></Button>
+                        </>}</>))}
                     </Grid>}
                     {pendingFriends && pendingFriends.length <= 0 && <p>No requests received.</p>}
                 </Grid>
@@ -158,7 +260,9 @@ export default function Friends() {
                         {pendingFriends.map((pending) => (<>
                         {pending.pending_status === 'sent' && <><Grid item xs={1}><PersonIcon /></Grid>
                         <Grid item xs={8.5}>{pending.username}</Grid>
-                        <Grid item xs={2.5}>Accept</Grid></>}</>))}
+                        <Grid item xs={2.5}>
+                            <Button color="error" onClick={(e) => {triggerConfirmModal(e, 'unsend', pending._id, pending.username, pending.pending_status)}}>Unsend</Button>
+                        </Grid></>}</>))}
                     </Grid>}
                     {pendingFriends && pendingFriends.length <= 0 && <p>No requests sent.</p>}
                 </Grid>
