@@ -6,6 +6,7 @@ import {FormControl,
 import axios from "axios";
 
 const baseUrl = "http://jservice.io/api";
+const siteUrl = 'http://localhost:3001';
 
 export default function GameSetup()
 {
@@ -14,6 +15,8 @@ export default function GameSetup()
     const [inSetup, setInSetup] = useState(true);
     const [inGame, setInGame] = useState(false);
     const [categories, setCategories] = useState([]);
+    const [catSearch, setCatSearch] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
     useEffect(() =>
@@ -29,7 +32,6 @@ export default function GameSetup()
         fun();
     }, [categoryChoice])
     
-    //query all categories from the API
     const handleGameTypeChange = (e, newGameType) =>
     {
         setGameType(newGameType);
@@ -37,13 +39,18 @@ export default function GameSetup()
         //make the category choice appear
     }
 
-    const handleCategoryChoiceChange = (e, catChoice) =>
+    const handleCategoryChoiceChange = (e) =>
     {
-        setCategoryChoice(catChoice);
-        if (catChoice === 'custom') setCategories([]);
-        //the callback for the toggles
-        //set the category choice
-        //make the next step appear
+        setCategoryChoice(e.target.value);
+        if (e.target.value === 'custom') 
+        {
+            setCategories([]);
+        }
+    }
+
+    const handleSearchChange = (e) =>
+    {
+        setCatSearch(e.target.value);
     }
 
     const handleFormSubmit = async (e) =>
@@ -70,7 +77,6 @@ export default function GameSetup()
         while (returnVal.length < 6)
         {
             const { data } = await axios.get(`${baseUrl}/random`);
-            console.log(data[0].category.title.toUpperCase())
             returnVal.push({id: data[0].category.id, title: data[0].category.title.toUpperCase()});
         }
         return returnVal;
@@ -80,10 +86,15 @@ export default function GameSetup()
     {
         return (
             <div>
-                <TextField></TextField>
+                <TextField onChange={handleSearchChange}></TextField>
                 <Button></Button>
             </div>
         );
+    }
+
+    const SearchResultsList = (props) =>
+    {
+
     }
 
     return(
@@ -100,15 +111,19 @@ export default function GameSetup()
                     gameType !== "" ? 
                     <>
                         <FormLabel>What kind of categories would you like to play with?</FormLabel>
-                        <ToggleButtonGroup exclusive value={categoryChoice} onChange={handleCategoryChoiceChange}>
-                            <ToggleButton value="random">Random</ToggleButton>
-                            <ToggleButton value="custom">Custom</ToggleButton>
+                        <ToggleButtonGroup exclusive value={categoryChoice}>
+                            <ToggleButton value="random" onClick={handleCategoryChoiceChange}>Random</ToggleButton>
+                            <ToggleButton value="custom" onClick={handleCategoryChoiceChange}>Custom</ToggleButton>
                         </ToggleButtonGroup>
                     </> : <></>
                 }
                 {
                     categoryChoice !== "" && gameType !== "" ? 
-                    (categoryChoice === 'custom' ? <CategoryForm /> : 
+                    (categoryChoice === 'custom' ? 
+                    <div>
+                        <CategoryForm />
+                        <SearchResultsList results={searchResults}/>
+                    </div> : 
                     <><span>Categories</span><ul>
                         {categories.map((category) => <li key={category.title}>{category.title}</li>)}
                     </ul></>) : <></>
