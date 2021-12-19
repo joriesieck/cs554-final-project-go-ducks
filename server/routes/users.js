@@ -15,6 +15,7 @@ const {
 } = require('../inputChecks');
 const bluebird = require('bluebird');
 const redis = require('redis');
+const { getUserByName } = require('../data/users');
 const client = redis.createClient();
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -84,6 +85,7 @@ const updateUserCache = async (updatedUser) => {
     updatedUser._id.toString(),
     JSON.stringify(updatedUser)
   );
+  return updatedUser;
 };
 router.get('/', async (req, res) => {
   let allUsers;
@@ -494,7 +496,7 @@ router.patch('/remove-pending-friend', async (req, res) => {
 });
 
 // save game info
-router.patch('/save-game-info', async (req, res) => {
+router.post('/save-game-info', async (req, res) => {
   // get the variables from req.body
   let { username, categories, highScore } = req.body;
   // check inputs
@@ -514,19 +516,17 @@ router.patch('/save-game-info', async (req, res) => {
     return;
   }
   // add the score - throws if not the new highest score
-  const user = await usernameCache(username); //get user from cache or database
+  let user = await usernameCache(username); //get user from cache or database
   if (!user.username) {
     res.status(404).json({ error: user });
     return;
   }
   try {
     updatedUser = await userData.addHighScore(user, highScore); //add highscore and get updated user
-    await updateUserCache(updatedUser); //update the user's cache
+    user = await updateUserCache(updatedUser); //update the user's cache
     if (!user.username) throw 'Error adding score.';
   } catch (e) {
-    console.log('in here');
-    res.status(400).json({ error: e.message });
-    return;
+    console.log('Not a high score');
   }
 
   // add to leaderboard
@@ -555,26 +555,38 @@ router.patch('/save-game-info', async (req, res) => {
   try {
     dbResult = await leaderboardData.addToLeaderboard(username, highScore);
   } catch (e) {
-    res
-      .status(400)
-      .json({
-        error: `Error adding ${username} to the database leaderboard: ${e}`,
-      });
+    res.status(400).json({
+      error: `Error adding ${username} to the database leaderboard: ${e}`,
+    });
     return;
   }
-
-  // add the categories to the database
-  for (let { categoryId, categoryName } of categories) {
-    try {
-      await categoryData.addCategory(categoryId, categoryName);
-    } catch (e) {
-      // no op - just move on
-    }
-  }
-
   res.status(200).json(user);
 });
-
+router.post('/save-shared-game', async (req, res) => {
+  let { username, categories, gameScore } = req.body;
+  try {
+    checkString(username, 'Username', false);
+    checkArray(categories, 'Categories');
+    if (categories.length <= 0) throw 'Please pass in at least one category.';
+    for (let { categoryId, categoryName, score } of categories) {
+      checkNum(categoryId, 'CategoryId');
+      checkString(categoryName, 'categoryName', true);
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
+    checkNum(gameScore, 'highScore');
+  } catch (e) {
+    res.status(400).json({ error: `Error in saving game info: ${e}` });
+    return;
+  }
+  try {
+    const data = await userData.addSavedGame(username, categories, gameScore);
+    updateUserCache(data[1]);
+    res.status(200).json({ user: data[1], savedGameId: data[0] });
+  } catch (e) {
+    res.status(400).json({ error: `Error in saving game info: ${e}` });
+  }
+});
 // get leaderboard
 router.get('/leaderboard', async (req, res) => {
   // get the number of people on the leaderboard

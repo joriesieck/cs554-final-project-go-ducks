@@ -64,6 +64,7 @@ const exportedMethods = {
       pending_friends: [],
       optedForLeaderboard: optedForLeaderboard,
       recent_categories: [],
+      saved_games: [],
     });
     return insertInfo;
   },
@@ -150,7 +151,11 @@ const exportedMethods = {
       user.recent_categories = user.recent_categories.filter(
         (cat) => cat.categoryId !== categoryId
       );
-      user.recent_categories.push({ categoryId, categoryName, score: score || 0 });
+      user.recent_categories.push({
+        categoryId,
+        categoryName,
+        score: score || 0,
+      });
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length > 12) user.recent_categories.shift();
@@ -186,6 +191,31 @@ const exportedMethods = {
     const highScore = Math.max(...user.high_scores);
     checkNum(highScore, 'high score');
     return highScore;
+  },
+  async addSavedGame(username, categories, gameScore) {
+    checkArray(categories, 'Categories');
+    if (categories.length <= 0) throw 'Please pass in at least one category.';
+    for (let { categoryId, categoryName, score } of categories) {
+      checkNum(categoryId, 'CategoryId');
+      checkString(categoryName, 'categoryName', true);
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
+    checkNum(gameScore, 'highScore');
+
+    const userCollection = await users();
+    const savedGameId = ObjectId();
+    const savedGame = {
+      _id: savedGameId,
+      categories: categories,
+      score: gameScore,
+    };
+    await userCollection.updateOne(
+      { username },
+      { $push: { saved_games: savedGame } }
+    );
+    const updatedUser = await userCollection.findOne({ username });
+    return [savedGameId, updatedUser];
   },
 };
 
