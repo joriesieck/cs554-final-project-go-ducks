@@ -2,13 +2,34 @@ import axios from 'axios';
 
 const siteUrl = 'http://localhost:3001';
 
-async function getUserByName(username, authToken) {
-  const { data } = await axios.get(`${siteUrl}/users/username/${username}`, {
+async function getAllUsers(authToken) {
+	const { data } = await axios.get(`${siteUrl}/users`,
+  {
     headers: {
       authToken,
     },
   });
-  return data;
+	return data;
+}
+
+async function getUserById (id, authToken) {
+	const { data } = await axios.get(`${siteUrl}/users/id/${id}`,
+  {
+    headers: {
+      authToken,
+    },
+  });
+	return data; 
+}
+
+async function getUserByName (username, authToken) {
+	const {data} = await axios.get(`${siteUrl}/users/username/${username}`,
+  {
+    headers: {
+      authToken,
+    },
+  });
+	return data;
 }
 
 async function getUserByEmail(email, authToken) {
@@ -20,21 +41,30 @@ async function getUserByEmail(email, authToken) {
   return data;
 }
 
-async function addUser(username, email, optedForLeaderboard, authToken) {
-  const { data } = await axios.post(
-    `${siteUrl}/users`,
-    {
-      username,
-      email,
-      optedForLeaderboard,
+async function searchUsersByName(searchTerm, authToken) {
+	const { data } = await axios.post(`${siteUrl}/users/search`, {
+		searchTerm
+	},
+  {
+    headers: {
+      authToken,
     },
-    {
-      headers: {
-        authToken,
-      },
-    }
-  );
-  return data;
+  });
+	return data;
+}
+
+async function addUser (username, email, optedForLeaderboard, authToken) {
+	const {data} = await axios.post(`${siteUrl}/users`, {
+		username,
+		email,
+		optedForLeaderboard
+	},
+  {
+    headers: {
+      authToken,
+    },
+  });
+	return data;
 }
 
 async function removeUser(username, authToken) {
@@ -161,8 +191,11 @@ async function getLeaderboard (authToken) {
 }
 
 export {
+	getUserById,
+	getAllUsers,
 	getUserByName,
 	getUserByEmail,
+	searchUsersByName,
 	addUser,
 	removeUser,
 	editUserInfo,

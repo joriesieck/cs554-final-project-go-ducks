@@ -1,5 +1,5 @@
-import {Button} from '@mui/material';
-import {Link} from 'react-router-dom';
+import { Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 export default function GameFinished(props) {
   let score = props.score;
@@ -8,10 +8,9 @@ export default function GameFinished(props) {
     <div>
       <p>Your final score is {score}</p>
       <Button
-        component={Link}
-        to="/game"
         variant="contained"
         className="landingButton"
+        onClick={() => window.location.reload()}
       >
         Start another Game
       </Button>

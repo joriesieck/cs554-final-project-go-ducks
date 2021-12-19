@@ -6,8 +6,10 @@ import GameSetup from './components/Game/GameSetup';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import Practice from './components/Practice/Practice';
 import Friends from './components/Friends/Friends';
+import IndProfile from './components/Profile/IndProfile';
 
-export default function AuthContainer() {
+export default function AuthContainer(props) {
+	console.log(props);
 	return (
 		<>
 			<NavBar />
