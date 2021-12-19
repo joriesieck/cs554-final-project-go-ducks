@@ -17,6 +17,13 @@ async function getUserByEmail (email) {
 	return data;
 }
 
+async function searchUsersByName(searchTerm) {
+	const { data } = await axios.post(`${siteUrl}/users/search`, {
+		searchTerm
+	});
+	return data;
+}
+
 async function addUser (username, email, optedForLeaderboard) {
 	const {data} = await axios.post(`${siteUrl}/users`, {
 		username,
@@ -92,6 +99,7 @@ export {
 	getAllUsers,
 	getUserByName,
 	getUserByEmail,
+	searchUsersByName,
 	addUser,
 	removeUser,
 	editUserInfo,

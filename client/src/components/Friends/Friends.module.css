@@ -1,0 +1,99 @@
+.tooltip {
+    background-color: lightgray;
+    max-width: 220;
+    border: 1px solid rgb(73, 69, 69);
+}
+
+.friendList {
+	border: 1px solid gray;
+	border-radius: 10px;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.searchModal {
+	max-width: 300px;
+	max-height: 50vh;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 100px;
+    /* overflow: scroll; */
+}
+
+.searchUser {
+    height: 5vh;
+    display: flex;
+    align-items: center;
+}
+
+.friendsModal {
+	max-width: 300px;
+	height: 300px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 100px;
+}
+
+.friendsBox {
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	padding: 20px;
+	border-radius: 5%;
+}
+
+.searchRow {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.searchRow:nth-child(odd){
+    background-color: rgb(227, 244, 255);
+}
+
+.spacer {
+    height: 10vh;
+}
+
+/* these are separate just in case more styling is done on the search box */
+.searchBox {
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	padding: 20px;
+	border-radius: 5%;
+}
+
+.innerBox {
+    overflow-y: auto;
+    height: 100%;
+	width: 100%;
+}
+
+.searchHeader {
+    vertical-align: top;
+}
+
+.friendsClose {
+	cursor: pointer;
+}
+
+.friendsError {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.searchError {
+    left: 0;
+    width: fit-content;
+}
