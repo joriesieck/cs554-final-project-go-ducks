@@ -1,9 +1,3 @@
-.tooltip {
-    background-color: lightgray;
-    max-width: 220;
-    border: 1px solid rgb(73, 69, 69);
-}
-
 .friendList {
 	border: 1px solid gray;
 	border-radius: 10px;
