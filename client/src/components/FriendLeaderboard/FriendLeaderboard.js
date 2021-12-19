@@ -74,7 +74,7 @@ export default function FriendLeaderboard (props) {
 					else if (i===1) place = 'secondPlace';
 					else if (i===2) place = 'thirdPlace';
 					console.log('score', score)
-					return (score !== '-inf' && <Grid container xs={12} className={`${styles.gridRow}${isSelf ? ` ${styles.currentUser}` : ''}`}>
+					return (<Grid container xs={12} className={`${styles.gridRow}${isSelf ? ` ${styles.currentUser}` : ''}`}>
 						<Grid item xs={1} className={styles[place]}>{i<=2 ? <EmojiEventsIcon /> : <LeaderboardIcon />}</Grid>
 						<Grid item xs={1}>{i+1}</Grid>
 						<Grid item xs={5}>{username}</Grid>
