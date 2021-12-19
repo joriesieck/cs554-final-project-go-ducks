@@ -39,6 +39,7 @@ export default function NavBar() {
         type: 'LOG_OUT',
       });
       setLogout(true);
+      window.location.href = '/';
     } catch (e) {
       console.log(e); //this never needs to be displayed i don't think
     }

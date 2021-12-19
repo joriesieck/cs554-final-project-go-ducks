@@ -10,9 +10,7 @@ export default function profileByName({ data }) {
 	return (
 		<>
 			<NextNav />
-				<IndProfile data={data} />
-
-			
+			<IndProfile data={data} />
 		</>
 	)
 }
