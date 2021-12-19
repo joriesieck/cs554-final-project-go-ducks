@@ -78,7 +78,7 @@ export default function NavBar() {
             aria-controls='navigation-tabs'
             aria-labelledby='game-tab'
           />
-          {/* <Tab
+          <Tab
             value="practice"
             label="Practice"
             aria-label="Practice"
@@ -87,7 +87,7 @@ export default function NavBar() {
             id='practice-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='practice-tab'
-          /> */}
+          />
           <Tab
             value="leaderboard"
             label="Leaderboard"
@@ -133,29 +133,32 @@ export default function NavBar() {
               setOpenMenu(true);
               setAnchor(e.target);
             }}
-            aria-controls='responsive-menu'
+            // aria-controls='responsive-menu'
             aria-haspopup='true'
             aria-expanded={openMenu}
             id='trigger-responsive-menu'
             aria-label='open menu'
             className={styles.responsiveNavIcon}
+            role='menu'
           />
           <Menu
             id='responsive-menu'
             open={openMenu}
             onClose={() => {setOpenMenu(false)}}
             MenuListProps={{
-              'aria-labelledby': 'trigger-responsive-menu'
+              'aria-labelledby': 'trigger-responsive-menu',
+              'aria-controls': 'responsive-menu'
             }}
             anchorEl={anchor}
             className={styles.responsiveNav}
           >
-            <MenuItem component={Link} href='/home' onClick={() => {setOpenMenu(false)}}>Home</MenuItem>
-            <MenuItem component={Link} href='/game' onClick={() => {setOpenMenu(false)}}>Game</MenuItem>
-            <MenuItem component={Link} href='/leaderboard' onClick={() => {setOpenMenu(false)}}>Leaderboard</MenuItem>
-            <MenuItem component={Link} href='/profile' onClick={() => {setOpenMenu(false)}}>Profile</MenuItem>
+
+            <MenuItem component={Link} to='/home' onClick={() => {setOpenMenu(false)}}>Home</MenuItem>
+            <MenuItem component={Link} to='/game' onClick={() => {setOpenMenu(false)}}>Game</MenuItem>
+            <MenuItem component={Link} to='/leaderboard' onClick={() => {setOpenMenu(false)}}>Leaderboard</MenuItem>
+            <MenuItem component={Link} to='/profile' onClick={() => {setOpenMenu(false)}}>Profile</MenuItem>
+
             <MenuItem onClick={logUserOut}>Log Out</MenuItem>
-            {/* <MenuItem onClick={handleMenuClick}>Practice</MenuItem> */}
           </Menu>
     </div>
   </>);

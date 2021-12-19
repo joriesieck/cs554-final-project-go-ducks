@@ -169,11 +169,11 @@ const exportedMethods = {
         categoryName,
         score: score || 0,
       });
-      console.log(user.recent_categories);
+      // console.log(user.recent_categories);
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length > 12) user.recent_categories.shift();
-    console.log(user.recent_categories);
+    // console.log(user.recent_categories);
 
     const result = await userCollection.updateOne(
       { username },
@@ -195,7 +195,7 @@ const exportedMethods = {
       Math.max(...user.high_scores) >= highScore
     )
       throw 'This score is not higher than all previous scores.';
-    console.log(highScore, Math.max(...user.high_scores));
+    // console.log(highScore, Math.max(...user.high_scores));
     user.high_scores.push(highScore);
     const result = await userCollection.updateOne(
       { username },
@@ -234,7 +234,7 @@ const exportedMethods = {
       { $push: { saved_games: savedGame } }
     );
     const gameSender = await this.getUserByName(username);
-    console.log(gameSender);
+    // console.log(gameSender);
     const friend = await userCollection.updateOne(
       { _id: ObjectId(friendID) },
       {
@@ -271,9 +271,16 @@ const exportedMethods = {
       }
     );
 
-    console.log(game);
+    // console.log(game);
     return game;
   },
+  async getAllPendingGames(username) {
+    checkString(username, 'Username', false);
+    const userCollection = await users();
+    const user = await userCollection.findOne({username});
+    if (!user) throw `Error: Couldn't find user ${username}`;
+    return user.friend_games || [];
+  }
 };
 
 module.exports = exportedMethods;

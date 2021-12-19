@@ -93,6 +93,7 @@ export default function Leaderboard () {
 				<Grid item xs={5}><FormControlLabel control={<Switch
 					onChange={() => {setFriendsOnly(!friendsOnly)}}
 					inputProps={{'aria-label': 'controlled'}}
+					checked={friendsOnly}
 				/>} label='Show only friends' /></Grid>
 			</Grid>
 			<Grid container xs={12} className={styles.gridContainer}>

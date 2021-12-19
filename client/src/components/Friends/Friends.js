@@ -218,8 +218,8 @@ export default function Friends() {
             <Modal 
                 open={openSearchModal}
                 onClose={() => setOpenSearchModal(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
+                // aria-labelledby="modal-modal-title"
+                // aria-describedby="modal-modal-description"
                 className={styles.searchModal}>
                 <Box className={styles.searchBox}>
                     <Grid container className={styles.searchHeader}>
@@ -264,8 +264,8 @@ export default function Friends() {
             <Modal
 				open={openAddModal}
 				onClose={() => {setOpenAddModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.friendsModal}>
 				<Box className={styles.friendsBox}>
 					<Grid container>
@@ -283,8 +283,8 @@ export default function Friends() {
             <Modal
 				open={openRemoveModal}
 				onClose={() => {setOpenRemoveModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.friendsModal}>
 				<Box className={styles.friendsBox}>
 					<Grid container>
@@ -302,8 +302,8 @@ export default function Friends() {
             <Modal
 				open={openAcceptModal}
 				onClose={() => {setOpenAcceptModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.friendsModal}>
 				<Box className={styles.friendsBox}>
 					<Grid container>
@@ -321,8 +321,8 @@ export default function Friends() {
             <Modal
 				open={openRejectModal}
 				onClose={() => {setOpenRejectModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.friendsModal}
 			>
 				<Box className={styles.friendsBox}>
@@ -341,8 +341,8 @@ export default function Friends() {
             <Modal
 				open={openUnsendModal}
 				onClose={() => {setOpenUnsendModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.friendsModal}>
 				<Box className={styles.friendsBox}>
 					<Grid container>
