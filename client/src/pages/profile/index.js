@@ -14,7 +14,6 @@ export default function profile() {
 async function getProfilesData() {
   console.log("getting profiles")
 	const data = await getAllUsers();
-  console.log(data);
 	return data;
 }
 export async function getStaticProps() {

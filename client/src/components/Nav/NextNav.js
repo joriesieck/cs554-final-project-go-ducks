@@ -45,6 +45,10 @@ export default function NavBar() {
     }
   };
 
+  const goTo = (newLocation) => {
+    window.location.href = newLocation;
+  }
+
   if (logout) return <Redirect to="/" />;
 
   return (<>
@@ -62,8 +66,7 @@ export default function NavBar() {
             value="home"
             label="Home"
             aria-label="Home"
-            component={Link}
-            to="/home"
+            onClick={() => {goTo('/home')}}
             id='home-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='home-tab'
@@ -72,8 +75,7 @@ export default function NavBar() {
             value="game"
             label="Game"
             aria-label="Game"
-            component={Link}
-            to="/game"
+            onClick={() => {goTo('/game')}}
             id='game-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='game-tab'
@@ -92,8 +94,7 @@ export default function NavBar() {
             value="leaderboard"
             label="Leaderboard"
             aria-label="Leaderboard"
-            component={Link}
-            to="/leaderboard"
+            onClick={() => {goTo('/leaderboard')}}
             id='leaderboard-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='leaderboard-tab'
@@ -102,8 +103,7 @@ export default function NavBar() {
             value="profile"
             label="Profile"
             aria-label="Profile"
-            component={Link}
-            to="/profile"
+            onClick={() => {goTo('/profile')}}
             id='profile-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='profile-tab'
@@ -112,8 +112,7 @@ export default function NavBar() {
             value="friends"
             label="Friends"
             aria-label="Friends"
-            component={Link}
-            to="/friends"
+            onClick={() => {goTo('/friends')}}
             id='friends-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='profile-tab'
