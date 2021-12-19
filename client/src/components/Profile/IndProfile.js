@@ -36,32 +36,29 @@ import { Box } from "@mui/system";
 import styles from './Profile.module.css';
 
 export default function IndProfile(props) {
-    console.log(props.data.friends);
 
-    const [userData, setUserData] = useState(null);
+
+    const [profileData, setProfileData] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        async function fetchUserByName() {
-            let data = [];
-            try {
+        async function fetchFriendsListById() {
+            let data = {friendsList : [], name : ""};
+            
                 for (let friend of props.data.friends) {
-                    let friendData = await getUserById(friend)
-                    data.push(friendData);
-                }
-                console.log(data);
-            } catch (e) {
-                if (!e.response || !e.response.data || !e.response.data.error) {
-					setError(e.toString());
-					return;
-				}
-				setError(e.response.data.error);
-				return;
-            }
+                    try {
+                        let friendData = await getUserById(friend);
+                        data.friendsList.push(friendData);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                    
+                } 
+                setProfileData(data);
         }
-        fetchUserByName();
-    },[props.data]);
-
+        fetchFriendsListById();
+    },[]);
+    console.log(profileData);
     return (
         <div className={styles.profile}>
             
@@ -69,8 +66,6 @@ export default function IndProfile(props) {
             <Grid className={styles.profileList} />
             <h2>Login Credentials</h2>
             <Grid item xs={12} className={styles.profileEditable}>
-				
-				
 				
 			</Grid>
             <div className={styles.profileList}>
@@ -84,8 +79,8 @@ export default function IndProfile(props) {
 			</div>
             <div className={styles.profileList}>
 			<h2>Friends</h2>
-            {props.data.friends.length > 0 ? (<Grid container>
-            {props.data.friends.map(({_id, username}, i) => (
+            {profileData.friendsList.length > 0 ? (<Grid container>
+            {profileData.friendsList.map(({_id, username}, i) => (
                 <>
                     <Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
 					<Grid item xs={8.5} className={styles.gridRow}>{username}</Grid>

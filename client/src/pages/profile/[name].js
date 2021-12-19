@@ -6,10 +6,9 @@ import { getAllUsers, getUserByName } from '../../utils/backendCalls';
 
 export default function profileByName({ data }) {
 	return (
-        <>
 
         <IndProfile data={data} />
-        </>
+
 	);
 }
 
