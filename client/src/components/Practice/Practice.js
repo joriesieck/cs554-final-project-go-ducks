@@ -158,7 +158,7 @@ export default function Practice()
             {!answered ? 
             <FormControl>
                 <p>{qs[index].question}</p>
-                <TextField onChange={handleAnswerChange}></TextField>
+                <TextField onChange={handleAnswerChange} label='Answer'></TextField>
                 <Button onClick={handleQuestionSubmit}>Submit</Button>
             </FormControl> : <></>}
             <Dialog open={answered}>

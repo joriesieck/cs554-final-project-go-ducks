@@ -35,6 +35,7 @@
 .gridColumn button:disabled
 {
     opacity: 50%;
+    color: #fffaea;
 }
 
 button.gridHeader
