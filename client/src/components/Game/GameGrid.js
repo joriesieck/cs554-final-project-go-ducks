@@ -12,6 +12,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import GameFinished from './GameFinished';
 import styles from './Game.module.css';
 import axios from 'axios';
+import { useSelector } from "react-redux";
+import { getUserByEmail } from '../../utils/backendCalls';
 
 
 const baseUrl = 'http://jservice.io/api';
@@ -24,6 +26,7 @@ export default function GameGrid(props) {
   const [quitOpen, setQuitOpen] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [correct, setCorrect] = useState(false);
+  const [username, setUsername] = useState('');
   const [questionInfo, setQuestionInfo] = useState({
     category: '',
     question: '',
@@ -39,13 +42,41 @@ export default function GameGrid(props) {
       '1000': [false, false, false, false, false]
     }
   )
-  let btnRef = useRef();
+  const user = useSelector((state) => state.user);
+  if (!user) return <Redirect to="/" />;
 
+  useEffect(() =>
+  {
+      async function x()
+      {
+          console.log(user);
+          const userInfo = await getUserByEmail(user);
+          console.log(userInfo)
+          setUsername(userInfo.username)
+      }
+      x()
+  }, [user])
   //GameSetup sends along the categories
   let categories = props.categories;
 
-  const handleQuitGame = (e) => {
+  const handleQuitGame = async (e) => {
     setRemaining(0);
+    try
+    {
+      const {data} = await axios.post(`${siteUrl}/users/save-game-info`,
+      {
+        username: username,
+        categories:categories,
+        highScore: score
+
+      });
+      if (!data) console.log('oh no')
+      console.log(data)
+    }
+    catch(e)
+    {
+      console.log(e.toString())
+    }
     setQuitOpen(false);
   };
 
@@ -185,6 +216,7 @@ export default function GameGrid(props) {
           value={1000}
           categoryId={categoryId}
           category={category}
+          groupindex={groupIndex}
         ></QuestionButton>
       </Grid>
     );
@@ -229,7 +261,6 @@ export default function GameGrid(props) {
     return (
       <Grid item xs={2}>
         <button
-          ref={btnRef}
           value={props.value}
           className={categoryId}
           category={props.category}

@@ -32,6 +32,11 @@
     font-size: 72px;
 }
 
+.gridColumn button:disabled
+{
+    opacity: 50%;
+}
+
 button.gridHeader
 {
     height: 16vh;

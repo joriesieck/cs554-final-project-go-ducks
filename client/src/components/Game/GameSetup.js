@@ -1,9 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import GameGrid from './GameGrid';
 import {FormControl, 
-    FormLabel, ToggleButtonGroup, ToggleButton, Button, TextField} from '@mui/material';
+    FormLabel, Alert, ToggleButtonGroup, Checkbox, ToggleButton, Button, TextField, Select, MenuItem} from '@mui/material';
 
 import axios from "axios";
+import { useSelector } from "react-redux";
+
+import { getAllFriends,getUserByEmail } from '../../utils/backendCalls';
 
 const baseUrl = "http://jservice.io/api";
 const siteUrl = 'http://localhost:3001';
@@ -17,7 +20,26 @@ export default function GameSetup()
     const [categories, setCategories] = useState([]);
     const [catSearch, setCatSearch] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [friends, setFriends] = useState([]);
+    const [friendToPlay, setFriendToPlay] = useState('');
+    const [error, setError] = useState('');
+    const [username, setUsername] = useState('');
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
+
+    const user = useSelector((state) => state.user);
+    if (!user) return <Redirect to="/" />;
+
+    useEffect(() =>
+    {
+        async function x()
+        {
+            console.log(user);
+            const userInfo = await getUserByEmail(user);
+            console.log(userInfo)
+            setUsername(userInfo.username)
+        }
+        x()
+    }, [user])
 
     useEffect(() =>
     {
@@ -32,10 +54,20 @@ export default function GameSetup()
         fun();
     }, [categoryChoice])
     
-    const handleGameTypeChange = (e, newGameType) =>
+    const handleGameTypeChange = async (e) =>
     {
-        setGameType(newGameType);
-        //set the game type
+        setError('');
+        setGameType(e.target.value);
+        console.log(gameType);
+
+        if (gameType ==='friends')
+        {
+            setFriendToPlay('');
+            const data = await getAllFriends(username);
+            if (data.length < 1) setError('You have no friends to play with!');
+            setFriends(data)
+        }
+        //set the game type>
         //make the category choice appear
     }
 
@@ -48,26 +80,9 @@ export default function GameSetup()
         }
     }
 
-    const handleSearchChange = (e) =>
-    {
-        setCatSearch(e.target.value);
-    }
-
     const handleFormSubmit = async (e) =>
     {
         setInSetup(false);
-        categories.forEach(async ({id, title}) =>
-        {
-            let questionObjArr = [];
-            let values = [200, 400, 600, 800, 1000]
-            for (let i = 0; i < 5; i++)
-            {
-                let questionObj = {}
-                const { data } = await axios.get(`${baseUrl}/clues/?category=${id}&value=${values[i]}`);
-                if (!data) throw 'UNCAUGHT ERROR';
-                
-            }
-        })
         setInGame(true);
     }
 
@@ -82,33 +97,52 @@ export default function GameSetup()
         return returnVal;
     }
 
-    const CategoryForm = (props) =>
+    const CategoryForm = async (props) =>
     {
+        setError('')
+        const {data} = await axios.get(`${siteUrl}/users/categories`);
+        if (!data) setError('could not get data')
         return (
             <div>
-                <TextField onChange={handleSearchChange}></TextField>
-                <Button></Button>
+                <FormLabel>Select up to 6 prior categories</FormLabel>
+                {data.categories.map((category) =>
+                <Checkbox>{category.categoryName}</Checkbox>)}
             </div>
         );
     }
 
-    const SearchResultsList = (props) =>
-    {
 
-    }
-
+    console.log(friendToPlay)
     return(
         <div id="gamePlay">
             {inSetup ?
             <FormControl id="gameSetupForm" component="fieldset">
                 <FormLabel>What kind of game are you looking to play?</FormLabel>
-                <ToggleButtonGroup exclusive value={gameType} onChange={handleGameTypeChange}>
-                    <ToggleButton value="solo">Solo</ToggleButton>
-                    <ToggleButton value="friends">With Friends</ToggleButton>
+                <ToggleButtonGroup exclusive value={gameType}>
+                    <ToggleButton onClick={handleGameTypeChange} value="solo">Solo</ToggleButton>
+                    <ToggleButton onClick={handleGameTypeChange} value="friends">With Friends</ToggleButton>
                 </ToggleButtonGroup>
                 <br/>
                 {
-                    gameType !== "" ? 
+                    gameType === 'friends' ?
+                    <>
+                    <FormLabel>Select a friend to play with</FormLabel>
+                    <Select value={friendToPlay} onChange={(e) =>
+                    {
+                        setFriendToPlay(e.target.value.name)
+                    }}>
+                        {friends.map((friendInfo) =>
+                            <MenuItem key={friendInfo.id} value={{id: friendInfo.id, name: friendInfo.username}}>{friendInfo.username}</MenuItem>
+                        )}
+                    </Select>
+                    {
+                        friendToPlay !== '' ? <FormLabel>You will send this game to {friendToPlay}</FormLabel> : <></>
+                    }
+                    </>
+                    : <></>
+                }
+                {
+                    ((gameType === 'friends' && friendToPlay !== '') || (gameType !== 'friends' && gameType !== '')) && error === '' ? 
                     <>
                         <FormLabel>What kind of categories would you like to play with?</FormLabel>
                         <ToggleButtonGroup exclusive value={categoryChoice}>
@@ -118,11 +152,13 @@ export default function GameSetup()
                     </> : <></>
                 }
                 {
-                    categoryChoice !== "" && gameType !== "" ? 
+                    error !== '' ? <Alert color='warning'>{error}</Alert> : <></>
+                }
+                {
+                    categoryChoice !== "" && gameType !== "" && error === '' ? 
                     (categoryChoice === 'custom' ? 
                     <div>
                         <CategoryForm />
-                        <SearchResultsList results={searchResults}/>
                     </div> : 
                     <><span>Categories</span><ul>
                         {categories.map((category) => <li key={category.title}>{category.title}</li>)}
