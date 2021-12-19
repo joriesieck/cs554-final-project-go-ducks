@@ -582,13 +582,22 @@ router.post('/save-game-info', async (req, res) => {
     return;
   }
 
-  // save previous categories
+  // save previous categories to user
   try {
     await userData.saveGameInfo(username, categories);
   } catch (e) {
     res.status(400).json({
       error: `Error updating previous categories: ${e}`,
     });
+  }
+
+  // save previous categories to categories
+  try {
+    for (let {categoryId, categoryName} of categories) {
+      await categoryData.addCategory(categoryId, categoryName);
+    }
+  } catch (e) {
+    // no op - just skip this one
   }
 
   res.status(200).json(user);
