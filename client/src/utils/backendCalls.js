@@ -7,6 +7,11 @@ async function getAllUsers() {
 	return data;
 }
 
+async function getUserById (id) {
+	const { data } = await axios.get(`${siteUrl}/users/id/${id}`);
+	return data; 
+}
+
 async function getUserByName (username) {
 	const {data} = await axios.get(`${siteUrl}/users/username/${username}`);
 	return data;
@@ -96,6 +101,7 @@ async function getLeaderboard () {
 }
 
 export {
+	getUserById,
 	getAllUsers,
 	getUserByName,
 	getUserByEmail,
