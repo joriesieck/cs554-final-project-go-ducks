@@ -130,6 +130,7 @@ export default function GameGrid(props) {
 
     return !answered ? (
       <>
+        {console.log(questionInfo)}
         <DialogContent>
           <DialogTitle>
             {questionInfo.category} for {questionInfo.value}
@@ -232,6 +233,7 @@ export default function GameGrid(props) {
       const { data } = await axios.get(
         `${baseUrl}/clues/?category=${e.target.className}&value=${props.value}`
       );
+      console.log(data);
       let valuesButtons = disabledButtons[e.target.value];
       valuesButtons[props.groupindex] = true;
       setDisabledButtons({...disabledButtons, [e.target.value]: valuesButtons})

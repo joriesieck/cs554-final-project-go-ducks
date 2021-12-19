@@ -58,13 +58,14 @@ export default function GameSetup()
     {
         setError('');
         setGameType(e.target.value);
-        console.log(gameType);
+        console.log(gameType, e.target.value);
 
-        if (gameType ==='friends')
+        if (e.target.value ==='friends')
         {
             setFriendToPlay('');
             const data = await getAllFriends(username);
             if (data.length < 1) setError('You have no friends to play with!');
+            console.log(data);
             setFriends(data)
         }
         //set the game type>
@@ -129,14 +130,15 @@ export default function GameSetup()
                     <FormLabel>Select a friend to play with</FormLabel>
                     <Select value={friendToPlay} onChange={(e) =>
                     {
-                        setFriendToPlay(e.target.value.name)
+                        console.log(e.target.value);
+                        setFriendToPlay(e.target.value)
                     }}>
                         {friends.map((friendInfo) =>
-                            <MenuItem key={friendInfo.id} value={{id: friendInfo.id, name: friendInfo.username}}>{friendInfo.username}</MenuItem>
+                            <MenuItem key={friendInfo._id} value={{id: friendInfo._id, name: friendInfo.username}}>{friendInfo.username}</MenuItem>
                         )}
                     </Select>
                     {
-                        friendToPlay !== '' ? <FormLabel>You will send this game to {friendToPlay}</FormLabel> : <></>
+                        friendToPlay ? <FormLabel>You will send this game to {friendToPlay.name}</FormLabel> : <></>
                     }
                     </>
                     : <></>
