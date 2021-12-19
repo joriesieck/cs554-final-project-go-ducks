@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
+import Link from 'next/link';
 import { FormControlLabel,Grid, Switch, Alert, CircularProgress } from "@mui/material";
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
@@ -75,7 +76,7 @@ export default function Leaderboard () {
 					return (<Grid container xs={12} className={`${styles.gridRow}${isSelf ? ` ${styles.currentUser}` : ''}`}>
 						<Grid item xs={1} className={styles[place]}>{i<=2 ? <EmojiEventsIcon /> : <LeaderboardIcon />}</Grid>
 						<Grid item xs={1}>{i+1}</Grid>
-						<Grid item xs={5}>{username}</Grid>
+						<Grid item xs={5}>{friends ? <Link href={`/profile/${username}`}>{username}</Link> : username}</Grid>
 						<Grid item xs={4}>{score}</Grid>
 						{friends && <Grid item xs={1}><GroupIcon /></Grid>}
 					</Grid>)})}

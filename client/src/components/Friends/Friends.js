@@ -190,7 +190,7 @@ export default function Friends() {
 	}
 
     const triggerAddFriend = async(e) => {
-        e.preventDefault;
+        e.preventDefault();
         let friendToAdd = toggleFriends.friendUser;
         let result;
         try {

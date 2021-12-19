@@ -17,8 +17,8 @@ import { Link, Redirect } from 'react-router-dom';
 import Image from 'next/image';
 
 import styles from './CreateUser.module.css';
-import googleLogo from '/public/imgs/google-logo.png';
-import gitLogo from '/public/imgs/github-logo.png';
+import googleLogo from '../../public/imgs/google-logo.png';
+import gitLogo from '../../public/imgs/github-logo.png';
 
 export default function CreateUser() {
 	const [errors, setErrors] = useState(null);
