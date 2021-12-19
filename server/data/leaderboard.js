@@ -5,10 +5,9 @@ const { checkString, checkNum } = require('../inputChecks');
 
 const exportedMethods = {
   async addToLeaderboard(username, score) {
-    console.log(score);
     checkString(username, 'Username', false);
     checkNum(score, 'Score');
-    const user = getUserByName(username);
+    const user = await getUserByName(username);
     if (!user.optedForLeaderboard) return;
     const leaderboardCollection = await leaderboard();
 
@@ -37,6 +36,28 @@ const exportedMethods = {
     });
     return currentLeaderboard;
   },
+  async removeFromLeaderboard(username) {
+    checkString(username, 'Username', false);
+    const user = await getUserByName(username);
+    if (user.optedForLeaderboard) return;
+    const leaderboardCollection = await leaderboard();
+
+    // get the current leaderboard
+    const currentLeaderboard = await leaderboardCollection.findOne({
+      tag: 'leaderboard',
+    });
+    // remove any previous entries for this person
+    currentLeaderboard.leaderboard = currentLeaderboard.leaderboard.filter(
+      (entry) => entry.username !== username
+    );
+    // update
+    const result = await leaderboardCollection.updateOne(
+      { tag: 'leaderboard' },
+      { $set: { leaderboard: currentLeaderboard.leaderboard } }
+    );
+    if (!result.modifiedCount) throw 'Error updating leaderboard';
+    return result;
+  }
 };
 
 module.exports = exportedMethods;

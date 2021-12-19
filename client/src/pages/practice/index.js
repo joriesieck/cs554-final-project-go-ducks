@@ -1,7 +1,8 @@
 import Practice from "../../components/Practice/Practice";
 import AuthContainer from "../../AuthContainer";
 
-export default function leaderboard() {
+export default function practice() {
+
 	return (
 		<AuthContainer>
 			<Practice />
