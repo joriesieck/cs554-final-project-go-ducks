@@ -14,6 +14,7 @@ import styles from './Game.module.css';
 import axios from 'axios';
 
 const baseUrl = 'http://jservice.io/api';
+const siteUrl = 'http://localhost:3001';
 
 export default function GameGrid(props) {
   const [score, setScore] = useState(0);
