@@ -679,7 +679,7 @@ export default function Profile () {
 			{userData.friends.length>0 && <Grid container className={styles.profileFriends}>
 				{userData.friends.map(({_id, username}, i) => (<>
 					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
-					<Grid item xs={8.5} className={styles.gridRow}><Link to={`profile/${username}`}>{username}</Link></Grid>
+					<Grid item xs={8.5} className={styles.gridRow}><Link to={`/profile/${username}`}>{username}</Link></Grid>
 					<Grid item xs={2.5} className={styles.gridRow}>
 					<Button color="error" onClick={(e) => {triggerConfirmModal(e,'remove', _id, username)}}>unfriend</Button>
 					</Grid>

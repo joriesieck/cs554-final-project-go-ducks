@@ -31,8 +31,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import CheckIcon from '@mui/icons-material/Check';
 import { useSelector, useDispatch } from "react-redux";
-//import { Link } from "react-router-dom";
-import Link from 'next/link'
+import { Link } from "react-router-dom";
+// import Link from 'next/link'
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
 
@@ -107,7 +107,7 @@ export default function IndProfile(props) {
                     {profileData.friendsList.map(({_id, username}, i) => (
                         <>
                             <Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
-                            <Grid item xs={8.5} className={styles.gridRow}><Link href={'/profile/' + username}>{username}</Link></Grid>
+                            <Grid item xs={8.5} className={styles.gridRow}>{username}</Grid>
                             <Grid item xs={2.5} className={styles.gridRow}>
     
                             </Grid>
