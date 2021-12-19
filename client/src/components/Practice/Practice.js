@@ -32,15 +32,44 @@ export default function Practice()
     const [score, setScore] = useState(0);
     const [categorySearch, setCategorySearch] = useState('');
     const [error, setError] = useState('');
-    const [smallFilteredClues, setSmallFilteredClues] = useState(false);
-    const [questions, setQuestions] = useState([]);
     const [answered, setAnswered] = useState(false);
     const [index, setIndex] = useState(0);
+    const [questions, setQuestions] = useState([]);
 
+    useEffect(() =>
+    {
+        async function filterQs(){
+        if (cluesToPractice !== '' && category !== '')
+        {
+            const {data} = await axios.get(`${baseUrl}/clues/?category=${category.id}`);
+            if (!data) return <Alert color="warning">Something has gone terribly wrong</Alert>
+            
+            console.log(data)
+            let filterQuestions = [];
+            let returnedQuestions = [];
+
+            //get rid of duplicates
+            data.forEach(q =>
+                {
+                    if (!filterQuestions.includes(q.question))
+                    {
+                        filterQuestions.push(q.question);
+                        returnedQuestions.push(q);
+                    }
+                });
+                
+            setQuestions(returnedQuestions);
+
+            if (cluesToPractice === 'available') setNumClues(returnedQuestions.length);
+        }
+    }
+    filterQs()
+    }, [cluesToPractice, category])
 
     const PracticeQuestion = (props) =>
     {
         let qs = props.arr;
+        console.log(qs);
         const [correct, setCorrect] = useState(false);
         const [response, setResponse] = useState('');
 
@@ -48,23 +77,24 @@ export default function Practice()
         {
             if (response.toLowerCase() === qs[index].answer)
             {
-                console.log('woo')
                 setScore(score + 1);
                 setCorrect(true);
             }
             else {
-                console.log('boo')
                 setCorrect(false);
             }
             setAnswered(true);
-            // if ((questionsCompleted + 1) >= numClues) setMode('end');
-            setQuestionsCompleted(questionsCompleted + 1);
         }
 
         const handleDialogClose = (e, reason) =>
         {
             if (reason === 'backdropClick') return false;
-            setQuestionsCompleted(questionsCompleted + 1);
+            let temp = questionsCompleted + 1;
+            setIndex(index + 1);
+            setAnswered(false)
+            setQuestionsCompleted(temp);
+            if (index >= numClues) setMode('end');
+
         }
 
         const handleAnswerChange = (e) =>
@@ -72,7 +102,7 @@ export default function Practice()
             setResponse(e.target.value);
         }
         console.log(answered)
-
+        console.log(qs[index])
         //id, answer, category
         return(
             <>
@@ -90,7 +120,7 @@ export default function Practice()
                     </DialogContentText>
                     :
                     <DialogContentText>
-                        Sorry, that's not right. The correct answer is:
+                        Sorry, that's not right. The correct answer is: {qs[index].answer}
                     </DialogContentText>
                     }
                     <DialogContentText>
@@ -98,7 +128,7 @@ export default function Practice()
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDialogClose}></Button>
+                    <Button onClick={handleDialogClose}>Continue</Button>
                 </DialogActions>
             </Dialog>
             </>
@@ -122,6 +152,7 @@ export default function Practice()
             const { data } = await axios.get(`${baseUrl}/random`);
             setCategory({id: data[0].category.id, title: data[0].category.title.toUpperCase(),
             cluesCount: data[0].category.clues_count});
+            console.log(category.title)
         }
         else if (type === 'previous')
         {
@@ -140,53 +171,32 @@ export default function Practice()
         }
     }
 
-    const handleCluesChange = (e, val) =>
+    const handleCluesChange = async (e, val) =>
     {
         setCluesToPractice(val);
-        if (val === 'available') setNumClues(category.cluesCount);
     }
 
     const handleNumCluesChange = (e) =>
     {
         setError('')
         let val = e.target.value;
-        console.log(val)
-        console.log(category.cluesCount)
-        if (val < 1 || category.cluesCount < val) setError('Provide a different value for # of clues to practice with.');
+        //filtering questions based on cluesToPractice
+        
+
+        if (val < 1 || questions.length < val) setError('Provide a different value for # of clues to practice with.');
         else setNumClues(val);       
     }
 
     const handleStartPractice = async (e) =>
     {
         //based on clues to practice query questions from api
-        const {data} = await axios.get(`${baseUrl}/clues/?category=${category.id}`);
-        if (!data) return <Alert color="warning">Something has gone terribly wrong</Alert>
-        console.log(data)
-        let filterQuestions = [];
-        let returnedQuestions = [];
-        //filter them so that no duplicates exist (big issue with the jservice API are the duplicated clues)
-        data.forEach(q =>
-            {
-                if (!filterQuestions.includes(q.question))
-                {
-                    filterQuestions.push(q.question);
-                    returnedQuestions.push(q);
-                }
-            });
-        if (returnedQuestions.length >= numClues)
+        
+        if (numClues < questions.length) //only option is numClues < returnedQuestions.length, as it can only be set in these 2 cases
         {
-            setQuestions(returnedQuestions.slice(0, numClues - 1));
-            setQuestionsCompleted(0);
-            setMode('inPractice');
+            setQuestions(questions.slice(0, numClues - 1));
         }
-        else
-        {
-            console.log(returnedQuestions)
-            setQuestions(returnedQuestions);
-            setSmallFilteredClues(true);
-            //set num clues to whatever number could actually be returned
-
-        }
+        setQuestionsCompleted(0);
+        setMode('inPractice');
     }
 
     const handleCategorySearch = (e) =>
@@ -218,34 +228,15 @@ export default function Practice()
                     <ToggleButton value='available'>All Available</ToggleButton>
                 </ToggleButtonGroup>
             </> : <></>} 
-            {cluesToPractice === 'available' ? <p>Your number of clues will be {category.cluesCount}</p> : <></>}
+            {cluesToPractice === 'available' ? <p>Your number of clues will be {questions !== [] ? questions.length : 0}</p> : <></>}
             {cluesToPractice === 'custom' && (error === 'Provide a different value for # of clues to practice with.' || error === '')? 
             <>
                 <TextField id="numberOfClues" label="Number of clues" variant="standard" type="number" onChange={handleNumCluesChange}></TextField>
                 {error !== '' ? <Alert color='warning'>{error}</Alert> : <></>}
             </> : <></>}
             {practiceType !== '' && cluesToPractice !== '' && numClues >= 1 && numClues <= category.cluesCount && error === '' ? <Button onClick={handleStartPractice}>Start Practice</Button> : <></>}
+            
             </> : <></>}
-            <Dialog open={smallFilteredClues || false}>
-                <DialogContent>
-                    <DialogContentTitle>Desired number of clues could not be returned due to duplicate clues</DialogContentTitle>
-                    <DialogContentText>Requested questions: {numClues}</DialogContentText>
-                    <DialogContentText>Available questions filtered: {questions.length}</DialogContentText>
-                    <DialogContentText>Would you like to practice with {questions.length} questions instead?</DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() =>
-                    {
-                        setQuestionsCompleted(0)
-                        setSmallFilteredClues(false);
-                        setMode('inPractice');
-                    }}>Yes, continue to practice!</Button>
-                    <Button onClick={() =>
-                    {
-                        setSmallFilteredClues(false);
-                    }}>No, go back</Button>
-                </DialogActions>
-            </Dialog>
         </FormControl> :
         (mode === 'inPractice' ? 
         <div>
