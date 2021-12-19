@@ -26,7 +26,7 @@ export default function GameSetup()
     const [username, setUsername] = useState('');
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
-    const user = useSelector((state) => state.user);
+    const user = useSelector((state) => state.user.user);
     const authToken = useSelector((state) => state.auth.authToken);
     if (!user) return <Redirect to="/" />;
 

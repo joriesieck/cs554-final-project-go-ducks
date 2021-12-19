@@ -2,6 +2,7 @@ import Profile from '../../components/Profile/Profile';
 import AuthContainer from '../../AuthContainer';
 import { getAllUsers, getUserByName } from '../../utils/backendCalls';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 export default function profile() {
   return (

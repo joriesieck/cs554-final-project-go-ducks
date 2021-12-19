@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { getLeaderboard, getUserByEmail } from "../../utils/backendCalls";
 
 export default function FriendLeaderboard (props) {
-	const user = useSelector((state) => state.user);	// highlight user
+	const user = useSelector((state) => state.user.user);	// highlight user
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
 	const [leaderboardData, setLeaderboardData] = useState([]);

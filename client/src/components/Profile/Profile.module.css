@@ -110,13 +110,11 @@
 }
 
 .gridRow {
-<<<<<<< HEAD
   align-self: center;
 }
 
 .submitCheck {
   max-height: 36px;
-=======
 	align-self: center;
 }
 
@@ -133,5 +131,4 @@
 		max-width: 100% !important;
 		text-align: center;
 	}
->>>>>>> main
 }

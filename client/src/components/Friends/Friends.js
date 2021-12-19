@@ -45,7 +45,7 @@ export default function Friends() {
     const authToken = useSelector((state) => state.auth.authToken);
     
 
-    const user = useSelector((state) => state.user);
+    const user = useSelector((state) => state.user.user);
 
     // get user, need username to get friends
     useEffect(() => {

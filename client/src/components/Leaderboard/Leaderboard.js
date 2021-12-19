@@ -77,7 +77,7 @@ export default function Leaderboard () {
 			</Grid>
 			</>}
 			
-			{leaderboardData.length<=0 && <p>Looks like there aren't any users on the leaderboard yet. <Link to='/game'>Play a game</Link> to kick it off!</p>}
+			{leaderboardData.length<=0 && <p>Looks like there aren't any users on the leaderboard yet. <Link href='/game'>Play a game</Link> to kick it off!</p>}
 			</>}
 
 			{friendsOnly && <> {(friendData.length>0 && userData) && 
@@ -107,7 +107,7 @@ export default function Leaderboard () {
 			</Grid>
 			</>}
 			
-			{friendData.length<=0 && <p>Looks like there aren't any friends on the leaderboard yet. <Link to='/game'>Play a game</Link> to kick it off!</p>}
+			{friendData.length<=0 && <p>Looks like there aren't any friends on the leaderboard yet. <Link href='/game'>Play a game</Link> to kick it off!</p>}
 			</>}
 
 			{error && <Alert severity="error">{error}</Alert>}

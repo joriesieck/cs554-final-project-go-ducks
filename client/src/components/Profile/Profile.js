@@ -76,7 +76,7 @@ export default function Profile () {
 	const [openAcceptModal, setOpenAcceptModal] = useState(false);
 	const [toggleFriends, setToggleFriends] = useState({friendId:'', friendUser:''});
 
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
   const authToken = useSelector((state) => state.auth.authToken);
 	const dispatch = useDispatch();
 
