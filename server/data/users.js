@@ -41,17 +41,17 @@ const exportedMethods = {
     if (!user) throw `User with email ${email} not found`;
     return user;
   },
-  async searchUsersByName(searchString){
+  async searchUsersByName(searchString) {
     let search = checkString(searchString, 'Search String', false);
-    let validStr = search.replace(/[^a-z\d]/gi, "");
-    if (!validStr){
-      throw "Search string not valid";
+    let validStr = search.replace(/[^a-z\d]/gi, '');
+    if (!validStr) {
+      throw 'Search string not valid';
     }
     let userCollection = await users();
-    let results = await userCollection.find(
-        {username: { $regex: ".*" + validStr + ".*", $options: "i"}}
-    )
-    results = results.toArray()
+    let results = await userCollection.find({
+      username: { $regex: '.*' + validStr + '.*', $options: 'i' },
+    });
+    results = results.toArray();
     return results;
   },
   async doesUserExist(username, email) {
@@ -77,6 +77,7 @@ const exportedMethods = {
       pending_friends: [],
       optedForLeaderboard: optedForLeaderboard,
       recent_categories: [],
+      saved_games: [],
     });
     return insertInfo;
   },
@@ -163,10 +164,16 @@ const exportedMethods = {
       user.recent_categories = user.recent_categories.filter(
         (cat) => cat.categoryId !== categoryId
       );
-      user.recent_categories.push({ categoryId, categoryName, score: score || 0 });
+      user.recent_categories.push({
+        categoryId,
+        categoryName,
+        score: score || 0,
+      });
+      console.log(user.recent_categories);
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length > 12) user.recent_categories.shift();
+    console.log(user.recent_categories);
 
     const result = await userCollection.updateOne(
       { username },
@@ -183,9 +190,12 @@ const exportedMethods = {
     const userCollection = await users();
 
     // make sure this is really a high score
-    if (user.high_scores.length > 0 && Math.max(user.high_scores) >= highScore)
+    if (
+      user.high_scores.length > 0 &&
+      Math.max(...user.high_scores) >= highScore
+    )
       throw 'This score is not higher than all previous scores.';
-
+    console.log(highScore, Math.max(...user.high_scores));
     user.high_scores.push(highScore);
     const result = await userCollection.updateOne(
       { username },
@@ -199,6 +209,70 @@ const exportedMethods = {
     const highScore = Math.max(...user.high_scores);
     checkNum(highScore, 'high score');
     return highScore;
+  },
+  async saveSharedGame(username, categories, gameScore, friendID) {
+    checkArray(categories, 'Categories');
+    if (categories.length <= 0) throw 'Please pass in at least one category.';
+    for (let { categoryId, categoryName, score } of categories) {
+      checkNum(categoryId, 'CategoryId');
+      checkString(categoryName, 'categoryName', true);
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
+    checkNum(gameScore, 'highScore');
+
+    const userCollection = await users();
+    const savedGameId = ObjectId();
+    const savedGame = {
+      _id: savedGameId,
+      categories: categories,
+      score: gameScore,
+      friend: friendID,
+    };
+    await userCollection.updateOne(
+      { username },
+      { $push: { saved_games: savedGame } }
+    );
+    const gameSender = await this.getUserByName(username);
+    console.log(gameSender);
+    const friend = await userCollection.updateOne(
+      { _id: ObjectId(friendID) },
+      {
+        $push: {
+          friend_games: { gameSender: gameSender._id, gameID: savedGameId },
+        },
+      }
+    );
+
+    const updatedUser = await userCollection.findOne({ username });
+    return [savedGameId, updatedUser];
+  },
+  async getSharedGame(userId, gameId) {
+    checkObjId(userId, 'User ID');
+    checkObjId(gameId, 'Game ID');
+    const parsedUserId = ObjectId(userId);
+    const parsedGameId = ObjectId(gameId);
+    const userCollection = await users();
+    const game = await userCollection.findOne(
+      {
+        _id: parsedUserId,
+      },
+      {
+        projection: {
+          _id: parsedGameId,
+          saved_games: {
+            $filter: {
+              input: '$saved_games',
+              as: 'saved_game',
+              cond: { $eq: ['$$saved_game._id', parsedGameId] },
+            },
+          },
+        },
+      }
+    );
+
+    console.log(game);
+    return game;
   },
 };
 
