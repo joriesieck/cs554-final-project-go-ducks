@@ -62,8 +62,7 @@ const emailCache = async (email) => {
       return user;
     }
   } catch (e) {
-    res.status(404).json({ error: e.message || e.toString() });
-    return;
+    return e;
   }
 };
 const updateEmailCache = async (updatedUser, originalEmail) => {
@@ -244,12 +243,16 @@ router.patch('/edit-user', async (req, res) => {
       if (updatedUser.optedForLeaderboard && !user.optedForLeaderboard) {
         //if the user wants to opt in to leaderboard
         const highScore = await userData.getHighScore(updatedUser);
-        await client.zaddAsync('leaderboard', highScore, updatedUser.username);
-        await leaderboardData.addToLeaderboard(updatedUser.username, highScore);
+        if (highScore > -Infinity) {
+          await client.zaddAsync('leaderboard', highScore, updatedUser.username);
+          await leaderboardData.addToLeaderboard(updatedUser.username, highScore);
+        }
       }
       if (!updatedUser.optedForLeaderboard && user.optedForLeaderboard) {
         //opt out of leaderboard
         await client.zremAsync('leaderboard', updatedUser.username);
+        // remove from db leaderboard
+        await leaderboardData.removeFromLeaderboard(updatedUser.username);
       }
       res.status(201).json(updatedUser);
     } catch (e) {
@@ -544,52 +547,55 @@ router.post('/save-game-info', async (req, res) => {
     res.status(404).json({ error: user });
     return;
   }
+  let isHighScore = false;
   try {
     updatedUser = await userData.addHighScore(user, highScore); //add highscore and get updated user
     user = await updateUserCache(updatedUser); //update the user's cache
     if (!user.username) throw 'Error adding score.';
+    isHighScore = true;
   } catch (e) {
     console.log('Not a high score');
   }
 
-  // add to leaderboard
-  if (user.optedForLeaderboard) {
-    const result = await client.zadd('leaderboard', highScore, username); //dont add if user has not opted in
-    if (!result) {
-      res
-        .status(400)
-        .json({ error: `Error adding ${username} to the leaderboard` });
-      return;
-    }
-    let dbResult;
-    try {
-      dbResult = await leaderboardData.addToLeaderboard(username, highScore);
-    } catch (e) {
-      res.status(400).json({
-        error: `Error adding ${username} to the database leaderboard: ${e}`,
-      });
-      return;
+  // only add to leaderboards if high score
+  if (isHighScore) {
+    // add to leaderboard
+    if (user.optedForLeaderboard) {
+      const result = await client.zadd('leaderboard', highScore, username); //dont add if user has not opted in
+      if (!result) {
+        res
+          .status(400)
+          .json({ error: `Error adding ${username} to the leaderboard` });
+        return;
+      }
+      let dbResult;
+      try {
+        dbResult = await leaderboardData.addToLeaderboard(username, highScore);
+      } catch (e) {
+        res.status(400).json({
+          error: `Error adding ${username} to the database leaderboard: ${e}`,
+        });
+        return;
+      }
     }
   }
-
-  // add to database leaderboard
-  let dbResult;
-  try {
-    dbResult = await leaderboardData.addToLeaderboard(username, highScore);
-  } catch (e) {
-    res.status(400).json({
-      error: `Error adding ${username} to the database leaderboard: ${e}`,
-    });
-    return;
-  }
-
-  // save previous categories
+  
+  // save previous categories to user
   try {
     await userData.saveGameInfo(username, categories);
   } catch (e) {
     res.status(400).json({
       error: `Error updating previous categories: ${e}`,
     });
+  }
+
+  // save previous categories to categories
+  try {
+    for (let {categoryId, categoryName} of categories) {
+      await categoryData.addCategory(categoryId, categoryName);
+    }
+  } catch (e) {
+    // no op - just skip this one
   }
 
   res.status(200).json(user);
@@ -709,5 +715,25 @@ router.get('/categories', async (req, res) => {
   }
   res.status(200).json({ categories: result });
 });
+
+// get a list of all friends w pending games
+router.get('/:username/pending-games', async (req, res) => {
+  let {username} = req.params;
+  try {
+    checkString(username, 'Username', false);
+  } catch (e) {
+    res.status(400).json({error: e});
+    return;
+  }
+  let friendGames;
+  try {
+    friendGames = await userData.getAllPendingGames(username);
+  } catch (e) {
+    res.status(400).json({error: `Error fetching pending games: ${e}`});
+    return;
+  }
+
+  res.status(200).json({friendGames});
+})
 
 module.exports = router;
