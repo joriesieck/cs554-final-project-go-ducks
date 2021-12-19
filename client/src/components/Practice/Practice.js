@@ -117,7 +117,8 @@ export default function Practice()
         const handleQuestionSubmit = (e) =>
         {
             console.log(qs[index].answer)
-            let sanitizedAnswer = qs[index].answer.replace( /(<([^>]+)>)/ig, '')
+            let sanitizedAnswer = qs[index].answer.replace( /(<([^>]+)>)/ig, '').replace(/\\/g, '');
+            console.log(sanitizedAnswer);
             if (response.toLowerCase() === sanitizedAnswer.toLowerCase())
             {
                 setCorrect(true);

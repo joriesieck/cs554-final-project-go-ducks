@@ -257,6 +257,8 @@ export default function GameGrid(props) {
         question = data[index].question;
         answer = data[index].answer;
       }
+      // strip html tags and \s from answers
+      answer = answer.replace( /(<([^>]+)>)/ig, '').replace(/\\/g, '');
       setQuestionInfo({
         category: category,
         question: question,
