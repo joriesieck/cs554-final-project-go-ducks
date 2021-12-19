@@ -243,12 +243,16 @@ router.patch('/edit-user', async (req, res) => {
       if (updatedUser.optedForLeaderboard && !user.optedForLeaderboard) {
         //if the user wants to opt in to leaderboard
         const highScore = await userData.getHighScore(updatedUser);
-        await client.zaddAsync('leaderboard', highScore, updatedUser.username);
-        await leaderboardData.addToLeaderboard(updatedUser.username, highScore);
+        if (highScore > -Infinity) {
+          await client.zaddAsync('leaderboard', highScore, updatedUser.username);
+          await leaderboardData.addToLeaderboard(updatedUser.username, highScore);
+        }
       }
       if (!updatedUser.optedForLeaderboard && user.optedForLeaderboard) {
         //opt out of leaderboard
         await client.zremAsync('leaderboard', updatedUser.username);
+        // remove from db leaderboard
+        await leaderboardData.removeFromLeaderboard(updatedUser.username);
       }
       res.status(201).json(updatedUser);
     } catch (e) {
