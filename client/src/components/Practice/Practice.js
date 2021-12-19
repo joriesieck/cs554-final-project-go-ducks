@@ -89,11 +89,17 @@ export default function Practice()
         const handleDialogClose = (e, reason) =>
         {
             if (reason === 'backdropClick') return false;
-            let temp = questionsCompleted + 1;
-            setIndex(index + 1);
+            let temp = questionsCompleted;
             setAnswered(false)
-            setQuestionsCompleted(temp);
-            if (index >= numClues) setMode('end');
+            setQuestionsCompleted(temp + 1);
+            if (temp + 1 >= numClues) 
+            {
+                setMode('end');
+            }
+            else
+            {
+                setIndex(index + 1);
+            }
 
         }
 
@@ -101,8 +107,7 @@ export default function Practice()
         {
             setResponse(e.target.value);
         }
-        console.log(answered)
-        console.log(qs[index])
+        console.log(index)
         //id, answer, category
         return(
             <>
@@ -182,7 +187,6 @@ export default function Practice()
         let val = e.target.value;
         //filtering questions based on cluesToPractice
         
-
         if (val < 1 || questions.length < val) setError('Provide a different value for # of clues to practice with.');
         else setNumClues(val);       
     }
@@ -195,6 +199,7 @@ export default function Practice()
         {
             setQuestions(questions.slice(0, numClues - 1));
         }
+        console.log(questions);
         setQuestionsCompleted(0);
         setMode('inPractice');
     }
