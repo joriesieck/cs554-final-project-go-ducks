@@ -177,7 +177,10 @@ const exportedMethods = {
     const userCollection = await users();
 
     // make sure this is really a high score
-    if (user.high_scores.length > 0 && Math.max(...user.high_scores) >= highScore)
+    if (
+      user.high_scores.length > 0 &&
+      Math.max(...user.high_scores) >= highScore
+    )
       throw 'This score is not higher than all previous scores.';
     console.log(highScore, Math.max(...user.high_scores));
     user.high_scores.push(highScore);
@@ -194,7 +197,7 @@ const exportedMethods = {
     checkNum(highScore, 'high score');
     return highScore;
   },
-  async addSavedGame(username, categories, gameScore) {
+  async saveSharedGame(username, categories, gameScore, friendID) {
     checkArray(categories, 'Categories');
     if (categories.length <= 0) throw 'Please pass in at least one category.';
     for (let { categoryId, categoryName, score } of categories) {
@@ -211,11 +214,17 @@ const exportedMethods = {
       _id: savedGameId,
       categories: categories,
       score: gameScore,
+      friend: friendID,
     };
     await userCollection.updateOne(
       { username },
       { $push: { saved_games: savedGame } }
     );
+    const friend = await userCollection.updateOne(
+      { _id: ObjectId(friendID) },
+      { $push: { friend_games: savedGameId } }
+    );
+    console.log(friend);
     const updatedUser = await userCollection.findOne({ username });
     return [savedGameId, updatedUser];
   },

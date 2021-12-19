@@ -1,4 +1,5 @@
 const express = require('express');
+const { ObjectId } = require('mongodb');
 const router = express.Router();
 const data = require('../data');
 const userData = data.users;
@@ -572,9 +573,11 @@ router.post('/save-game-info', async (req, res) => {
   res.status(200).json(user);
 });
 router.post('/save-shared-game', async (req, res) => {
-  let { username, categories, gameScore } = req.body;
+  let { username, categories, gameScore, friendID } = req.body;
+  console.log(friendID);
   try {
     checkString(username, 'Username', false);
+    checkObjId(friendID, 'Friend ID');
     checkArray(categories, 'Categories');
     if (categories.length <= 0) throw 'Please pass in at least one category.';
     for (let { categoryId, categoryName, score } of categories) {
@@ -589,7 +592,12 @@ router.post('/save-shared-game', async (req, res) => {
     return;
   }
   try {
-    const data = await userData.addSavedGame(username, categories, gameScore);
+    const data = await userData.saveSharedGame(
+      username,
+      categories,
+      gameScore,
+      friendID
+    );
     updateUserCache(data[1]);
     res.status(200).json({ user: data[1], savedGameId: data[0] });
   } catch (e) {
