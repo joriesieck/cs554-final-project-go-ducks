@@ -77,6 +77,7 @@ const exportedMethods = {
       pending_friends: [],
       optedForLeaderboard: optedForLeaderboard,
       recent_categories: [],
+      saved_games: [],
     });
     return insertInfo;
   },
@@ -163,10 +164,16 @@ const exportedMethods = {
       user.recent_categories = user.recent_categories.filter(
         (cat) => cat.categoryId !== categoryId
       );
-      user.recent_categories.push({ categoryId, categoryName, score: score || 0 });
+      user.recent_categories.push({
+        categoryId,
+        categoryName,
+        score: score || 0,
+      });
+      console.log(user.recent_categories);
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length > 12) user.recent_categories.shift();
+    console.log(user.recent_categories);
 
     const result = await userCollection.updateOne(
       { username },
@@ -183,9 +190,12 @@ const exportedMethods = {
     const userCollection = await users();
 
     // make sure this is really a high score
-    if (user.high_scores.length > 0 && Math.max(user.high_scores) >= highScore)
+    if (
+      user.high_scores.length > 0 &&
+      Math.max(...user.high_scores) >= highScore
+    )
       throw 'This score is not higher than all previous scores.';
-
+    console.log(highScore, Math.max(...user.high_scores));
     user.high_scores.push(highScore);
     const result = await userCollection.updateOne(
       { username },
@@ -199,6 +209,37 @@ const exportedMethods = {
     const highScore = Math.max(...user.high_scores);
     checkNum(highScore, 'high score');
     return highScore;
+  },
+  async saveSharedGame(username, categories, gameScore, friendID) {
+    checkArray(categories, 'Categories');
+    if (categories.length <= 0) throw 'Please pass in at least one category.';
+    for (let { categoryId, categoryName, score } of categories) {
+      checkNum(categoryId, 'CategoryId');
+      checkString(categoryName, 'categoryName', true);
+      if (!score) score = 0;
+      checkNum(score, 'Score');
+    }
+    checkNum(gameScore, 'highScore');
+
+    const userCollection = await users();
+    const savedGameId = ObjectId();
+    const savedGame = {
+      _id: savedGameId,
+      categories: categories,
+      score: gameScore,
+      friend: friendID,
+    };
+    await userCollection.updateOne(
+      { username },
+      { $push: { saved_games: savedGame } }
+    );
+    const friend = await userCollection.updateOne(
+      { _id: ObjectId(friendID) },
+      { $push: { friend_games: savedGameId } }
+    );
+    console.log(friend);
+    const updatedUser = await userCollection.findOne({ username });
+    return [savedGameId, updatedUser];
   },
 };
 
