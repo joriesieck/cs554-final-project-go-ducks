@@ -1,7 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {Link} from 'react-router-dom';
+import { useSelector } from "react-redux";
 import { FormControl, FormLabel, TextField, Button, ToggleButton, ToggleButtonGroup, Dialog, DialogActions, DialogContent, DialogContentTitle, DialogContentText, Alert } from '@mui/material';
 import axios from 'axios';
+import { getUserByEmail } from '../../utils/backendCalls';
 
 const baseUrl = "http://jservice.io/api";
 const siteUrl = 'http://localhost:3001';
@@ -10,7 +12,7 @@ const EndPracticeScreen = (props) =>
 {
     return(
         <div>
-            Your final score was {props.score || 0}
+            Your final score was {props.score || 0} / {props.num}
             <Button onClick={() => window.location.reload()}>Practice another category</Button>
             <Button component={Link} to="/practice">Back to home</Button>
         </div>
@@ -35,6 +37,10 @@ export default function Practice()
     const [answered, setAnswered] = useState(false);
     const [index, setIndex] = useState(0);
     const [questions, setQuestions] = useState([]);
+
+    //this is a protected route
+    const user = useSelector((state) => state.user);
+    if (!user) return <Redirect to="/" />;
 
     useEffect(() =>
     {
@@ -140,9 +146,17 @@ export default function Practice()
         );
     }
 
-    const handleEndPractice = (e) =>
+    const handleEndPractice = async (e) =>
     {
         setQuestionsCompleted(numClues);
+        const userInfo = await getUserByEmail(user);
+        console.log(userInfo.data)
+        const {data} = await axios.post(`${siteUrl}/save-game-info`,
+        {
+            username: '',
+            categories: [{categoryId: category.id, categoryName: category.title}],
+            highScore: 0
+        })
         setMode('end');
     }
 
@@ -197,7 +211,7 @@ export default function Practice()
         
         if (numClues < questions.length) //only option is numClues < returnedQuestions.length, as it can only be set in these 2 cases
         {
-            setQuestions(questions.slice(0, numClues - 1));
+            setQuestions(questions.slice(0, numClues));
         }
         console.log(questions);
         setQuestionsCompleted(0);
@@ -251,6 +265,6 @@ export default function Practice()
             <hr/>
             <PracticeQuestion arr={questions} />
         </div>
-        : <EndPracticeScreen score={score}/>)
+        : <EndPracticeScreen score={score} num={questionsCompleted}/>)
     );
 }
