@@ -31,8 +31,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import CheckIcon from '@mui/icons-material/Check';
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-// import Link from 'next/link'
+// import { Link } from "react-router-dom";
+import Link from 'next/link'
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
 
@@ -82,6 +82,11 @@ export default function IndProfile(props) {
         fetchFriendsListById();
     },[]);
 
+    const goHome = () => {
+        window.location.href = '/home';
+        // window.location.reload();
+    }
+
     if (profileData) {
         return (
 
@@ -115,7 +120,7 @@ export default function IndProfile(props) {
                     ))}
                 </Grid>) : <p>No friends to show.</p> }
                 </div>
-    
+            <Button onClick={goHome}>Home</Button>
             </div>
 
         )

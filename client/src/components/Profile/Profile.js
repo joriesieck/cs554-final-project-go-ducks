@@ -16,7 +16,9 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import CheckIcon from '@mui/icons-material/Check';
 import { useSelector, useDispatch } from "react-redux";
-import { Redirect, Link } from "react-router-dom";
+// import { Redirect, Link } from "react-router-dom";
+import { Redirect } from "react-router-dom";
+import Link from 'next/link';
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
 import { 
@@ -679,7 +681,7 @@ export default function Profile () {
 			{userData.friends.length>0 && <Grid container className={styles.profileFriends}>
 				{userData.friends.map(({_id, username}, i) => (<>
 					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
-					<Grid item xs={8.5} className={styles.gridRow}><Link to={`/profile/${username}`}>{username}</Link></Grid>
+					<Grid item xs={8.5} className={styles.gridRow}><Link href={`/profile/${username}`}>{username}</Link></Grid>
 					<Grid item xs={2.5} className={styles.gridRow}>
 					<Button color="error" onClick={(e) => {triggerConfirmModal(e,'remove', _id, username)}}>unfriend</Button>
 					</Grid>

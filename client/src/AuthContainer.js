@@ -19,7 +19,6 @@ export default function AuthContainer(props) {
 			<Route exact path='/friends' component={Friends} />
 			<Route exact path='/practice' component={Practice} />
 			<Route exact path='/leaderboard' component={Leaderboard} />
-			<Route exact path='/profile/:name' component={IndProfile} />
 		</>
 	)
 }
