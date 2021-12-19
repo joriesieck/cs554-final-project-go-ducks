@@ -256,9 +256,9 @@ export default function Friends() {
                             }
                         </Grid></Grid>)})}
                     </Grid>}
-                    </Box>
                     {searchResults && searchResults.length <= 0 && 
                     <p>Sorry we couldn't find any users with that name</p>}
+                    </Box>
                 </Box>
             </Modal>
             <Modal
