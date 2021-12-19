@@ -6,8 +6,10 @@ import GameSetup from './components/Game/GameSetup';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import Practice from './components/Practice/Practice';
 import Friends from './components/Friends/Friends';
+import IndProfile from './components/Profile/IndProfile';
 
-export default function AuthContainer() {
+export default function AuthContainer(props) {
+	console.log(props);
 	return (
 		<>
 			<NavBar />
@@ -17,6 +19,7 @@ export default function AuthContainer() {
 			<Route exact path='/friends' component={Friends} />
 			<Route exact path='/practice' component={Practice} />
 			<Route exact path='/leaderboard' component={Leaderboard} />
+			<Route exact path='/profile/:name' component={IndProfile} />
 		</>
 	)
 }

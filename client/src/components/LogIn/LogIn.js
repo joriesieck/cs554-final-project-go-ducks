@@ -13,9 +13,9 @@ import { getUserByName, getUserByEmail, addUser } from "../../utils/backendCalls
 import { Link, Redirect } from 'react-router-dom';
 import Image from 'next/image';
 
-import googleLogo from '/public/imgs/google-logo.png';
-import fbLogo from '/public/imgs/facebook-logo.png';
-import gitLogo from '/public/imgs/github-logo.png';
+import googleLogo from '../../public/imgs/google-logo.png';
+import fbLogo from '../../public/imgs/facebook-logo.png';
+import gitLogo from '../../public/imgs/github-logo.png';
 import styles from './LogIn.module.css';
 
 export default function LogIn() {

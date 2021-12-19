@@ -1,11 +1,20 @@
 import axios from 'axios';
+import AuthContainer from '../../AuthContainer';
+import NavBar from '../../components/Nav/Nav';
+import IndProfile from '../../components/Profile/IndProfile';
 import Profile from '../../components/Profile/Profile';
 import { getAllUsers, getUserByName } from '../../utils/backendCalls';
 
 export default function profileByName({ data }) {
+	console.log(data);
 	return (
-        <Profile />
-	);
+		<>
+			<NavBar />
+				<IndProfile data={data} />
+
+			
+		</>
+	)
 }
 
 export async function getStaticProps({ params }) {
