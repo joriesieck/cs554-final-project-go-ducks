@@ -14,7 +14,7 @@ const EndPracticeScreen = (props) =>
         <div>
             Your final score was {props.score || 0} / {props.num}
             <Button onClick={() => window.location.reload()}>Practice another category</Button>
-            <Button component={Link} to="/practice">Back to home</Button>
+            <Button component={Link} to="/home">Back to home</Button>
         </div>
     )
     //has score, what they got wrong, stuff from the game
@@ -60,7 +60,7 @@ export default function Practice()
     useEffect(() =>
     {
         async function filterQs(){
-        if (cluesToPractice !== '' && category !== '')
+        if (cluesToPractice && category)
         {
             const {data} = await axios.get(`${baseUrl}/clues/?category=${category.id}`);
             if (!data) return <Alert color="warning">Something has gone terribly wrong</Alert>
@@ -80,7 +80,7 @@ export default function Practice()
                 });
             console.log(category)
             setQuestions(returnedQuestions);
-
+            category.cluesCount = returnedQuestions.length
             if (cluesToPractice === 'available') setNumClues(returnedQuestions.length);
         }
     }
@@ -91,14 +91,21 @@ export default function Practice()
     {
         if (pastCategories && pastCategories.length > 0) 
         {
-            console.log(pastCategories[0])
-            setSelectedPastCategory(pastCategories[0]);
+            console.log(pastCategories);
+            console.log(pastCategories[0]);
+            // get the actual format of the dropdowns
+            const initialSelected = {
+                id: pastCategories[0].categoryId,
+                title: pastCategories[0].categoryName
+            }
+            setSelectedPastCategory(JSON.stringify(initialSelected));
         }
     }, [pastCategories])
 
     useEffect(() =>
     {
-        if (selectedPastCategory && selectedPastCategory !== '') setCategory(selectedPastCategory)
+        console.log(selectedPastCategory)
+        if (selectedPastCategory && selectedPastCategory !== '') setCategory(JSON.parse(selectedPastCategory))
     }, [selectedPastCategory])
 
     const PracticeQuestion = (props) =>
@@ -224,6 +231,7 @@ export default function Practice()
 
     const handleCluesChange = async (e, val) =>
     {
+        console.log(val);
         setCluesToPractice(val);
     }
 
@@ -269,15 +277,17 @@ export default function Practice()
                 <Select value={selectedPastCategory} onChange={(e)=>
                 {
                     console.log(e.target.value)
-                    setCategory(e.target.value)
+                    setSelectedPastCategory(e.target.value)
+                    setCategory(JSON.parse(e.target.value))
                 }}>
                     {pastCategories.map((category) =>
                     <MenuItem key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})}>{category.categoryName}</MenuItem>)}
                 </Select>
                 </> )
             }
-            {category !== '' && JSON.stringify(category).id ? 
+            {category ? 
             <>
+                {console.log(category)}
                 <FormLabel>How many clues would you like to practice with?</FormLabel>
                 <ToggleButtonGroup exclusive value={cluesToPractice} onChange={handleCluesChange}>
                     <ToggleButton value='custom'># of my choice</ToggleButton>
@@ -290,7 +300,8 @@ export default function Practice()
                 <TextField id="numberOfClues" label="Number of clues" variant="standard" type="number" onChange={handleNumCluesChange}></TextField>
                 {error !== '' ? <Alert color='warning'>{error}</Alert> : <></>}
             </> : <></>}
-            {practiceType !== '' && cluesToPractice !== '' && numClues >= 1 && numClues <= category.cluesCount && error === '' ? <Button onClick={handleStartPractice}>Start Practice</Button> : <></>}
+            {console.log(practiceType, cluesToPractice, numClues, category.cluesCount, error)}
+            {practiceType && cluesToPractice && numClues >= 1 && numClues <= category.cluesCount && error === '' ? <Button onClick={handleStartPractice}>Start Practice</Button> : <></>}
             
             </> : <></>}
         </FormControl> :

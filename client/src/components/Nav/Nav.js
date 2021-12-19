@@ -75,7 +75,7 @@ export default function NavBar() {
             aria-controls='navigation-tabs'
             aria-labelledby='game-tab'
           />
-          {/* <Tab
+          <Tab
             value="practice"
             label="Practice"
             aria-label="Practice"
@@ -84,7 +84,7 @@ export default function NavBar() {
             id='practice-tab'
             aria-controls='navigation-tabs'
             aria-labelledby='practice-tab'
-          /> */}
+          />
           <Tab
             value="leaderboard"
             label="Leaderboard"
@@ -149,10 +149,10 @@ export default function NavBar() {
           >
             <MenuItem component={Link} to='/home' onClick={() => {setOpenMenu(false)}}>Home</MenuItem>
             <MenuItem component={Link} to='/game' onClick={() => {setOpenMenu(false)}}>Game</MenuItem>
+            <MenuItem component={Link} to='/practice' onClick={() => {setOpenMenu(false)}}>Practice</MenuItem>
             <MenuItem component={Link} to='/leaderboard' onClick={() => {setOpenMenu(false)}}>Leaderboard</MenuItem>
             <MenuItem component={Link} to='/profile' onClick={() => {setOpenMenu(false)}}>Profile</MenuItem>
             <MenuItem onClick={logUserOut}>Log Out</MenuItem>
-            {/* <MenuItem onClick={handleMenuClick}>Practice</MenuItem> */}
           </Menu>
     </div>
   </>);
