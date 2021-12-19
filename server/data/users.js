@@ -274,6 +274,13 @@ const exportedMethods = {
     console.log(game);
     return game;
   },
+  async getAllPendingGames(username) {
+    checkString(username, 'Username', false);
+    const userCollection = await users();
+    const user = await userCollection.findOne({username});
+    if (!user) throw `Error: Couldn't find user ${username}`;
+    return user.friend_games || [];
+  }
 };
 
 module.exports = exportedMethods;

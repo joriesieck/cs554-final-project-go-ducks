@@ -63,6 +63,14 @@ export default function GameGrid(props) {
     setRemaining(0);
     try
     {
+      console.log(categories);
+      categories.forEach(({id, title}, i) => {
+        categories[i] = {
+          categoryId: id,
+          categoryName: title
+        }
+      });
+      console.log(categories);
       const {data} = await axios.post(`${siteUrl}/users/save-game-info`,
       {
         username: username,

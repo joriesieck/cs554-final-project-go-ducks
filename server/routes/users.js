@@ -710,4 +710,24 @@ router.get('/categories', async (req, res) => {
   res.status(200).json({ categories: result });
 });
 
+// get a list of all friends w pending games
+router.get('/:username/pending-games', async (req, res) => {
+  let {username} = req.params;
+  try {
+    checkString(username, 'Username', false);
+  } catch (e) {
+    res.status(400).json({error: e});
+    return;
+  }
+  let friendGames;
+  try {
+    friendGames = await userData.getAllPendingGames(username);
+  } catch (e) {
+    res.status(400).json({error: `Error fetching pending games: ${e}`});
+    return;
+  }
+
+  res.status(200).json({friendGames});
+})
+
 module.exports = router;
