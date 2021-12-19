@@ -232,6 +232,7 @@ export default function Practice()
 
     const handleCluesChange = async (e, val) =>
     {
+        setError('');
         console.log(val);
         setCluesToPractice(val);
     }
