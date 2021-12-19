@@ -78,6 +78,7 @@ export default function LogIn() {
 			result = await signInWithEmailAndPassword(auth, email, password);
 			if (!result.user.uid) throw Error('couldnt log in');
 		} catch (e) {
+			console.log(e);
 			setErrors(['Invalid login credentials.']);
 			//clear fields
 			document.getElementById('email').value = '';

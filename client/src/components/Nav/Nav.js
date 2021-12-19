@@ -130,19 +130,21 @@ export default function NavBar() {
               setOpenMenu(true);
               setAnchor(e.target);
             }}
-            aria-controls='responsive-menu'
+            // aria-controls='responsive-menu'
             aria-haspopup='true'
             aria-expanded={openMenu}
             id='trigger-responsive-menu'
             aria-label='open menu'
             className={styles.responsiveNavIcon}
+            role='menu'
           />
           <Menu
             id='responsive-menu'
             open={openMenu}
             onClose={() => {setOpenMenu(false)}}
             MenuListProps={{
-              'aria-labelledby': 'trigger-responsive-menu'
+              'aria-labelledby': 'trigger-responsive-menu',
+              'aria-controls': 'responsive-menu'
             }}
             anchorEl={anchor}
             className={styles.responsiveNav}

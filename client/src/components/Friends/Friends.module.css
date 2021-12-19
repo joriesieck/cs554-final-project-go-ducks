@@ -1,6 +1,6 @@
 .tooltip {
     background-color: lightgray;
-    max-width: 220;
+    max-width: 220px;
     border: 1px solid rgb(73, 69, 69);
 }
 
@@ -53,6 +53,10 @@
 
 .searchRow:nth-child(odd){
     background-color: rgb(227, 244, 255);
+}
+
+.searchRow:nth-child(odd) button {
+	color: #006fca;
 }
 
 .spacer {

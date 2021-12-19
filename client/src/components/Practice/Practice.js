@@ -117,7 +117,8 @@ export default function Practice()
         const handleQuestionSubmit = (e) =>
         {
             console.log(qs[index].answer)
-            let sanitizedAnswer = qs[index].answer.replace( /(<([^>]+)>)/ig, '')
+            let sanitizedAnswer = qs[index].answer.replace( /(<([^>]+)>)/ig, '').replace(/\\/g, '');
+            console.log(sanitizedAnswer);
             if (response.toLowerCase() === sanitizedAnswer.toLowerCase())
             {
                 setCorrect(true);
@@ -158,7 +159,7 @@ export default function Practice()
             {!answered ? 
             <FormControl>
                 <p>{qs[index].question}</p>
-                <TextField onChange={handleAnswerChange}></TextField>
+                <TextField onChange={handleAnswerChange} label='Answer'></TextField>
                 <Button onClick={handleQuestionSubmit}>Submit</Button>
             </FormControl> : <></>}
             <Dialog open={answered}>
@@ -231,6 +232,7 @@ export default function Practice()
 
     const handleCluesChange = async (e, val) =>
     {
+        setError('');
         console.log(val);
         setCluesToPractice(val);
     }

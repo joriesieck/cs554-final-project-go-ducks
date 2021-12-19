@@ -63,6 +63,14 @@ export default function GameGrid(props) {
     setRemaining(0);
     try
     {
+      console.log(categories);
+      categories.forEach(({id, title}, i) => {
+        categories[i] = {
+          categoryId: id,
+          categoryName: title
+        }
+      });
+      console.log(categories);
       const {data} = await axios.post(`${siteUrl}/users/save-game-info`,
       {
         username: username,
@@ -119,7 +127,8 @@ export default function GameGrid(props) {
     const handleQuestionModalSubmit = (e) => {
       console.log(questionInfo);
       setAnswered(true);
-      if (questionInfo.answer.toLowerCase() === responseVal.toLowerCase()) {
+      let cleanAnswer = questionInfo.answer.replace( /(<([^>]+)>)/ig, '').replace(/\\/g, '')
+      if (cleanAnswer.toLowerCase() === responseVal.toLowerCase()) {
         setScore(score + parseInt(questionInfo.value));
         setCorrect(true);
       } else {
@@ -185,7 +194,7 @@ export default function GameGrid(props) {
         container
         xs={2}
         direction="column"
-        id={category}
+        id={category.replace(/ /g, '_')}
         className={styles.gridColumn}
       >
         <QuestionButton
@@ -227,7 +236,7 @@ export default function GameGrid(props) {
     //let disabledStatus = props.disabledStatus;
     let categoryId = props.categoryId;
 
-    const handleQuestionClick = async (e) => {
+    const handleQuestionClick = async (e, category) => {
       console.log(e);
       console.log(categoryId);
       const { data } = await axios.get(
@@ -249,8 +258,10 @@ export default function GameGrid(props) {
         question = data[index].question;
         answer = data[index].answer;
       }
+      // strip html tags and \s from answers
+      answer = answer.replace( /(<([^>]+)>)/ig, '').replace(/\\/g, '');
       setQuestionInfo({
-        category: e.target.attributes.category.value,
+        category: category,
         question: question,
         answer: answer,
         value: e.target.value,
@@ -265,8 +276,8 @@ export default function GameGrid(props) {
         <button
           value={props.value}
           className={categoryId}
-          category={props.category}
-          onClick={handleQuestionClick}
+          // category={props.category}
+          onClick={(e) => {handleQuestionClick(e,props.category)}}
           disabled={disabledButtons[props.value][props.groupindex]}
         >
           {props.value}
@@ -281,7 +292,7 @@ export default function GameGrid(props) {
     gridHeaderElements.push(
       <Grid item key={category.title} xs={2}>
         <button className={styles.gridHeader} disabled>
-          <div>{category.title}</div>
+          {category.title}
         </button>
       </Grid>
     );
