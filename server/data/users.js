@@ -156,9 +156,11 @@ const exportedMethods = {
         categoryName,
         score: score || 0,
       });
+      console.log(user.recent_categories);
     }
     // only keep at most 12 categories (2 games' worth)
     while (user.recent_categories.length > 12) user.recent_categories.shift();
+    console.log(user.recent_categories);
 
     const result = await userCollection.updateOne(
       { username },
@@ -175,9 +177,9 @@ const exportedMethods = {
     const userCollection = await users();
 
     // make sure this is really a high score
-    if (user.high_scores.length > 0 && Math.max(user.high_scores) >= highScore)
+    if (user.high_scores.length > 0 && Math.max(...user.high_scores) >= highScore)
       throw 'This score is not higher than all previous scores.';
-
+    console.log(highScore, Math.max(...user.high_scores));
     user.high_scores.push(highScore);
     const result = await userCollection.updateOne(
       { username },

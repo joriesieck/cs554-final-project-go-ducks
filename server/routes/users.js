@@ -15,7 +15,7 @@ const {
 } = require('../inputChecks');
 const bluebird = require('bluebird');
 const redis = require('redis');
-const { getUserByName } = require('../data/users');
+const { getUserByName, saveGameInfo } = require('../data/users');
 const client = redis.createClient();
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -530,7 +530,6 @@ router.post('/save-game-info', async (req, res) => {
   }
 
   // add to leaderboard
-
   if (user.optedForLeaderboard) {
     const result = await client.zadd('leaderboard', highScore, username); //dont add if user has not opted in
     if (!result) {
@@ -560,6 +559,16 @@ router.post('/save-game-info', async (req, res) => {
     });
     return;
   }
+
+  // save previous categories
+  try {
+    await userData.saveGameInfo(username, categories);
+  } catch (e) {
+    res.status(400).json({
+      error: `Error updating previous categories: ${e}`,
+    });
+  }
+
   res.status(200).json(user);
 });
 router.post('/save-shared-game', async (req, res) => {
