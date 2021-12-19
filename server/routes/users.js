@@ -543,45 +543,39 @@ router.post('/save-game-info', async (req, res) => {
     res.status(404).json({ error: user });
     return;
   }
+  let isHighScore = false;
   try {
     updatedUser = await userData.addHighScore(user, highScore); //add highscore and get updated user
     user = await updateUserCache(updatedUser); //update the user's cache
     if (!user.username) throw 'Error adding score.';
+    isHighScore = true;
   } catch (e) {
     console.log('Not a high score');
   }
 
-  // add to leaderboard
-  if (user.optedForLeaderboard) {
-    const result = await client.zadd('leaderboard', highScore, username); //dont add if user has not opted in
-    if (!result) {
-      res
-        .status(400)
-        .json({ error: `Error adding ${username} to the leaderboard` });
-      return;
-    }
-    let dbResult;
-    try {
-      dbResult = await leaderboardData.addToLeaderboard(username, highScore);
-    } catch (e) {
-      res.status(400).json({
-        error: `Error adding ${username} to the database leaderboard: ${e}`,
-      });
-      return;
+  // only add to leaderboards if high score
+  if (isHighScore) {
+    // add to leaderboard
+    if (user.optedForLeaderboard) {
+      const result = await client.zadd('leaderboard', highScore, username); //dont add if user has not opted in
+      if (!result) {
+        res
+          .status(400)
+          .json({ error: `Error adding ${username} to the leaderboard` });
+        return;
+      }
+      let dbResult;
+      try {
+        dbResult = await leaderboardData.addToLeaderboard(username, highScore);
+      } catch (e) {
+        res.status(400).json({
+          error: `Error adding ${username} to the database leaderboard: ${e}`,
+        });
+        return;
+      }
     }
   }
-
-  // add to database leaderboard
-  let dbResult;
-  try {
-    dbResult = await leaderboardData.addToLeaderboard(username, highScore);
-  } catch (e) {
-    res.status(400).json({
-      error: `Error adding ${username} to the database leaderboard: ${e}`,
-    });
-    return;
-  }
-
+  
   // save previous categories to user
   try {
     await userData.saveGameInfo(username, categories);
