@@ -8,10 +8,11 @@ import {
   TextField,
   DialogContentText,
 } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GameFinished from './GameFinished';
 import styles from './Game.module.css';
 import axios from 'axios';
+
 
 const baseUrl = 'http://jservice.io/api';
 const siteUrl = 'http://localhost:3001';
@@ -29,6 +30,16 @@ export default function GameGrid(props) {
     answer: '',
     value: 20,
   });
+  const [disabledButtons, setDisabledButtons] = useState(
+    {
+      '200': [false, false, false, false, false],
+      '400': [false, false, false, false, false],
+      '600': [false, false, false, false, false],
+      '800': [false, false, false, false, false],
+      '1000': [false, false, false, false, false]
+    }
+  )
+  let btnRef = useRef();
 
   //GameSetup sends along the categories
   let categories = props.categories;
@@ -56,10 +67,6 @@ export default function GameGrid(props) {
     );
   };
 
-  //on click of quit button, what should happen?
-  //IDEA- pop up modal asking if the user actually wants to quit
-  //if so, go to game finished page and send info
-
   const handleQuestionModalClose = (e, reason) => {
     if (reason === 'backdropClick') {
       return false;
@@ -81,7 +88,7 @@ export default function GameGrid(props) {
     const handleQuestionModalSubmit = (e) => {
       console.log(questionInfo);
       setAnswered(true);
-      if (questionInfo.answer === responseVal) {
+      if (questionInfo.answer.toLowerCase() === responseVal.toLowerCase()) {
         setScore(score + parseInt(questionInfo.value));
         setCorrect(true);
       } else {
@@ -114,6 +121,7 @@ export default function GameGrid(props) {
         <DialogContent>
           <DialogContentText>
             Sorry, your answer was not correct.
+            Correct answer: {questionInfo.answer}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -137,11 +145,9 @@ export default function GameGrid(props) {
   };
 
   const QuestionButtonGroup = (props) => {
+    let groupIndex = props.groupindex;
     let category = props.category;
     let categoryId = props.catId;
-    console.log(props);
-    console.log(category);
-    console.log(categoryId);
     return (
       <Grid
         container
@@ -154,40 +160,39 @@ export default function GameGrid(props) {
           value={200}
           categoryId={categoryId}
           category={category}
-          disabledStatus={false}
+          groupindex={groupIndex}
         ></QuestionButton>
         <QuestionButton
           value={400}
           categoryId={categoryId}
           category={category}
-          disabledStatus={false}
+          groupindex={groupIndex}
         ></QuestionButton>
         <QuestionButton
           value={600}
           categoryId={categoryId}
           category={category}
-          disabledStatus={false}
+          groupindex={groupIndex}
         ></QuestionButton>
         <QuestionButton
           value={800}
           categoryId={categoryId}
           category={category}
-          disabledStatus={false}
+          groupindex={groupIndex}
+
         ></QuestionButton>
         <QuestionButton
           value={1000}
           categoryId={categoryId}
           category={category}
-          disabledStatus={false}
         ></QuestionButton>
       </Grid>
     );
   };
 
   const QuestionButton = (props) => {
-    let disabledStatus = props.disabledStatus;
+    //let disabledStatus = props.disabledStatus;
     let categoryId = props.categoryId;
-    //const [disabledStatus, setDisabledStatus] = useState(false);
 
     const handleQuestionClick = async (e) => {
       console.log(e);
@@ -195,7 +200,9 @@ export default function GameGrid(props) {
       const { data } = await axios.get(
         `${baseUrl}/clues/?category=${e.target.className}&value=${props.value}`
       );
-      console.log(data);
+      let valuesButtons = disabledButtons[e.target.value];
+      valuesButtons[props.groupindex] = true;
+      setDisabledButtons({...disabledButtons, [e.target.value]: valuesButtons})
       let question = '';
       let answer = '';
       if (data.length === 1) {
@@ -214,7 +221,6 @@ export default function GameGrid(props) {
         answer: answer,
         value: e.target.value,
       });
-      disabledStatus = true;
       setDialogOpen(true);
       setAnswered(false);
       setCorrect(false);
@@ -223,11 +229,12 @@ export default function GameGrid(props) {
     return (
       <Grid item xs={2}>
         <button
+          ref={btnRef}
           value={props.value}
           className={categoryId}
           category={props.category}
           onClick={handleQuestionClick}
-          disabled={disabledStatus}
+          disabled={disabledButtons[props.value][props.groupindex]}
         >
           {props.value}
         </button>
@@ -237,17 +244,17 @@ export default function GameGrid(props) {
 
   const gridElements = [];
   const gridHeaderElements = [];
-  categories.map((category) => {
+  categories.map((category,index) => {
     gridHeaderElements.push(
       <Grid item key={category.title} xs={2}>
         <button className={styles.gridHeader} disabled>
-          {category.title}
+          <div>{category.title}</div>
         </button>
       </Grid>
     );
     console.log(category.id);
     gridElements.push(
-      <QuestionButtonGroup catId={category.id} category={category.title} />
+      <QuestionButtonGroup catId={category.id} groupindex={index} category={category.title} />
     );
     console.log(category);
   });

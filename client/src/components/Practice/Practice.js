@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Link} from 'react-router-dom';
 import { useSelector } from "react-redux";
-import { FormControl, FormLabel, TextField, Button, ToggleButton, ToggleButtonGroup, Dialog, DialogActions, DialogContent, DialogContentTitle, DialogContentText, Alert } from '@mui/material';
+import { FormControl, FormLabel, TextField, Button, ToggleButton, ToggleButtonGroup, Dialog, DialogActions, DialogContent, DialogContentTitle, DialogContentText, Alert, Select, MenuItem, InputLabel } from '@mui/material';
 import axios from 'axios';
 import { getUserByEmail } from '../../utils/backendCalls';
 
@@ -30,17 +30,32 @@ export default function Practice()
     const [practiceType, setPracticeType] = useState('');
     const [numClues, setNumClues] = useState(1);
     const [cluesToPractice, setCluesToPractice] = useState('');
+    const [pastCategories, setPastCategories] = useState([]);
+    const [selectedPastCategory, setSelectedPastCategory] = useState('');
     const [category, setCategory] = useState('');
     const [score, setScore] = useState(0);
-    const [categorySearch, setCategorySearch] = useState('');
     const [error, setError] = useState('');
     const [answered, setAnswered] = useState(false);
     const [index, setIndex] = useState(0);
     const [questions, setQuestions] = useState([]);
+    const [username, setUsername] = useState('');
+    const [correct, setCorrect] = useState(false);
 
     //this is a protected route
     const user = useSelector((state) => state.user);
     if (!user) return <Redirect to="/" />;
+
+    useEffect(() =>
+    {
+        async function x()
+        {
+            console.log(user);
+            const userInfo = await getUserByEmail(user);
+            console.log(userInfo)
+            setUsername(userInfo.username)
+        }
+        x()
+    }, [user])
 
     useEffect(() =>
     {
@@ -63,7 +78,7 @@ export default function Practice()
                         returnedQuestions.push(q);
                     }
                 });
-                
+            console.log(category)
             setQuestions(returnedQuestions);
 
             if (cluesToPractice === 'available') setNumClues(returnedQuestions.length);
@@ -72,19 +87,34 @@ export default function Practice()
     filterQs()
     }, [cluesToPractice, category])
 
+    useEffect(() =>
+    {
+        if (pastCategories && pastCategories.length > 0) 
+        {
+            console.log(pastCategories[0])
+            setSelectedPastCategory(pastCategories[0]);
+        }
+    }, [pastCategories])
+
+    useEffect(() =>
+    {
+        if (selectedPastCategory && selectedPastCategory !== '') setCategory(selectedPastCategory)
+    }, [selectedPastCategory])
+
     const PracticeQuestion = (props) =>
     {
         let qs = props.arr;
         console.log(qs);
-        const [correct, setCorrect] = useState(false);
         const [response, setResponse] = useState('');
 
         const handleQuestionSubmit = (e) =>
         {
-            if (response.toLowerCase() === qs[index].answer)
+            console.log(qs[index].answer)
+            let sanitizedAnswer = qs[index].answer.replace( /(<([^>]+)>)/ig, '')
+            if (response.toLowerCase() === sanitizedAnswer.toLowerCase())
             {
-                setScore(score + 1);
                 setCorrect(true);
+                setScore(score + 1);    
             }
             else {
                 setCorrect(false);
@@ -92,7 +122,7 @@ export default function Practice()
             setAnswered(true);
         }
 
-        const handleDialogClose = (e, reason) =>
+        const handleDialogClose = async (e, reason) =>
         {
             if (reason === 'backdropClick') return false;
             let temp = questionsCompleted;
@@ -100,6 +130,7 @@ export default function Practice()
             setQuestionsCompleted(temp + 1);
             if (temp + 1 >= numClues) 
             {
+                await handleEndPractice()
                 setMode('end');
             }
             else
@@ -148,15 +179,16 @@ export default function Practice()
 
     const handleEndPractice = async (e) =>
     {
-        setQuestionsCompleted(numClues);
-        const userInfo = await getUserByEmail(user);
-        console.log(userInfo.data)
-        const {data} = await axios.post(`${siteUrl}/save-game-info`,
+        //setQuestionsCompleted(numClues);
+        console.log(username.toString());
+        console.log(category)
+        const {data} = await axios.post(`${siteUrl}/users/save-game-info`,
         {
-            username: '',
+            username: username,
             categories: [{categoryId: category.id, categoryName: category.title}],
             highScore: 0
-        })
+        });
+        console.log(data);
         setMode('end');
     }
 
@@ -179,8 +211,8 @@ export default function Practice()
             console.log("HIT")
             try
             {
-                const info = await axios.get(`${siteUrl}/categories`)
-                console.log(info)
+                const {data} = await axios.get(`${siteUrl}/users/categories`)
+                setPastCategories(data.categories);
             }
             catch(e)
             {
@@ -218,11 +250,6 @@ export default function Practice()
         setMode('inPractice');
     }
 
-    const handleCategorySearch = (e) =>
-    {
-        setCategorySearch(e.target.value)
-    }
-
     return (
         mode === 'setup' ? 
         <FormControl>
@@ -236,10 +263,20 @@ export default function Practice()
             {practiceType === 'random' ? 
                 <p>Your random category will be {category.title}</p> : 
                 (error !== '' ? 
-                <Alert color="warning">{error}</Alert> : 
-                <TextField label="Search for a previous category" onChange={handleCategorySearch}></TextField>)
+                <Alert color="warning">{error}</Alert> :
+                <>
+                <FormLabel>Select a previous category</FormLabel>
+                <Select value={selectedPastCategory} onChange={(e)=>
+                {
+                    console.log(e.target.value)
+                    setCategory(e.target.value)
+                }}>
+                    {pastCategories.map((category) =>
+                    <MenuItem key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})}>{category.categoryName}</MenuItem>)}
+                </Select>
+                </> )
             }
-            {category !== '' ? 
+            {category !== '' && JSON.stringify(category).id ? 
             <>
                 <FormLabel>How many clues would you like to practice with?</FormLabel>
                 <ToggleButtonGroup exclusive value={cluesToPractice} onChange={handleCluesChange}>

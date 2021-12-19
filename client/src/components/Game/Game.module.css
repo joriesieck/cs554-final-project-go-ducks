@@ -23,13 +23,23 @@
     width: 100%;
     height: 100%;
     color: #FFCC00;
-    font-size: 48px;
-    font-family: Impact, sans-serif;
+    font-family: Impact, Arial, sans-serif;
     background-color: #060CE9
+}
+
+.gridColumn button
+{
+    font-size: 72px;
 }
 
 button.gridHeader
 {
     height: 16vh;
     color: white;
+}
+
+button.gridHeader div
+{
+    width: 100%;
+    font-size: 2.8em
 }
