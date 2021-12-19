@@ -158,21 +158,23 @@ router.get('/email/:email', async (req, res) => {
   res.json(user);
 });
 // search users
-router.post('/search', async(req, res) => {
+router.post('/search', async (req, res) => {
   let { searchTerm } = req.body;
   // check input
   try {
-    searchTerm = checkString(searchTerm, "Search Term", false);
+    searchTerm = checkString(searchTerm, 'Search Term', false);
   } catch (e) {
-    res.status(400).json({error: e});
+    res.status(400).json({ error: e });
     return;
   }
   // perform search
   let users;
   try {
     users = await userData.searchUsersByName(searchTerm);
-  } catch (e){
-    res.status(400).json({error: `Could not perform search for ${searchTerm}. Error: ${e}`});
+  } catch (e) {
+    res.status(400).json({
+      error: `Could not perform search for ${searchTerm}. Error: ${e}`,
+    });
     return;
   }
   res.status(200).json(users);
@@ -619,9 +621,22 @@ router.post('/save-shared-game', async (req, res) => {
       friendID
     );
     updateUserCache(data[1]);
+    updateUserCache(await userData.getUserById(friendID));
     res.status(200).json({ user: data[1], savedGameId: data[0] });
   } catch (e) {
     res.status(400).json({ error: `Error in saving game info: ${e}` });
+  }
+});
+router.get('/get-shared-game', async (req, res) => {
+  let { userId, gameId } = req.body;
+  checkObjId(userId, 'User ID');
+  checkObjId(gameId, 'Game ID');
+  try {
+    const gameData = await userData.getSharedGame(userId, gameId);
+    console.log(gameData);
+    res.status(200).json(gameData);
+  } catch (e) {
+    res.status(400).json({ error: `Error in getting game info: ${e}` });
   }
 });
 // get leaderboard

@@ -41,17 +41,17 @@ const exportedMethods = {
     if (!user) throw `User with email ${email} not found`;
     return user;
   },
-  async searchUsersByName(searchString){
+  async searchUsersByName(searchString) {
     let search = checkString(searchString, 'Search String', false);
-    let validStr = search.replace(/[^a-z\d]/gi, "");
-    if (!validStr){
-      throw "Search string not valid";
+    let validStr = search.replace(/[^a-z\d]/gi, '');
+    if (!validStr) {
+      throw 'Search string not valid';
     }
     let userCollection = await users();
-    let results = await userCollection.find(
-        {username: { $regex: ".*" + validStr + ".*", $options: "i"}}
-    )
-    results = results.toArray()
+    let results = await userCollection.find({
+      username: { $regex: '.*' + validStr + '.*', $options: 'i' },
+    });
+    results = results.toArray();
     return results;
   },
   async doesUserExist(username, email) {
@@ -233,13 +233,46 @@ const exportedMethods = {
       { username },
       { $push: { saved_games: savedGame } }
     );
+    const gameSender = await this.getUserByName(username);
+    console.log(gameSender);
     const friend = await userCollection.updateOne(
       { _id: ObjectId(friendID) },
-      { $push: { friend_games: savedGameId } }
+      {
+        $push: {
+          friend_games: { gameSender: gameSender._id, gameID: savedGameId },
+        },
+      }
     );
-    console.log(friend);
+
     const updatedUser = await userCollection.findOne({ username });
     return [savedGameId, updatedUser];
+  },
+  async getSharedGame(userId, gameId) {
+    checkObjId(userId, 'User ID');
+    checkObjId(gameId, 'Game ID');
+    const parsedUserId = ObjectId(userId);
+    const parsedGameId = ObjectId(gameId);
+    const userCollection = await users();
+    const game = await userCollection.findOne(
+      {
+        _id: parsedUserId,
+      },
+      {
+        projection: {
+          _id: parsedGameId,
+          saved_games: {
+            $filter: {
+              input: '$saved_games',
+              as: 'saved_game',
+              cond: { $eq: ['$$saved_game._id', parsedGameId] },
+            },
+          },
+        },
+      }
+    );
+
+    console.log(game);
+    return game;
   },
 };
 
