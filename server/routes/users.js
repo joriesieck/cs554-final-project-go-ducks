@@ -62,8 +62,7 @@ const emailCache = async (email) => {
       return user;
     }
   } catch (e) {
-    res.status(404).json({ error: e.message || e.toString() });
-    return;
+    return e;
   }
 };
 const updateEmailCache = async (updatedUser, originalEmail) => {

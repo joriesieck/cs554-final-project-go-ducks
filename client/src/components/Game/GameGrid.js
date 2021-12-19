@@ -193,7 +193,7 @@ export default function GameGrid(props) {
         container
         xs={2}
         direction="column"
-        id={category}
+        id={category.replace(/ /g, '_')}
         className={styles.gridColumn}
       >
         <QuestionButton
@@ -235,7 +235,7 @@ export default function GameGrid(props) {
     //let disabledStatus = props.disabledStatus;
     let categoryId = props.categoryId;
 
-    const handleQuestionClick = async (e) => {
+    const handleQuestionClick = async (e, category) => {
       console.log(e);
       console.log(categoryId);
       const { data } = await axios.get(
@@ -258,7 +258,7 @@ export default function GameGrid(props) {
         answer = data[index].answer;
       }
       setQuestionInfo({
-        category: e.target.attributes.category.value,
+        category: category,
         question: question,
         answer: answer,
         value: e.target.value,
@@ -273,8 +273,8 @@ export default function GameGrid(props) {
         <button
           value={props.value}
           className={categoryId}
-          category={props.category}
-          onClick={handleQuestionClick}
+          // category={props.category}
+          onClick={(e) => {handleQuestionClick(e,props.category)}}
           disabled={disabledButtons[props.value][props.groupindex]}
         >
           {props.value}
@@ -289,7 +289,7 @@ export default function GameGrid(props) {
     gridHeaderElements.push(
       <Grid item key={category.title} xs={2}>
         <button className={styles.gridHeader} disabled>
-          <div>{category.title}</div>
+          {category.title}
         </button>
       </Grid>
     );

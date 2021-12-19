@@ -492,8 +492,8 @@ export default function Profile () {
 			<Modal
 				open={openModal}
 				onClose={handleClose}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={`${styles.profileReauthModal}${loginErrors ? ` ${styles.profileReauthModalErrors}` : ''}`}	
 			>
 				<Box className={styles.profileReauthBox}>
@@ -522,8 +522,8 @@ export default function Profile () {
 			<Modal
 				open={openRemoveModal}
 				onClose={() => {setOpenRemoveModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.profileReauthModal}
 			>
 				<Box className={styles.profileReauthBox}>
@@ -543,8 +543,8 @@ export default function Profile () {
 			<Modal
 				open={openRejectModal}
 				onClose={() => {setOpenRejectModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.profileReauthModal}
 			>
 				<Box className={styles.profileReauthBox}>
@@ -564,8 +564,8 @@ export default function Profile () {
 			<Modal
 				open={openAcceptModal}
 				onClose={() => {setOpenAcceptModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.profileReauthModal}
 			>
 				<Box className={styles.profileReauthBox}>
