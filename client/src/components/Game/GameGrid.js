@@ -127,7 +127,8 @@ export default function GameGrid(props) {
     const handleQuestionModalSubmit = (e) => {
       console.log(questionInfo);
       setAnswered(true);
-      if (questionInfo.answer.toLowerCase() === responseVal.toLowerCase()) {
+      let cleanAnswer = questionInfo.answer.replace( /(<([^>]+)>)/ig, '').replace(/\\/g, '')
+      if (cleanAnswer.toLowerCase() === responseVal.toLowerCase()) {
         setScore(score + parseInt(questionInfo.value));
         setCorrect(true);
       } else {
