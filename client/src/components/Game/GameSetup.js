@@ -11,6 +11,8 @@ import { getAllFriends,getUserByEmail } from '../../utils/backendCalls';
 const baseUrl = "http://jservice.io/api";
 const siteUrl = 'http://localhost:3001';
 
+import styles from './Game.module.css';
+
 export default function GameSetup()
 {
     const [gameType, setGameType] = useState("");
