@@ -56,13 +56,17 @@ export default function GameSetup()
             const {data} = await axios.get(`${siteUrl}/users/${username}/pending-games`);
             if (data.length < 1) setError('No saved games to play');
             let pendingGamesInfo = [];
-            data.friendGames.map(async ({gameSender, gameId}) =>
+            console.log(data.friendGames)
+            data.friendGames.map(async ({gameSender, gameID}) =>
             {
+                console.log(gameID)
                 const user = await getUserById(gameSender);
+                const {data} = await axios.get(`${siteUrl}/users/${gameSender}/game/${gameID}`);
+                console.log(data)
                 let info =
                 {
                     sender: user.username,
-                    
+
                 }
             })
             setPendingGames(data.friendGames);
