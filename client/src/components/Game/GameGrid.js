@@ -46,9 +46,10 @@ export default function GameGrid(props) {
   if (!user) return <Redirect to="/" />;
 
   let gameInfo = props.gameInfo; //IF WE HAVE GAMEINFO, SET THE FOLLOWING APPROPRIATELY
+  console.log(gameInfo)
   let gameType = props.gameType;
   let friend = props.friendToPlay;
-  let categories = props.categories;
+  let categories = JSON.parse(props.categories);
 
   useEffect(() =>
   {

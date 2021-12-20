@@ -11,7 +11,8 @@ import { getAllFriends,getUserByEmail } from '../../utils/backendCalls';
 const baseUrl = "http://jservice.io/api";
 const siteUrl = 'http://localhost:3001';
 
-import styles from './Game.module.css';
+import styles from './Game.module.css'
+import { getUserById } from '../../utils/backendCalls';
 
 export default function GameSetup()
 {
@@ -28,9 +29,6 @@ export default function GameSetup()
     const [displayHint, setDisplayHint] = useState(false);
     const [pendingGames, setPendingGames] = useState([]);
     const [savedGameToPlay, setSavedGameToPlay] = useState({});
-    let stateList = Array.from('false'.repeat(priorCategories.length));
-    let [categoryChecked, setCategoryChecked] = useState(stateList);
-    let [categoryDisabled, setCategoryDisabled] = useState(stateList);
     const [userCats, setUserCats] = useState([]);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
@@ -49,6 +47,29 @@ export default function GameSetup()
         }
         x()
     }, [user])
+
+    useEffect(() =>
+    {
+        async function y(){
+        if (gameType === 'saved')
+        {
+            const {data} = await axios.get(`${siteUrl}/users/${username}/pending-games`);
+            if (data.length < 1) setError('No saved games to play');
+            let pendingGamesInfo = [];
+            data.friendGames.map(async ({gameSender, gameId}) =>
+            {
+                const user = await getUserById(gameSender);
+                let info =
+                {
+                    sender: user.username,
+                    
+                }
+            })
+            setPendingGames(data.friendGames);
+        }
+    }
+        y();
+    }, [gameType])
 
     useEffect(() =>
     {
@@ -74,12 +95,6 @@ export default function GameSetup()
             const data = await getAllFriends(username);
             if (data.length < 1) setError('You have no friends to play with!');
             setFriends(data)
-        }
-        else if (e.target.value === 'saved')
-        {
-            const {data} = await axios.get(`${siteUrl}/users/${username}/pending-games`);
-            if (data.length < 1) setError('No saved games to play');
-            setPendingGames(data.friendGames);
         }
     }
 
@@ -116,47 +131,6 @@ export default function GameSetup()
 
     const CategoryForm = (props) =>
     {
-        //should create an array to help with the state
-        let checkedList = [];
-        const handleCategoryCheck = e =>
-        {
-            e.preventDefault();
-            console.log(e);
-            if (e.target.checked)
-            {
-                checkedList.push(e.target.value);
-                let priorIndex = priorCategories.indexOf(e.target.value);
-                if (priorIndex !== -1) 
-                {
-                    let temp = categoryChecked;
-                    temp[index] = true;
-                    setCategoryChecked(temp)
-                }
-            }
-            else
-            {
-                let index = checkedList.indexOf(e.target.value);
-                if (index >= 0) checkedList.splice(index, 1);
-            }
-
-            if (checkedList.length >= 6)
-            {
-                priorCategories.map((category, index) =>
-                {
-                    if (!category in checkedList) 
-                    {
-                        let temp = categoryDisabled;
-                        temp[index] = true;
-                        setCategoryDisabled(temp);
-                    }
-                })
-            }
-            else
-            {
-                setCategoryDisabled(stateList);
-            }
-            setCategories(checkedList);
-        }
 
         return (
             <div>
@@ -169,8 +143,6 @@ export default function GameSetup()
         );
     }
 
-
-    console.log(friendToPlay)
     return(
         <div id="gamePlay">
             {inSetup ?
@@ -192,7 +164,7 @@ export default function GameSetup()
                         setFriendToPlay(e.target.value)
                     }}>
                         {friends.map((friendInfo) =>
-                            <MenuItem key={friendInfo._id} className={friendInfo._id in pendingGames ? styles.pendingGame : styles.noPendingGame} value={{id: friendInfo._id, name: friendInfo.username}}>{friendInfo.username}</MenuItem>
+                            <MenuItem key={friendInfo._id} value={{id: friendInfo._id, name: friendInfo.username}}>{friendInfo.username}</MenuItem>
                         )}
                     </Select>
                     {

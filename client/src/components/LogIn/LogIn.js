@@ -23,6 +23,7 @@ export default function LogIn() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [displaySignUp, setDisplaySignUp] = useState(false);
 	const [email, setEmail] = useState(null);
+	const [loading, setLoading] = useState(false);
 	const user = useSelector((state) => state.user);
 	const dispatch = useDispatch();
 
@@ -47,6 +48,7 @@ export default function LogIn() {
 
 	const logUserIn = async (e) => {
 		e.preventDefault();
+		setLoading(true);
 
 		let email = e.target[0].value;
 		const password = e.target[2].value;
@@ -76,9 +78,11 @@ export default function LogIn() {
 		let result;
 		try {
 			result = await signInWithEmailAndPassword(auth, email, password);
+			setLoading(false);
 			if (!result.user.uid) throw Error('couldnt log in');
 		} catch (e) {
 			console.log(e);
+			setLoading(false)
 			setErrors(['Invalid login credentials.']);
 			//clear fields
 			document.getElementById('email').value = '';
@@ -274,6 +278,7 @@ export default function LogIn() {
 				Sign in with GitHub
 			</Button>
 			</div>
+			{loading && <p>Loading...</p>}
 
 			{displaySignUp && <>
 				<p>Looks like you don't have an account yet. Please fill out this short form and we'll create one for you.</p>
