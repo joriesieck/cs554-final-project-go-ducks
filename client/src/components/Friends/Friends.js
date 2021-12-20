@@ -42,18 +42,19 @@ export default function Friends() {
     const [ openUnsendModal, setOpenUnsendModal ] = useState(false);
     const [ openAddModal, setOpenAddModal ] = useState(false);
     const [ toggleFriends, setToggleFriends ] = useState({friendId: '', friendUser: ''});
+    const authToken = useSelector((state) => state.auth.authToken);
     
 
-    const user = useSelector((state) => state.user);
+    const user = useSelector((state) => state.user.user);
 
     // get user, need username to get friends
     useEffect(() => {
         async function fetchUserData() {
             let data;
             try {
-                data = await getUserByEmail(user);
-                const friends = await getAllFriends(data.username);
-                const pending = await getAllPendingFriends(data.username);
+                data = await getUserByEmail(user, authToken);
+                const friends = await getAllFriends(data.username, authToken);
+                const pending = await getAllPendingFriends(data.username, authToken);
                 setUserData(data);
                 setFriends(friends);
                 setPendingFriends(pending);
@@ -80,7 +81,7 @@ export default function Friends() {
         let results;
         try {
             searchTerm = checkString(searchTerm, 'Search Term', true, false);
-            results = await searchUsersByName(searchTerm);
+            results = await searchUsersByName(searchTerm, authToken);
             setSearchResults(results);
             setSearchError(null);
             setOpenSearchModal(true);
@@ -118,9 +119,9 @@ export default function Friends() {
 		let result;
 		try {
 			friendToRemove = checkString(friendToRemove, 'friendToRemove', true, false);
-			result = await removeFriend(userData.username, friendToRemove);
+			result = await removeFriend(userData.username, friendToRemove, authToken);
 			// remove them on the front end too
-			const friends = await getAllFriends(result.username);
+			const friends = await getAllFriends(result.username, authToken);
 			setFriends(friends);
             userData.friends = friends;
 		} catch (e) {
@@ -141,9 +142,9 @@ export default function Friends() {
 		let result;
 		try {
 			pendingToRemove = checkString(pendingToRemove, 'pendingToRemove', true, false);
-			result = await removePendingFriend(userData.username, pendingToRemove);
+			result = await removePendingFriend(userData.username, pendingToRemove, authToken);
 			// remove them on the front end too
-			const pendingFriends = await getAllPendingFriends(result.username);
+			const pendingFriends = await getAllPendingFriends(result.username, authToken);
 			setPendingFriends(pendingFriends);
             userData.pending_friends = pendingFriends;
 		} catch (e) {
@@ -168,10 +169,10 @@ export default function Friends() {
 		let result;
 		try {
 			friendToAccept = checkString(friendToAccept, 'friendToAccept', true, false);
-			result = await acceptPendingFriend(userData.username, friendToAccept);
+			result = await acceptPendingFriend(userData.username, friendToAccept, authToken);
 			// add them on the front end too
-			const friends = await getAllFriends(result.username);
-			const pendingFriends = await getAllPendingFriends(result.username);
+			const friends = await getAllFriends(result.username, authToken);
+			const pendingFriends = await getAllPendingFriends(result.username, authToken);
             setFriends(friends);
 			userData.pending_friends = pendingFriends;
             setPendingFriends(pendingFriends);
@@ -195,9 +196,9 @@ export default function Friends() {
         let result;
         try {
             friendToAdd = checkString(friendToAdd, "friendToAdd", true, false);
-            result = await addFriend(userData.username, friendToAdd);
+            result = await addFriend(userData.username, friendToAdd, authToken);
             // update front end
-            const pendingFriends = await getAllPendingFriends(result.username);
+            const pendingFriends = await getAllPendingFriends(result.username, authToken);
             userData.pending_friends = pendingFriends;
             setPendingFriends(pendingFriends);
         } catch (e) {

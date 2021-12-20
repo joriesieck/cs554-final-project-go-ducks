@@ -9,11 +9,12 @@ import { useEffect, useState } from "react";
 import { getLeaderboard, getUserByEmail } from "../../utils/backendCalls";
 
 export default function FriendLeaderboard (props) {
-	const user = useSelector((state) => state.user);	// highlight user
+	const user = useSelector((state) => state.user.user);	// highlight user
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
 	const [leaderboardData, setLeaderboardData] = useState([]);
 	const [friendLeaderboardData, setFriendLeaderboardData] = useState([]);
+	const authToken = useSelector((state) => state.auth.authToken);
 
 	useEffect(() => {
 		console.log("friendslb useEffect")
@@ -28,7 +29,7 @@ export default function FriendLeaderboard (props) {
 		async function fetchData() {
 			let data;
 			try {
-				data = await getUserByEmail(user);
+				data = await getUserByEmail(user, authToken);
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setError((e.toString()));
@@ -47,7 +48,7 @@ export default function FriendLeaderboard (props) {
 		async function fetchData() {
 			let data;
 			try {
-				data = await getLeaderboard();
+				data = await getLeaderboard(authToken);
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setError((e.toString()));
