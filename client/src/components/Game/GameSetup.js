@@ -75,9 +75,9 @@ export default function GameSetup()
         }
         else if (e.target.value === 'saved')
         {
-            const data = await axios.get(`${siteUrl}/users/${username}/pending-games`);
+            const {data} = await axios.get(`${siteUrl}/users/${username}/pending-games`);
             if (data.length < 1) setError('No saved games to play');
-            setPendingGames(data);
+            setPendingGames(data.friendGames);
         }
     }
 
@@ -199,7 +199,8 @@ export default function GameSetup()
                 {
                     gameType === 'saved' ?
                     <>
-                    <FormLabel>Select a friend's game to play</FormLabel>
+                    {console.log(pendingGames)}
+                    {(pendingGames && pendingGames.length>0 )&& <><FormLabel>Select a friend's game to play</FormLabel>
                     <Select value={savedGameToPlay} onChange={(e) =>
                     {
                         console.log(e.target.value);
@@ -208,7 +209,9 @@ export default function GameSetup()
                         {pendingGames.map((gameInfo) =>
                             <MenuItem key={gameInfo._id} value={{id: gameInfo._id}}>{gameInfo.username}</MenuItem>
                         )}
-                    </Select></> : <></>
+                    </Select></>}
+                    {(!pendingGames || pendingGames.length<=0) && <p>Sorry, no pending games.</p>}
+                    </> : <></>
                 }
                 {
                     ((gameType === 'friends' && friendToPlay !== '') || (gameType !== 'friends' && gameType !== 'saved' && gameType !== '')) && error === '' ? 
