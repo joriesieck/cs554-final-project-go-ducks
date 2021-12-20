@@ -217,8 +217,9 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					optedForLeaderboard: !userData.optedForLeaderboard
-				}, authToken);
+					optedForLeaderboard: !userData.optedForLeaderboard,
+					authToken: authToken
+				});
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setProviderError(`Something went wrong updating your leaderboard opt: ${e.toString()}`);
