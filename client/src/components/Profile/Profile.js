@@ -173,8 +173,9 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					username: newValue
-				}, authToken);
+					username: newValue,
+					authToken: authToken
+				});
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setProviderError(`Something went wrong updating your username: ${e.toString()}`);
@@ -216,8 +217,9 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					optedForLeaderboard: !userData.optedForLeaderboard
-				}, authToken);
+					optedForLeaderboard: !userData.optedForLeaderboard,
+					authToken: authToken
+				});
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setProviderError(`Something went wrong updating your leaderboard opt: ${e.toString()}`);
@@ -350,8 +352,9 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					newEmail: fieldToUpdate.value
-				}, authToken);
+					newEmail: fieldToUpdate.value,
+					authToken: authToken
+				});
 				await updateEmail(auth.currentUser, fieldToUpdate.value);
 			} catch (e) {
 				setLoginErrors([e.toString()]);
