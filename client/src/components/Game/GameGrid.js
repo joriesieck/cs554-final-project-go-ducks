@@ -45,6 +45,9 @@ export default function GameGrid(props) {
   const user = useSelector((state) => state.user);
   if (!user) return <Redirect to="/" />;
 
+  let gameType = props.gameType;
+  let friend = props.friendToPlay;
+
   useEffect(() =>
   {
       async function x()
@@ -331,6 +334,6 @@ export default function GameGrid(props) {
       </Grid>
     </div>
   ) : (
-    <GameFinished score={score} />
+    <GameFinished score={score} gameType={gameType}/>
   );
 }

@@ -18,6 +18,16 @@
     height: 84vh;
 }
 
+.pendingGame
+{
+    background-color: red;
+}
+
+.noPendingGame
+{
+    background-color: unset;
+}
+
 .gridColumn button, .gridRow button
 {
     width: 100%;

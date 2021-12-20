@@ -7,6 +7,7 @@ export default function GameFinished(props) {
   return (
     <div>
       <p>Your final score is {score}</p>
+      {props.gameType === 'friends' ? <>This game was played with a friend - your score will be sent</> : <></>}
       <Button
         variant="contained"
         className="landingButton"
