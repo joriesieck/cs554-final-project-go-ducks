@@ -163,7 +163,7 @@ export default function GameSetup()
                 <FormLabel>Select 6 prior categories</FormLabel>
                 <Select multiple value={categories} onChange={(e) => setCategories(e.target.value)}>
                 {priorCategories.map((category) =>
-                <MenuItem key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})} label={category.categoryName} />)}
+                <MenuItem key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})}>{category.categoryName}</MenuItem>)}
                 </Select>
             </div>
         );
