@@ -28,6 +28,9 @@ export default function GameSetup()
     const [displayHint, setDisplayHint] = useState(false);
     const [pendingGames, setPendingGames] = useState([]);
     const [savedGameToPlay, setSavedGameToPlay] = useState({});
+    let stateList = Array.from('false'.repeat(priorCategories.length));
+    let [categoryChecked, setCategoryChecked] = useState(stateList);
+    let [categoryDisabled, setCategoryDisabled] = useState(stateList);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
     const user = useSelector((state) => state.user);
@@ -108,12 +111,9 @@ export default function GameSetup()
     }
 
 
-    const CategoryForm = async (props) =>
+    const CategoryForm = (props) =>
     {
         //should create an array to help with the state
-        let stateList = Array.from('false'.repeat(priorCategories.length));
-        let [categoryChecked, setCategoryChecked] = useState(stateList);
-        let [categoryDisabled, setCategoryDisabled] = useState(stateList);
         let checkedList = [];
         const handleCategoryCheck = e =>
         {
