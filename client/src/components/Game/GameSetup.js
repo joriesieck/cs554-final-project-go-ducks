@@ -161,10 +161,10 @@ export default function GameSetup()
         return (
             <div>
                 <FormLabel>Select 6 prior categories</FormLabel>
-                <div>
-                {priorCategories.map((category, index) =>
-                <FormControlLabel control={<Checkbox key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})} onChange={handleCategoryCheck} checked={categoryChecked[index]} disabled={categoryDisabled[index]} />} label={category.categoryName} />)}
-                </div>
+                <Select multiple value={categories} onChange={(e) => setCategories(e.target.value)}>
+                {priorCategories.map((category) =>
+                <MenuItem key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})} label={category.categoryName} />)}
+                </Select>
             </div>
         );
     }
