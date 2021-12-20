@@ -13,15 +13,14 @@ export default function profile() {
 }
 
 async function getProfilesData() {
-	const authToken = useSelector((state) => state.auth.authToken);
-  console.log("getting profiles")
-	const data = await getAllUsers(authToken);
-	return data;
+  console.log('getting profiles');
+  const data = await getAllUsers();
+  return data;
 }
 export async function getStaticProps() {
-	const data = await getProfilesData();
-	return {
-		props: { data },
-		revalidate: 86400
-	};
+  const data = await getProfilesData();
+  return {
+    props: { data },
+    revalidate: 86400,
+  };
 }
