@@ -42,7 +42,8 @@ export default function GameGrid(props) {
       '1000': [false, false, false, false, false]
     }
   )
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.user);
+  const authToken = useSelector((state) => state.auth.authToken)
   if (!user) return <Redirect to="/" />;
 
   useEffect(() =>
@@ -50,7 +51,7 @@ export default function GameGrid(props) {
       async function x()
       {
           console.log(user);
-          const userInfo = await getUserByEmail(user);
+          const userInfo = await getUserByEmail(user, authToken);
           console.log(userInfo)
           setUsername(userInfo.username)
       }
@@ -77,6 +78,10 @@ export default function GameGrid(props) {
         categories:categories,
         highScore: score
 
+      }, {
+        headers: {
+          authToken
+        }
       });
       if (!data) console.log('oh no')
       console.log(data)

@@ -4,6 +4,7 @@ import NextNav from '../../components/Nav/NextNav';
 import IndProfile from '../../components/Profile/IndProfile';
 import Profile from '../../components/Profile/Profile';
 import { getAllUsers, getUserByName } from '../../utils/backendCalls';
+import { useSelector } from 'react-redux';
 
 export default function profileByName({ data }) {
 	console.log(data);
@@ -25,13 +26,15 @@ export async function getStaticProps({ params }) {
 }
 
 async function getProfileByUserName(name) {
-	const data = await getUserByName(name);
+	const authToken = useSelector((state) => state.auth.authToken);
+	const data = await getUserByName(name, authToken);
     console.log("fetched a user " + name);
 	return data;
 }
 
 async function getProfilesData() {
-	const data = await getAllUsers();
+	const authToken = useSelector((state) => state.auth.authToken);
+	const data = await getAllUsers(authToken);
     console.log("fetched all users")
 	return data;
 }

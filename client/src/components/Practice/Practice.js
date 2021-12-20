@@ -42,7 +42,8 @@ export default function Practice()
     const [correct, setCorrect] = useState(false);
 
     //this is a protected route
-    const user = useSelector((state) => state.user);
+    const user = useSelector((state) => state.user.user);
+    const authToken = useSelector((state) => state.auth.authToken);
     if (!user) return <Redirect to="/" />;
 
     useEffect(() =>
@@ -50,7 +51,7 @@ export default function Practice()
         async function x()
         {
             console.log(user);
-            const userInfo = await getUserByEmail(user);
+            const userInfo = await getUserByEmail(user, authToken);
             console.log(userInfo)
             setUsername(userInfo.username)
         }
@@ -195,6 +196,10 @@ export default function Practice()
             username: username,
             categories: [{categoryId: category.id, categoryName: category.title}],
             highScore: 0
+        }, {
+            headers: {
+                authToken
+            }
         });
         console.log(data);
         setMode('end');

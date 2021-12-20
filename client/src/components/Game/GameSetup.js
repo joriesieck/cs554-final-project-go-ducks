@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import GameGrid from './GameGrid';
 import {FormControl, 
     FormLabel, Alert, ToggleButtonGroup, Checkbox, ToggleButton, Button, TextField, Select, MenuItem} from '@mui/material';
@@ -26,7 +26,8 @@ export default function GameSetup()
     const [username, setUsername] = useState('');
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
-    const user = useSelector((state) => state.user);
+    const user = useSelector((state) => state.user.user);
+    const authToken = useSelector((state) => state.auth.authToken);
     if (!user) return <Redirect to="/" />;
 
     useEffect(() =>
@@ -34,7 +35,7 @@ export default function GameSetup()
         async function x()
         {
             console.log(user);
-            const userInfo = await getUserByEmail(user);
+            const userInfo = await getUserByEmail(user, authToken);
             console.log(userInfo)
             setUsername(userInfo.username)
         }
@@ -63,7 +64,7 @@ export default function GameSetup()
         if (e.target.value ==='friends')
         {
             setFriendToPlay('');
-            const data = await getAllFriends(username);
+            const data = await getAllFriends(username, authToken);
             if (data.length < 1) setError('You have no friends to play with!');
             console.log(data);
             setFriends(data)
@@ -101,7 +102,11 @@ export default function GameSetup()
     const CategoryForm = async (props) =>
     {
         setError('')
-        const {data} = await axios.get(`${siteUrl}/users/categories`);
+        const {data} = await axios.get(`${siteUrl}/users/categories`, {
+            headers: {
+                authToken
+            }
+        });
         if (!data) setError('could not get data')
         return (
             <div>
@@ -176,4 +181,4 @@ export default function GameSetup()
             }
         </div>    
     );
-}
+  };

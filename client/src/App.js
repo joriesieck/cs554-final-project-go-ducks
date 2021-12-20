@@ -5,6 +5,7 @@ import LogIn from './components/LogIn/LogIn';
 import AuthContainer from './AuthContainer';
 
 function App() {
+
   return (
     <>
       <Head><title>Jeopardy Trainer</title></Head>

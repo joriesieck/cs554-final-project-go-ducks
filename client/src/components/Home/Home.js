@@ -1,12 +1,12 @@
-import {Button} from '@mui/material';
+import { Button } from '@mui/material';
 import { Link, Redirect } from 'react-router-dom';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 
 export default function Home() {
 	//TODO conditional leaderboard button if player has opted in?
 	//get user leaderboard/social status from backend and store in variable
 
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
 	// if user is not logged in, redirect to login
 	if (!user) return <Redirect to="/" />;
 	return (

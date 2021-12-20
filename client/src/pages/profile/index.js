@@ -2,6 +2,7 @@ import Profile from '../../components/Profile/Profile';
 import AuthContainer from '../../AuthContainer';
 import { getAllUsers, getUserByName } from '../../utils/backendCalls';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 export default function profile() {
   return (
@@ -12,8 +13,9 @@ export default function profile() {
 }
 
 async function getProfilesData() {
+	const authToken = useSelector((state) => state.auth.authToken);
   console.log("getting profiles")
-	const data = await getAllUsers();
+	const data = await getAllUsers(authToken);
 	return data;
 }
 export async function getStaticProps() {
