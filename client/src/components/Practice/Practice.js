@@ -40,6 +40,7 @@ export default function Practice()
     const [questions, setQuestions] = useState([]);
     const [username, setUsername] = useState('');
     const [correct, setCorrect] = useState(false);
+    const [userCats, setUserCats] = useState([]);
 
     useEffect(() =>
     {
@@ -49,6 +50,7 @@ export default function Practice()
             const userInfo = await getUserByEmail(user, authToken);
             console.log(userInfo)
             setUsername(userInfo.username)
+            setUserCats(userInfo.recent_categories);
         }
         x()
     }, [user])
@@ -226,8 +228,8 @@ export default function Practice()
             console.log("HIT")
             try
             {
-                const {data} = await axios.get(`${siteUrl}/users/categories`)
-                setPastCategories(data.categories);
+                // const {data} = await axios.get(`${siteUrl}/users/categories`)
+                setPastCategories(userCats);
             }
             catch(e)
             {

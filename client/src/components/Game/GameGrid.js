@@ -34,6 +34,32 @@ export default function GameGrid(props) {
     answer: '',
     value: 20,
   });
+  const [disabledButtons, setDisabledButtons] = useState(
+    {
+      '200': [false, false, false, false, false, false],
+      '400': [false, false, false, false, false, false],
+      '600': [false, false, false, false, false, false],
+      '800': [false, false, false, false, false, false],
+      '1000': [false, false, false, false, false, false]
+    }
+  )
+
+  let gameType = props.gameType;
+  let categories;
+  let scoreToBeat = 0;
+  if (gameType === 'saved')
+  {
+    categories = props.categories;
+    scoreToBeat = props.scoreToBeat;
+  }
+  else
+  {
+    categories = props.categories;
+    console.log(props.categories);
+    // categories = JSON.parse(props.categories);
+  }
+  console.log(categories)
+  let friend = props.friendToPlay;
 
   useEffect(() =>
   {
@@ -46,22 +72,12 @@ export default function GameGrid(props) {
       }
       x()
   }, [user])
-  const [disabledButtons, setDisabledButtons] = useState(
-    {
-      '200': [false, false, false, false, false],
-      '400': [false, false, false, false, false],
-      '600': [false, false, false, false, false],
-      '800': [false, false, false, false, false],
-      '1000': [false, false, false, false, false]
-    }
-  )
   const user = useSelector((state) => state.user.user);
   const authToken = useSelector((state) => state.auth.authToken)
   if (!user) return <Redirect to="/" />;
 
   
   //GameSetup sends along the categories
-  let categories = props.categories;
 
   const handleQuitGame = async (e) => {
     setRemaining(0);
@@ -197,12 +213,13 @@ export default function GameGrid(props) {
     let groupIndex = props.groupindex;
     let category = props.category;
     let categoryId = props.catId;
+    console.log(category)
     return (
       <Grid
         container
         xs={2}
         direction="column"
-        id={category.replace(/ /g, '_')}
+        id={groupIndex}
         className={styles.gridColumn}
       >
         <QuestionButton
@@ -298,15 +315,15 @@ export default function GameGrid(props) {
   const gridHeaderElements = [];
   categories.map((category,index) => {
     gridHeaderElements.push(
-      <Grid item key={category.title} xs={2}>
+      <Grid item key={category.categoryName} xs={2}>
         <button className={styles.gridHeader} disabled>
-          {category.title}
+          {category.categoryName}
         </button>
       </Grid>
     );
-    console.log(category.id);
+    console.log(category.categoryName);
     gridElements.push(
-      <QuestionButtonGroup catId={category.id} groupindex={index} category={category.title} />
+      <QuestionButtonGroup catId={category.categoryId} groupindex={index} category={category.categoryName} />
     );
     console.log(category);
   });
@@ -339,6 +356,6 @@ export default function GameGrid(props) {
       </Grid>
     </div>
   ) : (
-    <GameFinished score={score} />
+    <GameFinished score={score} scoreToBeat={scoreToBeat} gameType={gameType} friend={friend}/>
   );
 }

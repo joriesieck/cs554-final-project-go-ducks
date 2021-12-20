@@ -28,6 +28,7 @@ export default function LogIn() {
   const [displaySignUp, setDisplaySignUp] = useState(false);
   const [email, setEmail] = useState(null);
   const [storeAuthToken, setStoreAuthToken] = useState(null);
+  const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
 
@@ -50,8 +51,9 @@ export default function LogIn() {
   // if user is already logged in, redirect to home
   if (user) return <Redirect to="/home" />;
 
-  const logUserIn = async (e) => {
-    e.preventDefault();
+	const logUserIn = async (e) => {
+		e.preventDefault();
+		setLoading(true);
 
     let email = e.target[0].value;
     const password = e.target[2].value;
@@ -82,10 +84,11 @@ export default function LogIn() {
     let authToken;
     try {
       result = await signInWithEmailAndPassword(auth, email, password);
-      console.log(result);
+      setLoading(false);
       authToken = result.user.accessToken;
       if (!result.user.uid) throw Error('couldnt log in');
     } catch (e) {
+      setLoading(false);
       setErrors(['Invalid login credentials.']);
       //clear fields
       document.getElementById('email').value = '';
@@ -317,6 +320,7 @@ export default function LogIn() {
           Sign in with GitHub
         </Button>
       </div>
+      {loading && <p>Loading...</p>}
 
       {displaySignUp && (
         <>

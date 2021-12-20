@@ -733,6 +733,25 @@ router.get('/:username/pending-games', async (req, res) => {
   }
 
   res.status(200).json({friendGames});
+});
+
+router.get('/:userId/game/:gameId', async (req, res) => {
+  let {userId, gameId} = req.params;
+  try {
+    checkObjId(userId, 'userId');
+    checkObjId(gameId, 'gameId');
+  } catch (e) {
+    res.status(400).json({error:e});
+    return;
+  }
+  let gameInfo;
+  try {
+    gameInfo = await userData.getSharedGame(userId,gameId);
+  } catch (e) {
+    res.status(400).json({error:e});
+    return;
+  }
+  res.status(200).json({gameInfo});
 })
 
 module.exports = router;
