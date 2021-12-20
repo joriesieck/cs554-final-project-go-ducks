@@ -27,7 +27,7 @@ export default function GameSetup()
     const [error, setError] = useState('');
     const [username, setUsername] = useState('');
     const [displayHint, setDisplayHint] = useState(false);
-    const [pendingGames, setPendingGames] = useState([]);
+    const [pendingGames, setPendingGames] = useState(null);
     const [savedGameToPlay, setSavedGameToPlay] = useState({});
     const [userCats, setUserCats] = useState([]);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
@@ -57,7 +57,7 @@ export default function GameSetup()
             if (data.length < 1) setError('No saved games to play');
             let pendingGamesInfo = [];
             console.log(data.friendGames)
-            data.friendGames.map(async ({gameSender, gameID}) =>
+            await data.friendGames.map(async ({gameSender, gameID}) =>
             {
                 console.log(gameID)
                 const user = await getUserById(gameSender);
@@ -69,9 +69,11 @@ export default function GameSetup()
                     categories: data.gameInfo.saved_games[0].categories,
                     oldScore: data.gameInfo.saved_games[0].score
                 }
-                pendingGamesInfo.push(info);
+                pendingGames.push(info);
+                // setPendingGames(pendingGamesInfo);
             })
-            setPendingGames(pendingGamesInfo);
+            console.log(pendingGamesInfo);
+            setPendingGames(pendingGames);
         }
     }
         y();
