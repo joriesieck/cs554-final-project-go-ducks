@@ -3,7 +3,11 @@
 ## Environment set up
 - Make sure you have the ```.env``` file in the root of the server folder.
 - Make sure you have the ```next.config.js``` file in the root of the client folder.
-- To install and run client and server together, run ```npm install``` followed by ```npm start``` in the root of the project. This will install all the modules for both client and server and start them concurrently.
+- To install and run client and server together, run:
+	- ```npm install``` in the root of the project, followed by
+	- ```npm build``` in the client folder, followed by
+	- ```npm start``` in the root of the project.
+This will install all the modules for both client and server, build the client, and start everything concurrently.
 
 ## To view on Heroku
 **http://cs554-client.herokuapp.com**
