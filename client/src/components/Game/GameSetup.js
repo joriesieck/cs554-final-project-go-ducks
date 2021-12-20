@@ -120,6 +120,8 @@ export default function GameSetup()
         let checkedList = [];
         const handleCategoryCheck = e =>
         {
+            e.preventDefault();
+            console.log(e);
             if (e.target.checked)
             {
                 checkedList.push(e.target.value);
