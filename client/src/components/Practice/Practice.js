@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import { useSelector } from "react-redux";
 import { FormControl, FormLabel, TextField, Button, ToggleButton, ToggleButtonGroup, Dialog, DialogActions, DialogContent, DialogContentTitle, DialogContentText, Alert, Select, MenuItem, InputLabel } from '@mui/material';
 import axios from 'axios';
@@ -40,11 +40,6 @@ export default function Practice()
     const [questions, setQuestions] = useState([]);
     const [username, setUsername] = useState('');
     const [correct, setCorrect] = useState(false);
-
-    //this is a protected route
-    const user = useSelector((state) => state.user.user);
-    const authToken = useSelector((state) => state.auth.authToken);
-    if (!user) return <Redirect to="/" />;
 
     useEffect(() =>
     {
@@ -108,6 +103,13 @@ export default function Practice()
         console.log(selectedPastCategory)
         if (selectedPastCategory && selectedPastCategory !== '') setCategory(JSON.parse(selectedPastCategory))
     }, [selectedPastCategory])
+
+    //this is a protected route
+    const user = useSelector((state) => state.user.user);
+    const authToken = useSelector((state) => state.auth.authToken);
+    if (!user) return <Redirect to="/" />;
+
+    
 
     const PracticeQuestion = (props) =>
     {
