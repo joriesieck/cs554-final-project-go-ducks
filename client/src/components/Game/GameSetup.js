@@ -163,16 +163,16 @@ export default function GameSetup()
                 {
                     gameType === 'friends' ?
                     <>
-                    <FormLabel>Select a friend to play with</FormLabel>
-                    <Select value={friendToPlay} onChange={(e) =>
+                    {friends.length > 0 ? <Select value={friendToPlay} onChange={(e) =>
                     {
                         console.log(e.target.value);
                         setFriendToPlay(e.target.value)
                     }}>
+                        <FormLabel>Select a friend to play with</FormLabel>
                         {friends.map((friendInfo) =>
                             <MenuItem key={friendInfo._id} value={{id: friendInfo._id, name: friendInfo.username}}>{friendInfo.username}</MenuItem>
                         )}
-                    </Select>
+                    </Select> : <></>}
                     {
                         friendToPlay ? <FormLabel>You will send this game to {friendToPlay.name}</FormLabel> : <></>
                     }
@@ -233,7 +233,7 @@ export default function GameSetup()
                     </ul></>) : <></>
                 }
 
-                {categoryChoice !== '' && gameType !== '' && categories.length === 6 || categoryChoice === 'custom' ? <Button type="submit" onClick={handleFormSubmit}>Start Game</Button> : <></>}
+                {categoryChoice !== '' && gameType !== '' && categories.length === 6 || (categoryChoice === 'custom' && categories.length === 6) ? <Button type="submit" onClick={handleFormSubmit}>Start Game</Button> : <></>}
             </FormControl>
             : <></>
             }
