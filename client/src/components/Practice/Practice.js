@@ -1,13 +1,20 @@
 import React, {useState, useEffect} from 'react';
-import { FormControl, FormLabel, TextField, Button, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import {Link} from 'react-router-dom';
+import { useSelector } from "react-redux";
+import { FormControl, FormLabel, TextField, Button, ToggleButton, ToggleButtonGroup, Dialog, DialogActions, DialogContent, DialogContentTitle, DialogContentText, Alert, Select, MenuItem, InputLabel } from '@mui/material';
+import axios from 'axios';
+import { getUserByEmail } from '../../utils/backendCalls';
+
+const baseUrl = "http://jservice.io/api";
+const siteUrl = 'http://localhost:3001';
 
 const EndPracticeScreen = (props) =>
 {
     return(
         <div>
-            Your final score was {props.score || 0}
-            <Button>Practice another category</Button>
-            <Button>Back to home</Button>
+            Your final score was {props.score || 0} / {props.num}
+            <Button onClick={() => window.location.reload()}>Practice another category</Button>
+            <Button component={Link} to="/home">Back to home</Button>
         </div>
     )
     //has score, what they got wrong, stuff from the game
@@ -21,89 +28,298 @@ export default function Practice()
     const [questionsCompleted, setQuestionsCompleted] = useState(0);
     const [mode, setMode] = useState('setup');
     const [practiceType, setPracticeType] = useState('');
-    //const [categoryChoice, setCategoryChoice] = useState('');
-    const [numClues, setNumClues] = useState(0);
+    const [numClues, setNumClues] = useState(1);
     const [cluesToPractice, setCluesToPractice] = useState('');
+    const [pastCategories, setPastCategories] = useState([]);
+    const [selectedPastCategory, setSelectedPastCategory] = useState('');
     const [category, setCategory] = useState('');
     const [score, setScore] = useState(0);
+    const [error, setError] = useState('');
+    const [answered, setAnswered] = useState(false);
+    const [index, setIndex] = useState(0);
+    const [questions, setQuestions] = useState([]);
+    const [username, setUsername] = useState('');
+    const [correct, setCorrect] = useState(false);
 
-    const handleQuestionSubmit = (e) =>
+    //this is a protected route
+    const user = useSelector((state) => state.user.user);
+    const authToken = useSelector((state) => state.auth.authToken);
+    if (!user) return <Redirect to="/" />;
+
+    useEffect(() =>
     {
-        if ((questionsCompleted + 1) >= numClues) setMode('end');
-        setQuestionsCompleted(questionsCompleted + 1);
-        setScore(score + 1);
+        async function x()
+        {
+            console.log(user);
+            const userInfo = await getUserByEmail(user, authToken);
+            console.log(userInfo)
+            setUsername(userInfo.username)
+        }
+        x()
+    }, [user])
+
+    useEffect(() =>
+    {
+        async function filterQs(){
+        if (cluesToPractice && category)
+        {
+            const {data} = await axios.get(`${baseUrl}/clues/?category=${category.id}`);
+            if (!data) return <Alert color="warning">Something has gone terribly wrong</Alert>
+            
+            console.log(data)
+            let filterQuestions = [];
+            let returnedQuestions = [];
+
+            //get rid of duplicates
+            data.forEach(q =>
+                {
+                    if (!filterQuestions.includes(q.question))
+                    {
+                        filterQuestions.push(q.question);
+                        returnedQuestions.push(q);
+                    }
+                });
+            console.log(category)
+            setQuestions(returnedQuestions);
+            category.cluesCount = returnedQuestions.length
+            if (cluesToPractice === 'available') setNumClues(returnedQuestions.length);
+        }
     }
+    filterQs()
+    }, [cluesToPractice, category])
+
+    useEffect(() =>
+    {
+        if (pastCategories && pastCategories.length > 0) 
+        {
+            console.log(pastCategories);
+            console.log(pastCategories[0]);
+            // get the actual format of the dropdowns
+            const initialSelected = {
+                id: pastCategories[0].categoryId,
+                title: pastCategories[0].categoryName
+            }
+            setSelectedPastCategory(JSON.stringify(initialSelected));
+        }
+    }, [pastCategories])
+
+    useEffect(() =>
+    {
+        console.log(selectedPastCategory)
+        if (selectedPastCategory && selectedPastCategory !== '') setCategory(JSON.parse(selectedPastCategory))
+    }, [selectedPastCategory])
 
     const PracticeQuestion = (props) =>
     {
+        let qs = props.arr;
+        console.log(qs);
+        const [response, setResponse] = useState('');
 
+        const handleQuestionSubmit = (e) =>
+        {
+            console.log(qs[index].answer)
+            let sanitizedAnswer = qs[index].answer.replace( /(<([^>]+)>)/ig, '').replace(/\\/g, '');
+            console.log(sanitizedAnswer);
+            if (response.toLowerCase() === sanitizedAnswer.toLowerCase())
+            {
+                setCorrect(true);
+                setScore(score + 1);    
+            }
+            else {
+                setCorrect(false);
+            }
+            setAnswered(true);
+        }
+
+        const handleDialogClose = async (e, reason) =>
+        {
+            if (reason === 'backdropClick') return false;
+            let temp = questionsCompleted;
+            setAnswered(false)
+            setQuestionsCompleted(temp + 1);
+            if (temp + 1 >= numClues) 
+            {
+                await handleEndPractice()
+                setMode('end');
+            }
+            else
+            {
+                setIndex(index + 1);
+            }
+
+        }
+
+        const handleAnswerChange = (e) =>
+        {
+            setResponse(e.target.value);
+        }
+        console.log(index)
         //id, answer, category
         return(
+            <>
+            {!answered ? 
             <FormControl>
-                <p>Question Information, and you answer the question below</p>
-                <TextField></TextField>
+                <p>{qs[index].question}</p>
+                <TextField onChange={handleAnswerChange} label='Answer'></TextField>
                 <Button onClick={handleQuestionSubmit}>Submit</Button>
-            </FormControl>
+            </FormControl> : <></>}
+            <Dialog open={answered}>
+                <DialogContent>
+                    {correct ? 
+                    <DialogContentText>
+                        Correct!
+                    </DialogContentText>
+                    :
+                    <DialogContentText>
+                        Sorry, that's not right. The correct answer is: {qs[index].answer}
+                    </DialogContentText>
+                    }
+                    <DialogContentText>
+                        Score: {score}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Continue</Button>
+                </DialogActions>
+            </Dialog>
+            </>
         );
     }
 
-    const handleEndPractice = (e) =>
+    const handleEndPractice = async (e) =>
     {
-        setQuestionsCompleted(numClues);
+        //setQuestionsCompleted(numClues);
+        console.log(username.toString());
+        console.log(category)
+        const {data} = await axios.post(`${siteUrl}/users/save-game-info`,
+        {
+            username: username,
+            categories: [{categoryId: category.id, categoryName: category.title}],
+            highScore: 0
+        }, {
+            headers: {
+                authToken
+            }
+        });
+        console.log(data);
         setMode('end');
     }
 
-    const handlePracticeTypeChange = (e, type) =>
+    const handlePracticeTypeChange = async (e, type) =>
     {
+        setError('')
         setPracticeType(type);
+        setCluesToPractice('')
+        if (type === 'random')
+        {
+            //saving clues count to make sure that user doesn't request more categories than are available
+            const { data } = await axios.get(`${baseUrl}/random`);
+            setCategory({id: data[0].category.id, title: data[0].category.title.toUpperCase(),
+            cluesCount: data[0].category.clues_count});
+            console.log(category.title)
+        }
+        else if (type === 'previous')
+        {
+            setCategory('');
+            console.log("HIT")
+            try
+            {
+                const {data} = await axios.get(`${siteUrl}/users/categories`)
+                setPastCategories(data.categories);
+            }
+            catch(e)
+            {
+                setError("No previous categories to practice with")
+            }
+            
+        }
     }
 
-    const handleCluesChange = (e, val) =>
+    const handleCluesChange = async (e, val) =>
     {
+        setError('');
+        console.log(val);
         setCluesToPractice(val);
-        //if (val === 'custom') 
-        setNumClues(10);
     }
 
-    const handleStartPractice = (e) =>
+    const handleNumCluesChange = (e) =>
     {
+        setError('')
+        let val = e.target.value;
+        //filtering questions based on cluesToPractice
+        
+        if (val < 1 || questions.length < val) setError('Provide a different value for # of clues to practice with.');
+        else setNumClues(val);       
+    }
+
+    const handleStartPractice = async (e) =>
+    {
+        //based on clues to practice query questions from api
+        
+        if (numClues < questions.length) //only option is numClues < returnedQuestions.length, as it can only be set in these 2 cases
+        {
+            setQuestions(questions.slice(0, numClues));
+        }
+        console.log(questions);
+        setQuestionsCompleted(0);
         setMode('inPractice');
     }
-    //select categories we want to do practice on
-    //select a number of questions to have for practice or "free play"
-    //toggle buttons, selection
-    //then button to start the practice game
-    //query the number of questions needed from the API
-    //when it starts, then remove everything else from the page
 
     return (
         mode === 'setup' ? 
         <FormControl>
             <FormLabel>What are you looking to practice today?</FormLabel>
             <ToggleButtonGroup exclusive value={practiceType} onChange={handlePracticeTypeChange}>
-                <ToggleButton>Random Category</ToggleButton>
-                <ToggleButton>Previous Category</ToggleButton>
+                <ToggleButton value='random'>Random Category</ToggleButton>
+                <ToggleButton value='previous'>Previous Category</ToggleButton>
             </ToggleButtonGroup>
             {practiceType !== '' ? 
             <>
-            <FormLabel>How many clues would you like to practice with?</FormLabel>
-            <ToggleButtonGroup exclusive value={cluesToPractice} onChange={handleCluesChange}>
-                <ToggleButton value='custom'># of my choice (10)</ToggleButton>
-                <ToggleButton value='available'>All Available</ToggleButton>
-                {practiceType === 'previous' ? <ToggleButton value='missed'>Only Missed Clues</ToggleButton> : <></>}
-            </ToggleButtonGroup>
+            {practiceType === 'random' ? 
+                <p>Your random category will be {category.title}</p> : 
+                (error !== '' ? 
+                <Alert color="warning">{error}</Alert> :
+                <>
+                <FormLabel>Select a previous category</FormLabel>
+                <Select value={selectedPastCategory} onChange={(e)=>
+                {
+                    console.log(e.target.value)
+                    setSelectedPastCategory(e.target.value)
+                    setCategory(JSON.parse(e.target.value))
+                }}>
+                    {pastCategories.map((category) =>
+                    <MenuItem key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})}>{category.categoryName}</MenuItem>)}
+                </Select>
+                </> )
+            }
+            {category ? 
+            <>
+                {console.log(category)}
+                <FormLabel>How many clues would you like to practice with?</FormLabel>
+                <ToggleButtonGroup exclusive value={cluesToPractice} onChange={handleCluesChange}>
+                    <ToggleButton value='custom'># of my choice</ToggleButton>
+                    <ToggleButton value='available'>All Available</ToggleButton>
+                </ToggleButtonGroup>
+            </> : <></>} 
+            {cluesToPractice === 'available' ? <p>Your number of clues will be {questions !== [] ? questions.length : 0}</p> : <></>}
+            {cluesToPractice === 'custom' && (error === 'Provide a different value for # of clues to practice with.' || error === '')? 
+            <>
+                <TextField id="numberOfClues" label="Number of clues" variant="standard" type="number" onChange={handleNumCluesChange}></TextField>
+                {error !== '' ? <Alert color='warning'>{error}</Alert> : <></>}
             </> : <></>}
-            {practiceType !== '' && cluesToPractice !== '' ? <Button onClick={handleStartPractice}>Start Practice</Button> : <></>}
+            {console.log(practiceType, cluesToPractice, numClues, category.cluesCount, error)}
+            {practiceType && cluesToPractice && numClues >= 1 && numClues <= category.cluesCount && error === '' ? <Button onClick={handleStartPractice}>Start Practice</Button> : <></>}
+            
+            </> : <></>}
         </FormControl> :
         (mode === 'inPractice' ? 
         <div>
-            {questionsCompleted}
-            {numClues}
-            Score = {score}
-            <Button>End Practice</Button>
+            Completed {questionsCompleted}/{numClues} <br/>
+            Score = {score} <br/>
+            <Button onClick={handleEndPractice}>End Practice</Button>
             <hr/>
-            <PracticeQuestion />
+            <PracticeQuestion arr={questions} />
         </div>
-        : <EndPracticeScreen score={score}/>)
+        : <EndPracticeScreen score={score} num={questionsCompleted}/>)
     );
 }

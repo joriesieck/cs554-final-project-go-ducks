@@ -1,9 +1,9 @@
-import Head from "next/head";
-import { Button } from "@mui/material";
+import Head from 'next/head';
+import { Button } from '@mui/material';
 
-import axios from "axios";
+import axios from 'axios';
 
-const baseUrl = "http://jservice.io/api";
+const baseUrl = 'http://jservice.io/api';
 
 export default function QuestionPage({ query, questionData, questionTitle }) {
   return (
@@ -29,7 +29,7 @@ export async function getServerSideProps({ params, query }) {
   let questionData = await getQuestion(query.category);
 
   questionData = questionData.filter((question) => {
-    return question.question !== "";
+    return question.question !== '';
   });
 
   return {

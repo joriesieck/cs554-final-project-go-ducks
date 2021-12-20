@@ -1,112 +1,134 @@
 .profile {
-	margin-left: auto;
-	margin-right: auto;
-	max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 500px;
 }
 
 .profileList {
-	border: 1px solid gray;
-	border-radius: 10px;
-	padding: 10px;
-	margin-bottom: 10px;
+  border: 1px solid gray;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
 }
 
 .profileList h2 {
-	margin-top: 5px;
-	margin-bottom: 5px;
-	font-size: 18px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 18px;
 }
 
 .profileEditable {
-	display: flex;
-	justify-content: space-between;
-	min-height: 75px;
-	align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 75px;
+  align-items: center;
 }
 
 .profileLeaderboard {
-	min-height: 0;
+  min-height: 0;
 }
 
 .profileEditable form {
-	display: flex;
-	justify-content: space-between;
-	width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .profileReauthModal {
-	max-width: 300px;
-	height: 300px;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 100px;
+  max-width: 300px;
+  height: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 100px;
 }
 
 .profileReauthModalErrors {
-	height: 450px;
+  height: 450px;
 }
 
 .profileReauthBox {
-	background-color: white;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-around;
-	align-items: center;
-	height: 100%;
-	width: 100%;
-	padding: 20px;
-	border-radius: 5%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+  border-radius: 5%;
 }
 
 .profileReauthBox h1 {
-	margin: 0;
-	text-align: center;
+  margin: 0;
+  text-align: center;
 }
 
 .profileReauthClose {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .reauthUserForm {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	height: 175px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 175px;
 }
 
-.changePassword, .deleteAccount {
-	width: 100%;
+.changePassword,
+.deleteAccount {
+  width: 100%;
 }
 
 .profileProvider {
-	display: flex;
+  display: flex;
 }
 
 .profileLoading {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
 }
 
 .profileErrors {
-	margin-top: 20px;
+  margin-top: 20px;
 }
 
 .profileErrors ul {
-	list-style-type: none;
-	padding: 0px;
+  list-style-type: none;
+  padding: 0px;
 }
 
 .personIcon {
-	fill: gray !important;
+  fill: gray !important;
 }
 
 .gridDivider {
-	border-top: 1px solid gray;
-	border-bottom: none;
+  border-top: 1px solid gray;
+  border-bottom: none;
 }
 
 .gridRow {
+  align-self: center;
+}
+
+.submitCheck {
+  max-height: 36px;
 	align-self: center;
+}
+
+@media only screen and (max-width:549px) {
+	.profile {
+		font-size: large;
+	}
+	.profileEditable, .profileFriends {
+		flex-direction: column !important;
+		justify-content: space-around;
+	}
+	.profileEditable>*, .profileFriends>* {
+		width: 100%;
+		max-width: 100% !important;
+		text-align: center;
+	}
 }

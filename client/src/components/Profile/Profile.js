@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Button,
@@ -7,7 +7,7 @@ import {
   Grid,
   Modal,
   TextField,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
@@ -16,7 +16,9 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import CheckIcon from '@mui/icons-material/Check';
 import { useSelector, useDispatch } from "react-redux";
+// import { Redirect, Link } from "react-router-dom";
 import { Redirect } from "react-router-dom";
+import Link from 'next/link';
 import { checkString } from "../../utils/inputChecks";
 import { Box } from "@mui/system";
 import { 
@@ -74,7 +76,8 @@ export default function Profile () {
 	const [openAcceptModal, setOpenAcceptModal] = useState(false);
 	const [toggleFriends, setToggleFriends] = useState({friendId:'', friendUser:''});
 
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
+  const authToken = useSelector((state) => state.auth.authToken);
 	const dispatch = useDispatch();
 
 	// check if the user logged in with a provider
@@ -93,9 +96,9 @@ export default function Profile () {
 		async function fetchUserData () {
 			let data;
 			try {
-				data = await getUserByEmail(user);
-				const friends = await getAllFriends(data.username);
-				const pendingFriends = await getAllPendingFriends(data.username);
+				data = await getUserByEmail(user, authToken);
+				const friends = await getAllFriends(data.username, authToken);
+				const pendingFriends = await getAllPendingFriends(data.username, authToken);
 				data.friends = friends;
 				data.pending_friends = pendingFriends;
 				console.log(friends, pendingFriends);
@@ -171,7 +174,7 @@ export default function Profile () {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
 					username: newValue
-				});
+				}, authToken);
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setProviderError(`Something went wrong updating your username: ${e.toString()}`);
@@ -214,7 +217,7 @@ export default function Profile () {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
 					optedForLeaderboard: !userData.optedForLeaderboard
-				});
+				}, authToken);
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setProviderError(`Something went wrong updating your leaderboard opt: ${e.toString()}`);
@@ -281,7 +284,7 @@ export default function Profile () {
 		}
 		// delete the user
 		try {
-			await removeUser(userData.username);
+			await removeUser(userData.username, authToken);
 			await deleteUser(auth.currentUser);
 			
 			dispatch({
@@ -348,7 +351,7 @@ export default function Profile () {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
 					newEmail: fieldToUpdate.value
-				});
+				}, authToken);
 				await updateEmail(auth.currentUser, fieldToUpdate.value);
 			} catch (e) {
 				setLoginErrors([e.toString()]);
@@ -376,7 +379,7 @@ export default function Profile () {
 		} else if (fieldToUpdate.field==='delete') {
 			// delete user from database
 			try {
-				await removeUser(userData.username);
+				await removeUser(userData.username, authToken);
 				await deleteUser(auth.currentUser);
 				dispatch({
 					type: 'LOG_OUT'
@@ -416,9 +419,9 @@ export default function Profile () {
 		let result;
 		try {
 			friendToRemove = checkString(friendToRemove, 'friendToRemove', true, false);
-			result = await removeFriend(userData.username, friendToRemove);
+			result = await removeFriend(userData.username, friendToRemove, authToken);
 			// remove them on the front end too
-			const friends = await getAllFriends(result.username);
+			const friends = await getAllFriends(result.username, authToken);
 			userData.friends = friends;
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
@@ -439,9 +442,9 @@ export default function Profile () {
 		let result;
 		try {
 			pendingToRemove = checkString(pendingToRemove, 'pendingToRemove', true, false);
-			result = await removePendingFriend(userData.username, pendingToRemove);
+			result = await removePendingFriend(userData.username, pendingToRemove, authToken);
 			// remove them on the front end too
-			const pendingFriends = await getAllPendingFriends(result.username);
+			const pendingFriends = await getAllPendingFriends(result.username, authToken);
 			userData.pending_friends = pendingFriends;
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
@@ -462,10 +465,10 @@ export default function Profile () {
 		let result;
 		try {
 			friendToAccept = checkString(friendToAccept, 'friendToAccept', true, false);
-			result = await acceptPendingFriend(userData.username, friendToAccept);
+			result = await acceptPendingFriend(userData.username, friendToAccept, authToken);
 			// add them on the front end too
-			const friends = await getAllFriends(result.username);
-			const pendingFriends = await getAllPendingFriends(result.username);
+			const friends = await getAllFriends(result.username, authToken);
+			const pendingFriends = await getAllPendingFriends(result.username, authToken);
 			userData.pending_friends = pendingFriends;
 			userData.friends = friends;
 		} catch (e) {
@@ -492,8 +495,8 @@ export default function Profile () {
 			<Modal
 				open={openModal}
 				onClose={handleClose}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={`${styles.profileReauthModal}${loginErrors ? ` ${styles.profileReauthModalErrors}` : ''}`}	
 			>
 				<Box className={styles.profileReauthBox}>
@@ -522,8 +525,8 @@ export default function Profile () {
 			<Modal
 				open={openRemoveModal}
 				onClose={() => {setOpenRemoveModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.profileReauthModal}
 			>
 				<Box className={styles.profileReauthBox}>
@@ -543,8 +546,8 @@ export default function Profile () {
 			<Modal
 				open={openRejectModal}
 				onClose={() => {setOpenRejectModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.profileReauthModal}
 			>
 				<Box className={styles.profileReauthBox}>
@@ -564,8 +567,8 @@ export default function Profile () {
 			<Modal
 				open={openAcceptModal}
 				onClose={() => {setOpenAcceptModal(false)}}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
+				// aria-labelledby="modal-modal-title"
+				// aria-describedby="modal-modal-description"
 				className={styles.profileReauthModal}
 			>
 				<Box className={styles.profileReauthBox}>
@@ -676,10 +679,10 @@ export default function Profile () {
 			
 			<div className={styles.profileList}>
 			<h2>Friends</h2>
-			{userData.friends.length>0 && <Grid container>
+			{userData.friends.length>0 && <Grid container className={styles.profileFriends}>
 				{userData.friends.map(({_id, username}, i) => (<>
 					<Grid item xs={1} className={styles.gridRow}><PersonIcon className={styles.personIcon} /></Grid>
-					<Grid item xs={8.5} className={styles.gridRow}>{username}</Grid>
+					<Grid item xs={8.5} className={styles.gridRow}><Link href={`/profile/${username}`}>{username}</Link></Grid>
 					<Grid item xs={2.5} className={styles.gridRow}>
 					<Button color="error" onClick={(e) => {triggerConfirmModal(e,'remove', _id, username)}}>unfriend</Button>
 					</Grid>
