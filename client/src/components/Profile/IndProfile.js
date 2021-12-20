@@ -45,13 +45,14 @@ export default function IndProfile(props) {
     const router = useRouter();
     const [profileData, setProfileData] = useState(null);
     const [error, setError] = useState(null);
+    const authToken = useSelector((state) => state.auth.authToken);
     
     useEffect(() => {
         async function fetchFriendsListById() {
             try {
                 let userByName;
                 
-                userByName = (props.data) ? await getUserByName(props.data.username) : await getUserByName(props.match.params.name)
+                userByName = (props.data) ? await getUserByName(props.data.username, authToken) : await getUserByName(props.match.params.name, authToken)
                 
                 console.log(userByName);
             

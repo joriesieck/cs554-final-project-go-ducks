@@ -1,10 +1,10 @@
-import Head from "next/head";
-import { Button } from "@mui/material";
-import Link from "next/link";
+import Head from 'next/head';
+import { Button } from '@mui/material';
+import Link from 'next/link';
 
-import axios from "axios";
+import axios from 'axios';
 
-const baseUrl = "http://jservice.io/api";
+const baseUrl = 'http://jservice.io/api';
 
 export default function CategoryPage({ categoryData, children }) {
   return (
@@ -41,7 +41,7 @@ export async function getServerSideProps({ params }) {
   let categoryData = await getCategories(params.id);
 
   categoryData.clues = categoryData.clues.filter((question) => {
-    return question.question !== "";
+    return question.question !== '';
   });
 
   return {

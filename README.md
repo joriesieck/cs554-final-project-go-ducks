@@ -1,4 +1,25 @@
-# CS 554 Jeopardy Trainer final project w/ Nextjs
+# Go Ducks CS554 final project
+
+## Environment set up
+- Make sure you have the ```.env``` file in the root of the server folder.
+- Make sure you have the ```next.config.js``` file in the root of the client folder.
+- To install and run client and server together, run:
+	- ```npm install``` in the root of the project, followed by
+	- ```npm build``` in the client folder, followed by
+	- ```npm start``` in the root of the project.
+This will install all the modules for both client and server, build the client, and start everything concurrently.
+
+## To view on Heroku
+**http://cs554-client.herokuapp.com**
+
+## To build and run the Docker image with Docker Compose
+- Make sure you have both Docker and Docker Compose installed: https://docs.docker.com/compose/install/
+	- Docker for Windows/Mac comes with Compose
+	- On Linux, install the Docker Engine https://docs.docker.com/engine/install/#server and then follow the above link for instructions installing Compose
+- From the root of the project, run ```docker-compose up``` to build and run the container (and create the Docker image)
+- To view the Docker image run ```docker images``` and it should be called ```cs554-final-project-go-ducks_node_app```
+
+## Nextjs
 
 * Authentication via Email, Facebook, Twitter and Google+
 * Uses Express combined with Passport JS for authentication and route handling
@@ -9,7 +30,7 @@
 
 You can see a live demo at **https://nextjs-starter.now.sh**
 
-## About 
+### About 
 
 Next.js is a framework that makes it easy to create 'universal' React apps - React apps that do both client and server side rendering.
 
@@ -17,7 +38,7 @@ With Next.js, React pages are automatically rendered on both client and server s
 
 This is a project using the jservice.io jeopardy API
 
-## Running locally in development mode
+### Running locally in development mode
 
 To get started, just clone the repository and run `npm install && npm run dev`:
 
@@ -26,7 +47,7 @@ To get started, just clone the repository and run `npm install && npm run dev`:
 
 Note: If you are running on Windows run install --noptional flag (i.e. `npm install --no-optional`) which will skip installing fsevents.
 
-## Building and deploying in production
+### Building and deploying in production
 
 If you wanted to run this site in production, you should install modules then build the site with `npm run build` and run it with `npm start`:
 
@@ -38,13 +59,13 @@ You should run `npm run build` again any time you make changes to the site.
 
 Note: If you are already running a webserver on port 80 (e.g. Macs usually have the Apache webserver running on port 80) you can still start the example in production mode by passing a different port as an Environment Variable when starting (e.g. `PORT=3000 npm start`).
 
-## Configuring
+### Configuring
 
 If you configure a .env file (just copy [.env.example](https://github.com/iaincollins/nextjs-starter/blob/master/.env.example) over to '.env' and fill in the options) you can configure a range of options.
 
 See the [AUTHENTICATION.md](https://github.com/iaincollins/nextjs-starter/blob/master/AUTHENTICATION.md) for how to set up oAuth if you want to do that. It suggested you start with Twitter as it's the easiest to get working.
 
-### After deploying
+#### After deploying
 
 Once you have deployed, `now` will return a URL where the site when it has been deployed to, you can use this to preview everything works correctly in the browser.
 
@@ -58,21 +79,21 @@ You can configure `now` to use aliases with custom domains using the `now domain
 
 ----
 
-## Further reading
+### Further reading
 
-### Database hosting
+#### Database hosting
 
 If you need an instance of MongoDB in the cloud https://mlab.com/ have free and inexpensive options.
 
-### Secrets for Environment Variables
+#### Secrets for Environment Variables
 
 Once you are comfortable using `.env` files for configuration and running and deploying your app, take a look at `now secrets` to set options in the cloud so you don't have to set them each time you deploy.
 
-### GitHub integration
+#### GitHub integration
 
 You can integrate `now` with a GitHub account to trigger automated deployments anytime you push to GitHub. This works great if you have secrets set up!
 
-### Now 2.0
+#### Now 2.0
 
 When you deploy this project you will see this message as of November 2018:
 
@@ -80,6 +101,6 @@ When you deploy this project you will see this message as of November 2018:
 
 Now 2.0 was released in November 2018 and works differently from Now 1.0. This project has not been updated for Now 2.0. You may ignore this message for now.
 
-### Alternate hosting options
+#### Alternate hosting options
 
 You can host your Next.js site with any hosting provider. Although it works great on Now, it also works great with other providers like Heroku, Amazon Web Service, Google Cloud Platform, Microsoft Azure, DigitalOcean and others.

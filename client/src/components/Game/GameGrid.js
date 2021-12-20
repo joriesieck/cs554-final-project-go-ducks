@@ -11,6 +11,7 @@ import {
 import React, { useState, useEffect, useRef } from 'react';
 import GameFinished from './GameFinished';
 import styles from './Game.module.css';
+import { Redirect } from 'react-router';
 import axios from 'axios';
 import { useSelector } from "react-redux";
 import { getUserByEmail } from '../../utils/backendCalls';
@@ -65,12 +66,26 @@ export default function GameGrid(props) {
       async function x()
       {
           console.log(user);
-          const userInfo = await getUserByEmail(user);
+          const userInfo = await getUserByEmail(user, authToken);
           console.log(userInfo)
           setUsername(userInfo.username)
       }
       x()
   }, [user])
+  const [disabledButtons, setDisabledButtons] = useState(
+    {
+      '200': [false, false, false, false, false],
+      '400': [false, false, false, false, false],
+      '600': [false, false, false, false, false],
+      '800': [false, false, false, false, false],
+      '1000': [false, false, false, false, false]
+    }
+  )
+  const user = useSelector((state) => state.user.user);
+  const authToken = useSelector((state) => state.auth.authToken)
+  if (!user) return <Redirect to="/" />;
+
+  
   //GameSetup sends along the categories
 
   const handleQuitGame = async (e) => {
@@ -91,6 +106,10 @@ export default function GameGrid(props) {
         categories:categories,
         highScore: score
 
+      }, {
+        headers: {
+          authToken
+        }
       });
       if (!data) console.log('oh no')
       console.log(data)

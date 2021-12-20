@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Button,
@@ -7,7 +7,7 @@ import {
   Grid,
   Modal,
   TextField,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
@@ -76,7 +76,8 @@ export default function Profile () {
 	const [openAcceptModal, setOpenAcceptModal] = useState(false);
 	const [toggleFriends, setToggleFriends] = useState({friendId:'', friendUser:''});
 
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.user);
+  const authToken = useSelector((state) => state.auth.authToken);
 	const dispatch = useDispatch();
 
 	// check if the user logged in with a provider
@@ -95,9 +96,9 @@ export default function Profile () {
 		async function fetchUserData () {
 			let data;
 			try {
-				data = await getUserByEmail(user);
-				const friends = await getAllFriends(data.username);
-				const pendingFriends = await getAllPendingFriends(data.username);
+				data = await getUserByEmail(user, authToken);
+				const friends = await getAllFriends(data.username, authToken);
+				const pendingFriends = await getAllPendingFriends(data.username, authToken);
 				data.friends = friends;
 				data.pending_friends = pendingFriends;
 				console.log(friends, pendingFriends);
@@ -172,7 +173,8 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					username: newValue
+					username: newValue,
+					authToken: authToken
 				});
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
@@ -215,7 +217,8 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					optedForLeaderboard: !userData.optedForLeaderboard
+					optedForLeaderboard: !userData.optedForLeaderboard,
+					authToken: authToken
 				});
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
@@ -283,7 +286,7 @@ export default function Profile () {
 		}
 		// delete the user
 		try {
-			await removeUser(userData.username);
+			await removeUser(userData.username, authToken);
 			await deleteUser(auth.currentUser);
 			
 			dispatch({
@@ -349,7 +352,8 @@ export default function Profile () {
 			try {
 				newUser = await editUserInfo({
 					originalEmail: userData.email,
-					newEmail: fieldToUpdate.value
+					newEmail: fieldToUpdate.value,
+					authToken: authToken
 				});
 				await updateEmail(auth.currentUser, fieldToUpdate.value);
 			} catch (e) {
@@ -378,7 +382,7 @@ export default function Profile () {
 		} else if (fieldToUpdate.field==='delete') {
 			// delete user from database
 			try {
-				await removeUser(userData.username);
+				await removeUser(userData.username, authToken);
 				await deleteUser(auth.currentUser);
 				dispatch({
 					type: 'LOG_OUT'
@@ -418,9 +422,9 @@ export default function Profile () {
 		let result;
 		try {
 			friendToRemove = checkString(friendToRemove, 'friendToRemove', true, false);
-			result = await removeFriend(userData.username, friendToRemove);
+			result = await removeFriend(userData.username, friendToRemove, authToken);
 			// remove them on the front end too
-			const friends = await getAllFriends(result.username);
+			const friends = await getAllFriends(result.username, authToken);
 			userData.friends = friends;
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
@@ -441,9 +445,9 @@ export default function Profile () {
 		let result;
 		try {
 			pendingToRemove = checkString(pendingToRemove, 'pendingToRemove', true, false);
-			result = await removePendingFriend(userData.username, pendingToRemove);
+			result = await removePendingFriend(userData.username, pendingToRemove, authToken);
 			// remove them on the front end too
-			const pendingFriends = await getAllPendingFriends(result.username);
+			const pendingFriends = await getAllPendingFriends(result.username, authToken);
 			userData.pending_friends = pendingFriends;
 		} catch (e) {
 			if (!e.response || !e.response.data || !e.response.data.error) {
@@ -464,10 +468,10 @@ export default function Profile () {
 		let result;
 		try {
 			friendToAccept = checkString(friendToAccept, 'friendToAccept', true, false);
-			result = await acceptPendingFriend(userData.username, friendToAccept);
+			result = await acceptPendingFriend(userData.username, friendToAccept, authToken);
 			// add them on the front end too
-			const friends = await getAllFriends(result.username);
-			const pendingFriends = await getAllPendingFriends(result.username);
+			const friends = await getAllFriends(result.username, authToken);
+			const pendingFriends = await getAllPendingFriends(result.username, authToken);
 			userData.pending_friends = pendingFriends;
 			userData.friends = friends;
 		} catch (e) {

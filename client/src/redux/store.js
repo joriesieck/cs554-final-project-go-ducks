@@ -1,7 +1,8 @@
 import { createStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import storage from 'redux-persist/lib/storage';
-import userReducer from './userReducer';
+import rootReducer from './rootReducer';
 
 /**
  * following: https://dev.to/bhatvikrant/redux-persist-v6-in-detail-react-10nh
@@ -9,16 +10,13 @@ import userReducer from './userReducer';
  */
 
 const persistConfig = {
-  key: 'user',
+  key: 'root',
   storage, // default is localStorage
 };
 
 const store = createStore(
-  persistReducer(persistConfig, userReducer),
-  typeof window === undefined
-    ? window.__REDUX_DEVTOOLS_EXTENSION__ &&
-        window.__REDUX_DEVTOOLS_EXTENSION__()
-    : null
+  persistReducer(persistConfig, rootReducer),
+  composeWithDevTools()
 );
 
 const persistor = persistStore(store);

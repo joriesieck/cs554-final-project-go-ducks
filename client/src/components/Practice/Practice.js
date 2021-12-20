@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import { useSelector } from "react-redux";
 import { FormControl, FormLabel, TextField, Button, ToggleButton, ToggleButtonGroup, Dialog, DialogActions, DialogContent, DialogContentTitle, DialogContentText, Alert, Select, MenuItem, InputLabel } from '@mui/material';
 import axios from 'axios';
@@ -42,16 +42,12 @@ export default function Practice()
     const [correct, setCorrect] = useState(false);
     const [userCats, setUserCats] = useState([]);
 
-    //this is a protected route
-    const user = useSelector((state) => state.user);
-    if (!user) return <Redirect to="/" />;
-
     useEffect(() =>
     {
         async function x()
         {
             console.log(user);
-            const userInfo = await getUserByEmail(user);
+            const userInfo = await getUserByEmail(user, authToken);
             console.log(userInfo)
             setUsername(userInfo.username)
             setUserCats(userInfo.recent_categories);
@@ -109,6 +105,13 @@ export default function Practice()
         console.log(selectedPastCategory)
         if (selectedPastCategory && selectedPastCategory !== '') setCategory(JSON.parse(selectedPastCategory))
     }, [selectedPastCategory])
+
+    //this is a protected route
+    const user = useSelector((state) => state.user.user);
+    const authToken = useSelector((state) => state.auth.authToken);
+    if (!user) return <Redirect to="/" />;
+
+    
 
     const PracticeQuestion = (props) =>
     {
@@ -197,6 +200,10 @@ export default function Practice()
             username: username,
             categories: [{categoryId: category.id, categoryName: category.title}],
             highScore: 0
+        }, {
+            headers: {
+                authToken
+            }
         });
         console.log(data);
         setMode('end');

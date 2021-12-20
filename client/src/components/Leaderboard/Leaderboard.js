@@ -10,7 +10,8 @@ import { useEffect, useState } from "react";
 import { getLeaderboard, getUserByEmail } from "../../utils/backendCalls";
 
 export default function Leaderboard () {
-	const user = useSelector((state) => state.user);	// highlight user
+	const user = useSelector((state) => state.user.user);	// highlight user
+	const authToken = useSelector((state) => state.auth.authToken);
 	const [userData, setUserData] = useState(null);
 	const [error, setError] = useState(null);
 	const [friendsOnly, setFriendsOnly] = useState(false);
@@ -23,8 +24,8 @@ export default function Leaderboard () {
 			let data;
 			let lData;
 			try {
-				data = await getUserByEmail(user);
-				lData = await getLeaderboard();
+				data = await getUserByEmail(user, authToken);
+				lData = await getLeaderboard(authToken);
 			} catch (e) {
 				if (!e.response || !e.response.data || !e.response.data.error) {
 					setError((e.toString()));
@@ -43,13 +44,6 @@ export default function Leaderboard () {
 		}
 		fetchData();
 	}, []);
-
-	// useEffect(() => {
-	// 	async function fetchData() {
-			
-	// 	}
-	// 	fetchData();
-	// }, []);
 
 	if (loading) return <div className={styles.loading}><CircularProgress /></div>;
 
@@ -83,7 +77,7 @@ export default function Leaderboard () {
 			</Grid>
 			</>}
 			
-			{leaderboardData.length<=0 && <p>Looks like there aren't any users on the leaderboard yet. <Link to='/game'>Play a game</Link> to kick it off!</p>}
+			{leaderboardData.length<=0 && <p>Looks like there aren't any users on the leaderboard yet. <Link href='/game'>Play a game</Link> to kick it off!</p>}
 			</>}
 
 			{friendsOnly && <> {(friendData.length>0 && userData) && 
@@ -106,14 +100,14 @@ export default function Leaderboard () {
 					return (<Grid container xs={12} className={`${styles.gridRow}${isSelf ? ` ${styles.currentUser}` : ''}`}>
 						<Grid item xs={1} className={styles[place]}>{i<=2 ? <EmojiEventsIcon /> : <LeaderboardIcon />}</Grid>
 						<Grid item xs={1}>{i+1}</Grid>
-						<Grid item xs={5}>{username}</Grid>
+						<Grid item xs={5}>{!isSelf ? <Link href={`/profile/${username}`}>{username}</Link> : username}</Grid>
 						<Grid item xs={4}>{score}</Grid>
 						{!isSelf && <Grid item xs={1}><GroupIcon /></Grid>}
 					</Grid>)})}
 			</Grid>
 			</>}
 			
-			{friendData.length<=0 && <p>Looks like there aren't any friends on the leaderboard yet. <Link to='/game'>Play a game</Link> to kick it off!</p>}
+			{friendData.length<=0 && <p>Looks like there aren't any friends on the leaderboard yet. <Link href='/game'>Play a game</Link> to kick it off!</p>}
 			</>}
 
 			{error && <Alert severity="error">{error}</Alert>}

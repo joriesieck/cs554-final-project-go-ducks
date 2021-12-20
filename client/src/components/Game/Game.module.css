@@ -1,21 +1,17 @@
-.gamePlay
-{
-    height: 100vh;
+.gamePlay {
+  height: 100vh;
 }
 
-.gameGrid
-{
-    height: 100vh;
+.gameGrid {
+  height: 100vh;
 }
 
-.statusBar
-{
-    height: 6vh;
+.statusBar {
+  height: 6vh;
 }
 
-.gridColumn
-{
-    height: 84vh;
+.gridColumn {
+  height: 84vh;
 }
 
 .pendingGame

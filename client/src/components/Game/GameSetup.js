@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import GameGrid from './GameGrid';
 import {FormControl, 
     FormLabel, Alert, ToggleButtonGroup, Checkbox, ToggleButton, Button, TextField, Select, MenuItem, FormControlLabel} from '@mui/material';
@@ -34,15 +34,12 @@ export default function GameSetup()
     const [scoreToBeat, setScoreToBeat] = useState(0);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
-    const user = useSelector((state) => state.user);
-    if (!user) return <Redirect to="/" />;
-
     useEffect(() =>
     {
         async function x()
         {
             console.log(user);
-            const userInfo = await getUserByEmail(user);
+            const userInfo = await getUserByEmail(user, authToken);
             console.log(userInfo)
             setUsername(userInfo.username)
             setUserCats(userInfo.recent_categories);
@@ -92,6 +89,12 @@ export default function GameSetup()
         }
         fun();
     }, [categoryChoice])
+
+    const user = useSelector((state) => state.user.user);
+    const authToken = useSelector((state) => state.auth.authToken);
+    if (!user) return <Redirect to="/" />;
+
+    
     
     const handleGameTypeChange = async (e) =>
     {
@@ -102,7 +105,7 @@ export default function GameSetup()
         if (e.target.value ==='friends')
         {
             setFriendToPlay('');
-            const data = await getAllFriends(username);
+            const data = await getAllFriends(username, authToken);
             if (data.length < 1) setError('You have no friends to play with!');
             setFriends(data)
         }
@@ -147,7 +150,13 @@ export default function GameSetup()
 
     const CategoryForm = (props) =>
     {
-
+        setError('')
+        const {data} = await axios.get(`${siteUrl}/users/categories`, {
+            headers: {
+                authToken
+            }
+        });
+        if (!data) setError('could not get data')
         return (
             <div>
                 <FormLabel>Select 6 prior categories</FormLabel>
@@ -250,4 +259,4 @@ export default function GameSetup()
             }
         </div>    
     );
-}
+  };
