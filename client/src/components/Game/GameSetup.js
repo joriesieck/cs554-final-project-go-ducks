@@ -27,9 +27,11 @@ export default function GameSetup()
     const [error, setError] = useState('');
     const [username, setUsername] = useState('');
     const [displayHint, setDisplayHint] = useState(false);
-    const [pendingGames, setPendingGames] = useState(null);
+    const [pendingGames, setPendingGames] = useState([]);
     const [savedGameToPlay, setSavedGameToPlay] = useState({});
     const [userCats, setUserCats] = useState([]);
+    const [opponent, setOpponent] = useState(null);
+    const [scoreToBeat, setScoreToBeat] = useState(0);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
     const user = useSelector((state) => state.user);
@@ -51,15 +53,14 @@ export default function GameSetup()
     useEffect(() =>
     {
         async function y(){
+            setPendingGames([])
         if (gameType === 'saved')
         {
             const {data} = await axios.get(`${siteUrl}/users/${username}/pending-games`);
             if (data.length < 1) setError('No saved games to play');
-            let pendingGamesInfo = [];
             console.log(data.friendGames)
             await data.friendGames.map(async ({gameSender, gameID}) =>
             {
-                console.log(gameID)
                 const user = await getUserById(gameSender);
                 const {data} = await axios.get(`${siteUrl}/users/${gameSender}/game/${gameID}`);
                 console.log(data.gameInfo.saved_games[0].categories)
@@ -72,7 +73,7 @@ export default function GameSetup()
                 pendingGames.push(info);
                 // setPendingGames(pendingGamesInfo);
             })
-            console.log(pendingGamesInfo);
+            console.log(pendingGames)
             setPendingGames(pendingGames);
         }
     }
@@ -95,6 +96,7 @@ export default function GameSetup()
     const handleGameTypeChange = async (e) =>
     {
         setError('');
+        setCategories([])
         setGameType(e.target.value);
 
         if (e.target.value ==='friends')
@@ -122,6 +124,12 @@ export default function GameSetup()
     const handleFormSubmit = async (e) =>
     {
         setInSetup(false);
+        if (savedGameToPlay !== {})
+        {
+            setCategories(savedGameToPlay.categories);
+            setFriendToPlay(savedGameToPlay.sender);
+            setScoreToBeat(savedGameToPlay.oldScore)
+        }
         setInGame(true);
     }
 
@@ -131,7 +139,7 @@ export default function GameSetup()
         while (returnVal.length < 6)
         {
             const { data } = await axios.get(`${baseUrl}/random`);
-            returnVal.push({id: data[0].category.id, title: data[0].category.title.toUpperCase()});
+            returnVal.push({categoryId: data[0].category.id, categoryName: data[0].category.title.toUpperCase()});
         }
         return returnVal;
     }
@@ -145,7 +153,7 @@ export default function GameSetup()
                 <FormLabel>Select 6 prior categories</FormLabel>
                 <Select multiple value={categories} onChange={(e) => setCategories(e.target.value)}>
                 {priorCategories.map((category) =>
-                <MenuItem key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})}>{category.categoryName}</MenuItem>)}
+                <MenuItem key={category.categoryId} value={JSON.stringify({categoryId: category.categoryId, categoryName: category.categoryName})}>{category.categoryName}</MenuItem>)}
                 </Select>
             </div>
         );
@@ -184,7 +192,6 @@ export default function GameSetup()
                 {
                     gameType === 'saved' ?
                     <>
-                    {console.log(pendingGames)}
                     {(pendingGames && pendingGames.length>0 )&& <><FormLabel>Select a friend's game to play</FormLabel>
                     <Select value={savedGameToPlay} onChange={(e) =>
                     {
@@ -225,22 +232,21 @@ export default function GameSetup()
                             <span>Categories</span><ul>
                             {categories.map((category) => {
                                 category = JSON.parse(category);
-                                return <li key={category.title}>{category.title}</li>
+                                return <li key={category.categoryId}>{category.categoryName}</li>
                             })}
                             </ul></> : <></>
                         }
                     </div> : 
                     <><span>Categories</span><ul>
-                        {categories.map((category) => <li key={category.title}>{category.title}</li>)}
+                        {categories.map((category) => <li key={category.categoryName}>{category.categoryName}</li>)}
                     </ul></>) : <></>
                 }
-
-                {categoryChoice !== '' && gameType !== '' && categories.length === 6 || (categoryChoice === 'custom' && categories.length === 6) ? <Button type="submit" onClick={handleFormSubmit}>Start Game</Button> : <></>}
+                {savedGameToPlay !== {} || (categoryChoice !== '' && gameType !== '' && categories.length === 6) || (categoryChoice === 'custom' && categories.length === 6) ? <Button type="submit" onClick={handleFormSubmit}>Start Game</Button> : <></>}
             </FormControl>
             : <></>
             }
             {inGame ?
-            <GameGrid id="grid" categories={categories} gameType={gameType} friendToPlay={friendToPlay} gameInfo={savedGameToPlay}></GameGrid> : <div></div>
+            <GameGrid id="grid" categories={categories} gameType={gameType} friendToPlay={friendToPlay} scoreToBeat={scoreToBeat}></GameGrid> : <div></div>
             }
         </div>    
     );

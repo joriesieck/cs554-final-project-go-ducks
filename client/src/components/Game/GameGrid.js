@@ -45,11 +45,20 @@ export default function GameGrid(props) {
   const user = useSelector((state) => state.user);
   if (!user) return <Redirect to="/" />;
 
-  let gameInfo = props.gameInfo; //IF WE HAVE GAMEINFO, SET THE FOLLOWING APPROPRIATELY
-  console.log(gameInfo)
   let gameType = props.gameType;
+  let categories;
+  let scoreToBeat = 0;
+  if (gameType === 'saved')
+  {
+    categories = props.categories;
+    scoreToBeat = props.scoreToBeat;
+  }
+  else
+  {
+    categories = JSON.parse(props.categories);
+  }
+  console.log(categories)
   let friend = props.friendToPlay;
-  let categories = JSON.parse(props.categories);
 
   useEffect(() =>
   {
@@ -194,12 +203,13 @@ export default function GameGrid(props) {
     let groupIndex = props.groupindex;
     let category = props.category;
     let categoryId = props.catId;
+    console.log(category)
     return (
       <Grid
         container
         xs={2}
         direction="column"
-        id={category.replace(/ /g, '_')}
+        id={groupIndex}
         className={styles.gridColumn}
       >
         <QuestionButton
@@ -295,15 +305,15 @@ export default function GameGrid(props) {
   const gridHeaderElements = [];
   categories.map((category,index) => {
     gridHeaderElements.push(
-      <Grid item key={category.title} xs={2}>
+      <Grid item key={category.categoryName} xs={2}>
         <button className={styles.gridHeader} disabled>
-          {category.title}
+          {category.categoryName}
         </button>
       </Grid>
     );
-    console.log(category.id);
+    console.log(category.categoryName);
     gridElements.push(
-      <QuestionButtonGroup catId={category.id} groupindex={index} category={category.title} />
+      <QuestionButtonGroup catId={category.categoryId} groupindex={index} category={category.categoryName} />
     );
     console.log(category);
   });
@@ -336,6 +346,6 @@ export default function GameGrid(props) {
       </Grid>
     </div>
   ) : (
-    <GameFinished score={score} gameType={gameType} friend={friend}/>
+    <GameFinished score={score} scoreToBeat={scoreToBeat} gameType={gameType} friend={friend}/>
   );
 }
