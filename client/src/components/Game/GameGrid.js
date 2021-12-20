@@ -35,19 +35,20 @@ export default function GameGrid(props) {
   });
   const [disabledButtons, setDisabledButtons] = useState(
     {
-      '200': [false, false, false, false, false],
-      '400': [false, false, false, false, false],
-      '600': [false, false, false, false, false],
-      '800': [false, false, false, false, false],
-      '1000': [false, false, false, false, false]
+      '200': [false, false, false, false, false, false],
+      '400': [false, false, false, false, false, false],
+      '600': [false, false, false, false, false, false],
+      '800': [false, false, false, false, false, false],
+      '1000': [false, false, false, false, false, false]
     }
   )
   const user = useSelector((state) => state.user);
   if (!user) return <Redirect to="/" />;
 
+  let gameInfo = props.gameInfo; //IF WE HAVE GAMEINFO, SET THE FOLLOWING APPROPRIATELY
   let gameType = props.gameType;
   let friend = props.friendToPlay;
-  let gameInfo = props.gameInfo;
+  let categories = props.categories;
 
   useEffect(() =>
   {
@@ -61,7 +62,6 @@ export default function GameGrid(props) {
       x()
   }, [user])
   //GameSetup sends along the categories
-  let categories = props.categories;
 
   const handleQuitGame = async (e) => {
     setRemaining(0);
