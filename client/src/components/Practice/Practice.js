@@ -40,6 +40,7 @@ export default function Practice()
     const [questions, setQuestions] = useState([]);
     const [username, setUsername] = useState('');
     const [correct, setCorrect] = useState(false);
+    const [userCats, setUserCats] = useState([]);
 
     //this is a protected route
     const user = useSelector((state) => state.user);
@@ -53,6 +54,7 @@ export default function Practice()
             const userInfo = await getUserByEmail(user);
             console.log(userInfo)
             setUsername(userInfo.username)
+            setUserCats(userInfo.recent_categories);
         }
         x()
     }, [user])
@@ -219,8 +221,8 @@ export default function Practice()
             console.log("HIT")
             try
             {
-                const {data} = await axios.get(`${siteUrl}/users/categories`)
-                setPastCategories(data.categories);
+                // const {data} = await axios.get(`${siteUrl}/users/categories`)
+                setPastCategories(userCats);
             }
             catch(e)
             {

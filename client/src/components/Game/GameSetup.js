@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import GameGrid from './GameGrid';
 import {FormControl, 
-    FormLabel, Alert, ToggleButtonGroup, Checkbox, ToggleButton, Button, TextField, Select, MenuItem} from '@mui/material';
+    FormLabel, Alert, ToggleButtonGroup, Checkbox, ToggleButton, Button, TextField, Select, MenuItem, FormControlLabel} from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -31,6 +31,7 @@ export default function GameSetup()
     let stateList = Array.from('false'.repeat(priorCategories.length));
     let [categoryChecked, setCategoryChecked] = useState(stateList);
     let [categoryDisabled, setCategoryDisabled] = useState(stateList);
+    const [userCats, setUserCats] = useState([]);
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
     const user = useSelector((state) => state.user);
@@ -44,6 +45,7 @@ export default function GameSetup()
             const userInfo = await getUserByEmail(user);
             console.log(userInfo)
             setUsername(userInfo.username)
+            setUserCats(userInfo.recent_categories);
         }
         x()
     }, [user])
@@ -87,9 +89,10 @@ export default function GameSetup()
         if (e.target.value === 'custom') 
         {
             setCategories([]);
-            const {data} = await axios.get(`${siteUrl}/users/categories`);
-            if (data.categories.length < 1) setError('No prior categories to play with! Play a game to change this!')
-            else setPriorCategories(data.categories);
+            // const {data} = await axios.get(`${siteUrl}/users/categories`);
+            // console.log(data.categories);
+            if (userCats.length < 1) setError('No prior categories to play with! Play a game to change this!')
+            else setPriorCategories(userCats);
         }
     }
 
@@ -158,7 +161,7 @@ export default function GameSetup()
                 <FormLabel>Select 6 prior categories</FormLabel>
                 <div>
                 {priorCategories.map((category, index) =>
-                <Checkbox key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})} onChange={handleCategoryCheck} checked={categoryChecked[index]} disabled={categoryDisabled[index]}>{category.categoryName}</Checkbox>)}
+                <FormControlLabel control={<Checkbox key={category.categoryId} value={JSON.stringify({id: category.categoryId, title: category.categoryName})} onChange={handleCategoryCheck} checked={categoryChecked[index]} disabled={categoryDisabled[index]} />} label={category.categoryName} />)}
                 </div>
             </div>
         );
