@@ -47,6 +47,7 @@ export default function GameGrid(props) {
 
   let gameType = props.gameType;
   let friend = props.friendToPlay;
+  let gameInfo = props.gameInfo;
 
   useEffect(() =>
   {
@@ -334,6 +335,6 @@ export default function GameGrid(props) {
       </Grid>
     </div>
   ) : (
-    <GameFinished score={score} gameType={gameType}/>
+    <GameFinished score={score} gameType={gameType} friend={friend}/>
   );
 }

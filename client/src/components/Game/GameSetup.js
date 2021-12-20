@@ -27,6 +27,7 @@ export default function GameSetup()
     const [username, setUsername] = useState('');
     const [displayHint, setDisplayHint] = useState(false);
     const [pendingGames, setPendingGames] = useState([]);
+    const [savedGameToPlay, setSavedGameToPlay] = useState({});
     //should we set up game stuff/get things from cache/api here or in the grid component itself?
 
     const user = useSelector((state) => state.user);
@@ -68,8 +69,12 @@ export default function GameSetup()
             const data = await getAllFriends(username);
             if (data.length < 1) setError('You have no friends to play with!');
             setFriends(data)
-            const info = await axios.get(`${siteUrl}/users/${username}/pending-games`);
-            setPendingGames(info);
+        }
+        else if (e.target.value === 'saved')
+        {
+            const data = await axios.get(`${siteUrl}/users/${username}/pending-games`);
+            if (data.length < 1) setError('No saved games to play');
+            setPendingGames(data);
         }
     }
 
@@ -168,7 +173,8 @@ export default function GameSetup()
                 <FormLabel>What kind of game are you looking to play?</FormLabel>
                 <ToggleButtonGroup exclusive value={gameType}>
                     <ToggleButton onClick={handleGameTypeChange} value="solo">Solo</ToggleButton>
-                    <ToggleButton onClick={handleGameTypeChange} value="friends">With Friends</ToggleButton>
+                    <ToggleButton onClick={handleGameTypeChange} value="friends">New Game With Friends</ToggleButton>
+                    <ToggleButton onClick={handleGameTypeChange} value="saved">Available Shared Games With Friends</ToggleButton>
                 </ToggleButtonGroup>
                 <br/>
                 {
@@ -191,7 +197,21 @@ export default function GameSetup()
                     : <></>
                 }
                 {
-                    ((gameType === 'friends' && friendToPlay !== '') || (gameType !== 'friends' && gameType !== '')) && error === '' ? 
+                    gameType === 'saved' ?
+                    <>
+                    <FormLabel>Select a friend's game to play</FormLabel>
+                    <Select value={savedGameToPlay} onChange={(e) =>
+                    {
+                        console.log(e.target.value);
+                        setSavedGameToPlay(e.target.value)
+                    }}>
+                        {pendingGames.map((gameInfo) =>
+                            <MenuItem key={gameInfo._id} value={{id: gameInfo._id}}>{gameInfo.username}</MenuItem>
+                        )}
+                    </Select></> : <></>
+                }
+                {
+                    ((gameType === 'friends' && friendToPlay !== '') || (gameType !== 'friends' && gameType !== 'saved' && gameType !== '')) && error === '' ? 
                     <>
                         <FormLabel>What kind of categories would you like to play with?</FormLabel>
                         <ToggleButtonGroup exclusive value={categoryChoice}>
@@ -209,7 +229,7 @@ export default function GameSetup()
                     error !== '' ? <Alert color='warning'>{error}</Alert> : <></>
                 }
                 {
-                    categoryChoice !== "" && gameType !== "" && error === '' ? 
+                    gameType !== 'saved' && categoryChoice !== "" && gameType !== "" && error === '' ? 
                     (categoryChoice === 'custom' ? 
                     <div>
                         <CategoryForm />
@@ -229,7 +249,7 @@ export default function GameSetup()
             : <></>
             }
             {inGame ?
-            <GameGrid id="grid" categories={categories} gameType={gameType} friendToPlay={friendToPlay}></GameGrid> : <div></div>
+            <GameGrid id="grid" categories={categories} gameType={gameType} friendToPlay={friendToPlay} gameInfo={savedGameToPlay}></GameGrid> : <div></div>
             }
         </div>    
     );
