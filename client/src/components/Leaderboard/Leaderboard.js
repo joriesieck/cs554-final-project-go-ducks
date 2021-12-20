@@ -100,7 +100,7 @@ export default function Leaderboard () {
 					return (<Grid container xs={12} className={`${styles.gridRow}${isSelf ? ` ${styles.currentUser}` : ''}`}>
 						<Grid item xs={1} className={styles[place]}>{i<=2 ? <EmojiEventsIcon /> : <LeaderboardIcon />}</Grid>
 						<Grid item xs={1}>{i+1}</Grid>
-						<Grid item xs={5}>{username}</Grid>
+						<Grid item xs={5}>{!isSelf ? <Link href={`/profile/${username}`}>{username}</Link> : username}</Grid>
 						<Grid item xs={4}>{score}</Grid>
 						{!isSelf && <Grid item xs={1}><GroupIcon /></Grid>}
 					</Grid>)})}
