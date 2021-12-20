@@ -243,7 +243,10 @@ export default function GameSetup()
                         <CategoryForm />
                         {categories ? <>
                             <span>Categories</span><ul>
-                            {categories.map((category) => <li key={category.title}>{category.title}</li>)}
+                            {categories.map((category) => {
+                                category = JSON.parse(category);
+                                return <li key={category.title}>{category.title}</li>
+                            })}
                             </ul></> : <></>
                         }
                     </div> : 
