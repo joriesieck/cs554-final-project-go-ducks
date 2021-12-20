@@ -16,8 +16,7 @@ const {
 } = require('../inputChecks');
 const bluebird = require('bluebird');
 const redis = require('redis');
-const { getUserByName, saveGameInfo } = require('../data/users');
-const client = redis.createClient();
+const client = redis.createClient(process.env.REDIS_URL);
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
