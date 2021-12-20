@@ -43,8 +43,6 @@ export default function GameGrid(props) {
       '1000': [false, false, false, false, false, false]
     }
   )
-  const user = useSelector((state) => state.user);
-  if (!user) return <Redirect to="/" />;
 
   let gameType = props.gameType;
   let categories;
@@ -56,7 +54,9 @@ export default function GameGrid(props) {
   }
   else
   {
-    categories = JSON.parse(props.categories);
+    categories = props.categories;
+    console.log(props.categories);
+    // categories = JSON.parse(props.categories);
   }
   console.log(categories)
   let friend = props.friendToPlay;
@@ -72,15 +72,6 @@ export default function GameGrid(props) {
       }
       x()
   }, [user])
-  const [disabledButtons, setDisabledButtons] = useState(
-    {
-      '200': [false, false, false, false, false],
-      '400': [false, false, false, false, false],
-      '600': [false, false, false, false, false],
-      '800': [false, false, false, false, false],
-      '1000': [false, false, false, false, false]
-    }
-  )
   const user = useSelector((state) => state.user.user);
   const authToken = useSelector((state) => state.auth.authToken)
   if (!user) return <Redirect to="/" />;

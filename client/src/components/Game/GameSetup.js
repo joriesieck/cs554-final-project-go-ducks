@@ -84,6 +84,7 @@ export default function GameSetup()
             if (categoryChoice === 'random' && inSetup) 
             {
                 let cats = await setRandomCategories();
+                console.log(cats);
                 setCategories(cats);
             }
         }
@@ -133,6 +134,8 @@ export default function GameSetup()
             setFriendToPlay(savedGameToPlay.sender);
             setScoreToBeat(savedGameToPlay.oldScore)
         }
+        console.log(categories);
+        setCategories(categories);
         setInGame(true);
     }
 
@@ -151,12 +154,12 @@ export default function GameSetup()
     const CategoryForm = (props) =>
     {
         setError('')
-        const {data} = await axios.get(`${siteUrl}/users/categories`, {
-            headers: {
-                authToken
-            }
-        });
-        if (!data) setError('could not get data')
+        // const {data} = await axios.get(`${siteUrl}/users/categories`, {
+        //     headers: {
+        //         authToken
+        //     }
+        // });
+        // if (!data) setError('could not get data')
         return (
             <div>
                 <FormLabel>Select 6 prior categories</FormLabel>
