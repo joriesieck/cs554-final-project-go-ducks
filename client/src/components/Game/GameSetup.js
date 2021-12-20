@@ -62,14 +62,16 @@ export default function GameSetup()
                 console.log(gameID)
                 const user = await getUserById(gameSender);
                 const {data} = await axios.get(`${siteUrl}/users/${gameSender}/game/${gameID}`);
-                console.log(data)
+                console.log(data.gameInfo.saved_games[0].categories)
                 let info =
                 {
                     sender: user.username,
-
+                    categories: data.gameInfo.saved_games[0].categories,
+                    oldScore: data.gameInfo.saved_games[0].score
                 }
+                pendingGamesInfo.push(info);
             })
-            setPendingGames(data.friendGames);
+            setPendingGames(pendingGamesInfo);
         }
     }
         y();
@@ -188,7 +190,7 @@ export default function GameSetup()
                         setSavedGameToPlay(e.target.value)
                     }}>
                         {pendingGames.map((gameInfo) =>
-                            <MenuItem key={gameInfo._id} value={{id: gameInfo._id}}>{gameInfo.username}</MenuItem>
+                            <MenuItem key={gameInfo.sender} value={gameInfo}>{gameInfo.sender}</MenuItem>
                         )}
                     </Select></>}
                     {(!pendingGames || pendingGames.length<=0) && <p>Sorry, no pending games.</p>}
